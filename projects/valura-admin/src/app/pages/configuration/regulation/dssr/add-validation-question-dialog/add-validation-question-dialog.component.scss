@@ -1,0 +1,15 @@
+@use "../../../../../../styles/custom/colors.scss" as colors;
+
+.header-sticky {
+  position: sticky;
+  top: 0;
+  background: colors.$bg-dialog;
+  z-index: 10;
+}
+
+.footer-sticky {
+  position: sticky;
+  bottom: 0;
+  background: colors.$bg-dialog;
+  z-index: 10;
+}

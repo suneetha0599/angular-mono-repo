@@ -1,0 +1,224 @@
+<!-- <div class="my-3">
+    <div class="toggle-group">
+        <mat-button-toggle-group [(ngModel)]="selectedSection" name="fontStyle" aria-label="Font Style">
+            <mat-button-toggle value="general" (click)="onGeneral()">General</mat-button-toggle>
+            <mat-button-toggle value="rightSpecific" (click)="onRightSpecific()">Right specific</mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+    <div class="questions my-3">
+        @for(q of questions; let last = $last; track q.id;) {
+            <div class="pb-2">
+                <div class="d-flex justify-between">
+                    <div class="d-flex gap-2">
+                        <div class="question-label">[{{ q.text }}]</div>
+                        <mat-icon class="material-symbols-outlined mat-md-icon mt-1 text-primary cursor-pointer">info</mat-icon>
+                    </div>
+                    <div class="d-flex gap-3 me-2">
+                        <mat-icon class="material-symbols-outlined mat-md-icon mt-1 cursor-pointer">edit</mat-icon>
+                        <mat-icon class="material-symbols-outlined mat-md-icon mt-1 cursor-pointer" (click)="onDeleteQuestion(q)">delete</mat-icon>
+                    </div>
+                </div>
+                <div>
+                    @if(q.type === TEXT) {
+                        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-50 my-2">
+                            <mat-label>Text field</mat-label>
+                            <input matInput [value]="q.response" placeholder="Enter text" readonly />
+                        </mat-form-field>
+                    }
+                    @else if(q.type === TEXTAREA) {
+                        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-50 my-2">
+                            <mat-label>Text area</mat-label>
+                            <textarea matInput [value]="q.response" placeholder="Enter your answer" readonly></textarea>
+                        </mat-form-field>
+                    }
+                    @else if (q.type === 'SINGLE_SELECT') {
+                        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-50 my-2">
+                            <mat-label>Select an option</mat-label>
+                            <mat-select [value]="q.response" readonly>
+                            @for (option of q.options; track option) {
+                                <mat-option [value]="option">
+                                    {{ option }}
+                                </mat-option>
+                            }
+                            </mat-select>
+                        </mat-form-field>
+                    }
+                    @else if(q.type === CHECK_BOX) {
+                        @for(option of q.options; track option;) {
+                            <div>
+                                <mat-checkbox [checked]="option === q.response" class="readonly-field">{{ option }}</mat-checkbox>
+                            </div>
+                        }
+                    }
+                    @else if(q.type === RADIO) {
+                        @for(option of q.options; track option;) {
+                            <div>
+                                <mat-radio-button [checked]="option === q.response" class="readonly-field">{{ option }}</mat-radio-button>
+                            </div>
+                        }
+                    }
+                    @else if(q.type === FILE_UPLOAD) {
+                        <div>
+                            <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3 my-2">
+                                <mat-icon class="material-icons-outlined file-icon text-primary mat-md-icon">description</mat-icon>
+                                <div>
+                                    <span class="text-sm truncate">{{ q.response }}</span>
+                                </div>
+                            </div>
+                            <div class="w-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1C2B70] transition mt-2">
+                                <label>
+                                    <div class="flex flex-col items-center justify-center p-5 cursor-pointer" fileDrop
+                                        (fileDropped)="onFileDropped($event, q)">
+                                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border border-gray-300 mb-2 cursor-pointer">
+                                            <mat-icon fontSet="material-icons-outlined" class="text-4xl text-gray-500">folder</mat-icon>
+                                        </div>
+                                        <p class="text-sm font-medium">
+                                            <span class="text-primary">Click here</span> or drag files to upload
+                                        </p>
+                                        <p class="text-xs text-gray-500">Supported format: Jpeg, Png, Jpg less than 5mb each</p>
+                                    </div>
+                                    <input type="file" class="hidden" multiple (change)="onFileBrowse($event, q)" (click)="onClick($event)">
+                                </label>
+                            </div>
+                            @if(res.tempResponse?.length > 0) {
+                                <div class="w-full mt-2">
+                                    @for(file of res.tempResponse; let i = $index; track file.fileName) {
+                                        <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3 m-2">
+                                            <mat-icon class="material-icons-outlined file-icon text-primary mat-md-icon">description</mat-icon>
+                                            <div>
+                                                <span class="text-sm truncate">{{ file.fileName }}</span>
+                                            </div>
+                                            <mat-icon fontSet="material-icons-outlined"
+                                                    class="text-primary cursor-pointer mat-md-icon"
+                                                    (click)="removeFile(res, i)">
+                                                delete
+                                            </mat-icon>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                @if(!last) {
+                    <mat-divider class="question-divider my-2"></mat-divider>
+                }
+            </div>
+        }
+    </div>
+</div> -->
+
+<div class="h-full flex flex-col overflow-hidden">
+    @if(hasValidations()){
+    <div class="mt-2 ms-2">
+        <mat-button-toggle-group class="toggle-btn-grp toggle-group" [(ngModel)]="selectedSection" name="fontStyle"
+            aria-label="Font Style" (change)="onSectionChange($event)">
+            <mat-button-toggle [value]="GENERAL">General</mat-button-toggle>
+            <mat-button-toggle [value]="RIGHT_SPECIFIC">Right specific</mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+    }
+
+    <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+        @if(dataSource.filteredData.length > 0){
+        <ng-container>
+            <ng-container *ngTemplateOutlet="ngTemplateTable"></ng-container>
+        </ng-container>
+        } @else{
+        <item-not-found [imgHeight]="'200px'" [heading]=errorTitle></item-not-found>
+        }
+    </div>
+</div>
+
+
+<ng-template #ngTemplateTable>
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 w-100 custom-table table table-layout-fixed"
+        matSort>
+
+        <ng-container matColumnDef="provision">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="'10%'">Provision</th>
+            <td mat-cell *matCellDef="let element">
+                <div class="d-flex">
+                    <span [appEllipsisTooltip]="element.provision" [colorType]="'primary'" [maxWidth]="0"
+                        [matTooltip]="element.provision" matTooltipPosition="below" matTooltipClass="material-tooltip"
+                        (click)="onViewClick(element)">
+                        {{ element.provision || '-' }}
+                    </span>
+                </div>
+            </td>
+        </ng-container>
+
+        <!-- Question Column -->
+        <ng-container matColumnDef="question">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="rightSpecificTab ? '35%' : '50%' ">
+                Question </th>
+            <td mat-cell *matCellDef="let element">
+                <div class="d-flex">
+                    <span [appEllipsisTooltip]="element.question" [colorType]="'default'" [maxWidth]="0"
+                        [matTooltip]="element.question" matTooltipPosition="below" matTooltipClass="material-tooltip">
+                        {{ element.question }}
+                    </span>
+                </div>
+            </td>
+        </ng-container>
+        <!-- Helper Column -->
+        <ng-container matColumnDef="helper">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="'15%'"> Helper Text </th>
+            <td mat-cell *matCellDef="let element">
+                <div class="d-flex">
+                    <span [appEllipsisTooltip]="element.helper" [colorType]="'default'" [maxWidth]="0"
+                        [matTooltip]="element.helper" matTooltipPosition="below" matTooltipClass="material-tooltip">
+                        {{ element.helper || '-' }}
+                    </span>
+                </div>
+            </td>
+        </ng-container>
+
+        <!-- Rights -->
+
+        <ng-container matColumnDef="rightTitle">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="'15%'"> Rights </th>
+            <td mat-cell *matCellDef="let element">
+                <div class="d-flex">
+                    <span [appEllipsisTooltip]="element.rightTitle" [colorType]="'default'" [maxWidth]="0"
+                        [matTooltip]="element.rightTitle" matTooltipPosition="below" matTooltipClass="material-tooltip">
+                        {{ element.rightTitle || '-' }}
+                    </span>
+                </div>
+            </td>
+        </ng-container>
+
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="'15%'"> Field Type </th>
+            <td mat-cell *matCellDef="let element">
+                <div class="d-flex">
+                    <span [appEllipsisTooltip]="element.questionType" [colorType]="'default'" [maxWidth]="0"
+                        [matTooltip]="element.questionType" matTooltipPosition="below"
+                        matTooltipClass="material-tooltip">
+                        {{ element.questionType || '-' }}
+                    </span>
+                </div>
+            </td>
+        </ng-container>
+
+
+        <!-- Action Column -->
+        <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef [style.width]="'10%'"> Action </th>
+            <td mat-cell *matCellDef="let element">
+                <div class="d-flex gap-2">
+                    <mat-icon class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+                        (click)="onEditClick(element)">edit</mat-icon>
+                    <mat-icon class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+                        (click)="onDeleteClick(element)">delete</mat-icon>
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    </table>
+</ng-template>

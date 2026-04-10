@@ -1,0 +1,78 @@
+.shimmer-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #e5e7eb 25%,
+    #f3f4f6 37%,
+    #e5e7eb 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  // gap: 12px;
+  padding: 20px 24px;
+
+
+  .dialog-title-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+  }
+
+  mat-icon {
+    font-size: 24px;
+    height: 24px;
+    width: 24px;
+    color: #555;
+
+    &.text-red-600 {
+      color: #d32f2f;
+    }
+
+    &.text-blue-600 {
+      color: #1976d2;
+    }
+  }
+}
+
+.dialog-content {
+  // padding: 24px;
+  margin: 0;
+  // max-height: 400px;
+  overflow-y: auto;
+  color: #424242;
+
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+}

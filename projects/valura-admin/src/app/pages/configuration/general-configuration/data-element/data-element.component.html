@@ -1,0 +1,97 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+
+    @if(!requestLoading && hasApiError){
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    }
+    @else if(isEmptyRequest){
+    <item-not-found [imgHeight]="'200px'" [heading]=errorTitle>
+    </item-not-found>
+    }
+    @else{
+    <ng-container *ngTemplateOutlet="ngTemplateTable; context: {}">
+    </ng-container>
+    }
+
+  </div>
+</div>
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="loading ? shimmerRows : dataSource"
+    class="mat-elevation-z8 w-100 custom-table table table-layout-fixed" matSort (matSortChange)="onSortChange($event)">
+    <ng-container matColumnDef="elementName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 30%">
+        Name
+      </th>
+      <td mat-cell *matCellDef="let element">
+        @if (loading) {
+        <div class="shimmer-line shimmer-large"></div>
+        } @else {
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.name" [colorType]="dataElementFullAcess ? 'primary' : 'default'"
+            [matTooltip]="element.name" matTooltipPosition="below" matTooltipClass="material-tooltip"
+            (click)="dataElementFullAcess && onViewClick(element)">
+            {{ element.name }}
+          </span>
+        </div>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="category">
+      <th mat-header-cell *matHeaderCellDef style="width: 30%" mat-sort-header>Category</th>
+      <td mat-cell *matCellDef="let element">
+        @if (loading) {
+        <div class="shimmer-line shimmer-large"></div>
+        } @else {
+        <div class="d-flex">
+          <span class="" [appEllipsisTooltip]="element.categoryName" [matTooltip]="element.categoryName"
+            matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.categoryName }}
+          </span>
+        </div>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="classification">
+      <th mat-header-cell *matHeaderCellDef style="width: 30%" mat-sort-header>
+        Classification
+      </th>
+      <td mat-cell *matCellDef="let element">
+        @if (loading) {
+        <div class="shimmer-line shimmer-large"></div>
+        } @else {
+        <div class="d-flex">
+          <span class="" [appEllipsisTooltip]="element.classification" [matTooltip]="element.classification"
+            matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.classification }}
+          </span>
+        </div>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="action">
+      <th mat-header-cell *matHeaderCellDef style="width: 10%">Actions</th>
+      <td mat-cell *matCellDef="let element">
+        @if (loading) {
+        <div class="shimmer-line shimmer-small"></div>
+        } @else {
+        <div class="d-flex gap-2">
+          <mat-icon class="material-symbols-outlined mat-md-icon" [class.text-primary]="dataElementFullAcess"
+            [class.text-grey]="!dataElementFullAcess" [class.cursor-pointer]="dataElementFullAcess"
+            [style.opacity]="dataElementFullAcess ? '1' : '0.4'" (click)="dataElementFullAcess && onEditClick(element)"
+            title="Edit">
+            edit
+          </mat-icon>
+          <mat-icon class="material-symbols-outlined mat-md-icon" [class.text-primary]="dataElementFullAcess"
+            [class.text-grey]="!dataElementFullAcess" [class.cursor-pointer]="dataElementFullAcess"
+            [style.opacity]="dataElementFullAcess ? '1' : '0.4'"
+            (click)="dataElementFullAcess && onDeleteClick(element)" title="Delete">
+            delete
+          </mat-icon>
+        </div>
+        }
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="table-header"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</ng-template>

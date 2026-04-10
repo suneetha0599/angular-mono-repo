@@ -1,0 +1,64 @@
+@use "../../../../styles/custom/colors" as colors;
+//
+//.mat-mdc-header-cell{
+//  border-bottom-color: colors.$med-grey;
+//  &.sticky-actions {
+//    border-left: 1px solid #d1d5db !important;
+//    border-bottom: none !important;
+//  }
+//}
+//
+//.mat-mdc-cell {
+//  border: none !important;
+//
+//  &.sticky-actions {
+//    border-left: 1px solid #d1d5db !important;
+//    position: sticky !important;
+//  }
+//}
+//
+//.mat-mdc-row:nth-child(even) {
+//  background-color: colors.$bg-light-grey;
+//}
+//
+//.mat-mdc-row:nth-child(odd) {
+//  background-color: colors.$body-bg;
+//}
+////
+//// .actions-cell-header {
+////  border-bottom: none !important;
+////  box-shadow: -1px 0 0 0 #2d2f32 !important;
+////}
+//
+//
+//
+//// .mat-table-sticky-border-elem-left {
+////  border-right: 1px solid #{colors.$border-color};
+////}
+////
+//
+//
+//
+////
+////
+////.shadow-left-sticky {
+////  box-shadow: -2px 0 0 0 (colors.$border-color);
+//}
+::ng-deep .mdc-notched-outline > * {
+  border: none !important;
+}
+//
+//.paginator{
+//  background-color: colors.$body-bg;
+//}
+//
+//
+//
+
+.mat-mdc-header-cell{
+  border-bottom-color: colors.$med-grey;
+  &.sticky-actions {
+    border-left: 1px solid #d1d5db !important;
+    border-bottom: none !important;
+  }
+}

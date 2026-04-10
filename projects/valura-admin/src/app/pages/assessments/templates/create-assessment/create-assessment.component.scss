@@ -1,0 +1,147 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../styles/custom/typography.scss" as typography;
+
+.fs-14 {
+  font-size: typography.$fs-14;
+}
+
+.hr-bold {
+  height: 5px;
+  margin-top: 0px !important;
+}
+
+.card {
+  height: 98%;
+  background-color: colors.$body-bg;
+  border: 1px solid colors.$lightest-grey-border;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.add-icon {
+  border-radius: 50%;
+  font-size: typography.$fs-24;
+}
+
+.title {
+  font-size: typography.$fs-13;
+}
+
+.section-title {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.active-section {
+  background-color: colors.$light-grey-border;
+  border-radius: 6px;
+}
+
+.section-content {
+  max-height: 385px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.preview-content {
+  max-height: 350px;
+  height: 342px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.save-icon {
+  color: colors.$stage-success;
+}
+
+.cancel-icon {
+  color: colors.$bg-danger;
+}
+
+.options {
+  margin-left: 31px;
+}
+
+.option-label {
+  background-color: colors.$light-primary;
+}
+
+.header-actions {
+  position: absolute;
+  right: 10px;
+  top: 25px;
+  transform: translateY(-50%);
+  gap: 16px;
+}
+
+.content {
+  height: 62vh;
+}
+
+.custom-mat-tab-wrapper {
+  height: 77vh !important;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+::ng-deep .custom-mat-tab-wrapper .mat-tab-wrapper {
+  position: relative;
+}
+
+::ng-deep .custom-tab-group .mat-tab-header {
+  padding-right: 180px;
+}
+
+::ng-deep .custom-tab-group .mat-mdc-tab-body-content {
+  overflow: hidden !important;
+}
+
+::ng-deep .custom-mdc-text-field .mdc-line-ripple,
+::ng-deep .option-label .mdc-line-ripple,
+::ng-deep .option-label .mat-mdc-form-field-bottom-align::before,
+::ng-deep .option-label .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+::ng-deep .custom-mdc-text-field .mat-mdc-form-field.mat-focused .mdc-line-ripple,
+::ng-deep .option-label .mat-mdc-form-field.mat-focused .mdc-line-ripple {
+  display: block;
+}
+
+::ng-deep .custom-mdc-text-field .mat-md-input .mat-mdc-form-field-flex:not(:has(textarea)) {
+  height: auto !important;
+  width: 100% !important;
+}
+
+::ng-deep .custom-mdc-text-field .mat-md-input .mat-mdc-form-field-flex:not(:has(textarea)) .mat-mdc-form-field-infix,
+::ng-deep .custom-mdc-text-field .mdc-text-field {
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field-infix,
+::ng-deep .custom-mdc-text-field .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  margin: 0 !important;
+  all: unset !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  margin: 0 !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: unset !important;
+}
+
+::ng-deep .toggle .mat-button-toggle-checked .mat-button-toggle-button:has(.mat-button-toggle-checkbox-wrapper) {
+  padding-left: 0px !important;
+}
+
+.toggle-group .mat-button-toggle-checked {
+  background-color: colors.$body-bg !important;
+}

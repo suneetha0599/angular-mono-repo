@@ -1,0 +1,90 @@
+<div class="grid grid-cols-12 gap-4 mb-2">
+    <div class="col-span-12">
+        <div class="d-flex my-auto">
+            <span class="label-large">{{label}}</span>
+            @if(!hideTooltip){
+            <mat-icon class="text-base !text-[#2060EB] info-icn material-symbols-outlined my-auto ms-2"
+                [matTooltip]="infoMessage" matTooltipClass="material-tooltip multiline-tooltip "
+                matTooltipPosition="right">
+                info
+            </mat-icon>}
+        </div>
+    </div>
+</div>
+<div class="grid grid-cols-12 gap-4 mb-2">
+    <div class="col-span-12">
+        @if(!hideuploder){
+        <div
+            class="h-auto border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1C2B70] transition mt-2">
+            <label>
+                <div class="flex flex-col items-center justify-center p-5 cursor-pointer" fileDrop
+                    (fileDropped)="onFileDropped($event)">
+                    <div
+                        class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 mb-2">
+                        <mat-icon class="text-4xl text-gray-500 material-symbols-outlined">
+                            folder
+                        </mat-icon>
+                    </div>
+                    <p class="label-large">
+                        <span class="text-primary">Click here</span> or drag file
+                        to upload
+                    </p>
+                    <p class="body-medium">
+                        {{ fileUploadSupportedText }}
+                    </p>
+                </div>
+                <input type="file" class="hidden" multiple [accept]="fileUploadAccept" (change)="onFileBrowse($event)"
+                    (click)="onclick($event)" />
+            </label>
+        </div>
+        }
+
+        @if (uploadingFiles.length > 0) {
+        <div class="w-full my-3">
+            @for (file of uploadingFiles; track file.fileName) {
+            <div class="file-row">
+                <mat-icon class="material-symbols-outlined file-icon textprimary">description</mat-icon>
+                <div class="file-info">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium truncate">{{ file.fileName }}</span>
+                        <mat-icon class="delete-icn pointer material-symbols-outlined text-primary">delete</mat-icon>
+                    </div>
+                    <div class="progress-bar-track mt-1">
+                        <div class="progress-bar-fill" [style.width.%]="file.progress"></div>
+                        <span class="progress-dot"></span>
+                    </div>
+                    <div class="flex justify-between mt-1">
+                        <span class="text-xs text-gray-500">{{ file.fileSize }}</span>
+                        <span class="text-xs text-gray-500">{{ file.progress }}%</span>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+
+        @if (selectedFiles.length > 0) {
+        <div class="w-full my-3">
+            @for (file of selectedFiles; track file; let i = $index) {
+            <div class="file-row">
+                <mat-icon class="material-symbols-outlined file-icon text-primary">description</mat-icon>
+                <div class="file-info">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium truncate" matTooltip="{{ file.fileName }}"
+                            matTooltipClass="material-tooltip" matTooltipPosition="right"
+                            (click)="onDocNameClick(file)">
+                            {{ file.fileName }}
+                        </span>
+                        @if(!hideuploder){
+                        <mat-icon class="delete-icn pointer material-symbols-outlined text-primary"
+                            (click)="removeFile(i)">delete</mat-icon>
+                        }
+                    </div>
+                    <span class="body-large text-gray-500">{{ file.fileSize || '' }}</span>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>

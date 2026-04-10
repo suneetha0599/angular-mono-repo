@@ -1,0 +1,15 @@
+/* Remove reserved space when no error/hint is shown */
+.mat-mdc-form-field-subscript-wrapper {
+    height: 0 !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    line-height: 0 !important;
+}
+
+/* Allow space ONLY when error is visible */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-subscript-wrapper {
+    height: auto !important;
+    line-height: 0 !important;
+
+}

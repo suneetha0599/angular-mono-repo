@@ -1,0 +1,80 @@
+@use "../../../../../styles/custom/colors.scss" as us;
+
+.fontColor {
+  color: us.$primary;
+}
+
+
+.mat-divider {
+  border-top-color: #EEEEEE
+}
+
+.mat-stepper-horizontal {
+  background-color: #FFFFFF;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: 100%;
+  width: 100%;
+}
+
+::ng-deep .mat-mdc-chip .mdc-evolution-chip__cell--primary,
+::ng-deep .mat-mdc-chip .mdc-evolution-chip__action--primary,
+::ng-deep .mat-mdc-chip .mat-mdc-chip-action-label {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+}
+
+// ::ng-deep .mat-horizontal-stepper-header .mat-step-icon {
+//   width: 48px;
+//   height: 48px;
+//   font-size: 20px;
+//   padding: 12px;
+// }
+
+::ng-deep .mat-step-icon {
+  background-color: #1C2B70 !important;
+  color: white !important;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+::ng-deep .mat-step-icon {
+  background-color: transparent !important;
+}
+
+.mat-stepper-label-position-bottom .mat-horizontal-stepper-header {
+  font-size: 20px;
+  padding: 12px;
+}
+
+.mat-stepper-label-position-bottom .mat-horizontal-stepper-header:not(:last-child)::after,
+[dir=rtl] .mat-stepper-label-position-bottom .mat-horizontal-stepper-header:not(:first-child)::after {
+  right: -4px;
+}
+
+
+
+.delete-icn {
+  font-size: 16px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: us.$primary !important;
+}
+
+::ng-deep .mat-mdc-option .mat-pseudo-checkbox {
+  display: none !important;
+}
+
+::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}

@@ -1,0 +1,174 @@
+<div class="d-flex p-3 flex-column view-wrapper verflow-hidden">
+  <div class="pb-3 headline-medium">{{pageTitle}}</div>
+
+  <div class="flex flex-column overflow-hidden position-relative h-100">
+    <div class="grid grid-cols-12 h-100 gap-4">
+      <div class="col-span-8 overflow-auto bg-white shadow-sm rounded-lg p-3 no-scrollbar">
+        <ng-container *ngTemplateOutlet="ngTemplateConsentForm; context:{}">
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #ngTemplateConsentForm>
+  @if(consentForm){
+  <div [formGroup]="consentForm">
+    <div cdkDropList [cdkDropListData]="propertyListControls" (cdkDropListDropped)="dropForm($event)">
+      @for (property of propertyListControls; track property;let propIndex = $index;let isFirst=$first;let isLast=$last)
+      {
+      <ng-container
+        *ngTemplateOutlet="ngTemplateComponentSection; context:{ propertyForm:property, propIndex:propIndex, isFirst:isFirst, isLast:isLast, firstLevel:true}">
+      </ng-container>
+      }
+    </div>
+  </div>
+  <ng-container
+    *ngTemplateOutlet="ngTemplateButtons; context:{btn1Label: getBtnLabel(FIRST_BTN),btn2Label: getBtnLabel(SECOND_BTN),btn3Label: getBtnLabel(THIRD_BTN)}">
+  </ng-container>
+  }
+</ng-template>
+
+<ng-template #ngTemplateComponentSection let-propertyForm="propertyForm" let-propIndex="propIndex" let-isFirst="isFirst"
+  let-isLast="isLast" let-firstLevel="firstLevel">
+  <div [formGroup]="propertyForm">
+    @if(propertyForm){
+    <!-- TEXT_ALPHA_NUMERIC or TEXT_NUMERIC-->
+
+    @if(getPropertyComponent(propertyForm)==TEXT_ALPHA_NUMERIC || getPropertyComponent(propertyForm)==TEXT_NUMERIC){
+    <div class="grid gap-2"
+      [ngClass]="{'mt-3': (!isFirst && firstLevel), 'grid-cols-2': firstLevel, 'grid-cols-1': !firstLevel}">
+      <div class="grid grid-cols-1 gap-2">
+        <div class="block label-large text-gray-700 mb-2">{{getPropertyName(propertyForm)}}</div>
+        <create-consent-form [propertyForm]="propertyForm"></create-consent-form>
+      </div>
+      @for(subProperty of getSubPropertyListControls(propertyForm);track subProperty;let subPropIndex = $index) {
+      @if(subProperty){
+      <ng-container
+        *ngTemplateOutlet="ngTemplateComponentSection; context:{ propertyForm:subProperty, propIndex:subPropIndex, isFirst:false, isLast:false, firstLevel:false}">
+      </ng-container>
+      }
+      }
+    </div>
+    }
+
+    <!-- TEXT_AREA -->
+    @else if(getPropertyComponent(propertyForm)==TEXT_AREA){
+    <div class="grid gap-2"
+      [ngClass]="{'mt-3': (!isFirst && firstLevel),'grid-cols-2': firstLevel, 'grid-cols-1': !firstLevel}">
+      <div class="grid grid-cols-1 gap-2">
+        <div class="flex my-2">
+          <div class="block label-large text-gray-700 my-auto me-2">{{getPropertyName(propertyForm)}}</div>
+          <mat-icon class="cursor-pointer material-symbols-outlined my-auto text-primary"
+            matTooltipClass="material-tooltip" matTooltipPosition="right"
+            matTooltip="Provide details for the purpose">info</mat-icon>
+        </div>
+        <create-consent-form [propertyForm]="propertyForm"></create-consent-form>
+      </div>
+      @for(subProperty of getSubPropertyListControls(propertyForm);track subProperty;let subPropIndex = $index) {
+      @if(subProperty){
+      <ng-container
+        *ngTemplateOutlet="ngTemplateComponentSection; context:{ propertyForm:subProperty, propIndex:subPropIndex, isFirst:false, isLast:false, firstLevel:false}">
+      </ng-container>
+      }
+      }
+    </div>
+    }
+    <!-- TEXT_BUTTON -->
+    @else if(getPropertyComponent(propertyForm)==TEXT_BUTTON){
+    <div class="grid grid-cols-2 gap-2" [ngClass]="{'mt-3': (!isFirst && firstLevel)}">
+      <div class="grid grid-cols-1 gap-2">
+        @if(!hidePropName(propertyForm)){
+
+        <div class="block label-large text-gray-700 mb-2">{{getPropertyName(propertyForm)}}</div>
+        }
+        <create-consent-form [propertyForm]="propertyForm"
+          (onButtonClick)="onButtonClick($event.property)"></create-consent-form>
+      </div>
+    </div>
+    }
+    <!--  DROP_DOWN -->
+    @else if(getPropertyComponent(propertyForm)==DROP_DOWN){
+    <div class="grid gap-2"
+      [ngClass]="{'mt-3': (!isFirst && firstLevel), 'grid-cols-2': firstLevel, 'grid-cols-1': !firstLevel}">
+      <div class="grid grid-cols-1 gap-2">
+        <div class="block label-large text-gray-700 mb-2">{{getPropertyName(propertyForm)}}</div>
+        <div class="grid grid-cols-1 gap-2">
+          <create-consent-form [propertyForm]="propertyForm" [propertyValueList]="expiryOptions"></create-consent-form>
+        </div>
+      </div>
+    </div>
+    }
+    <!-- BUTTON -->
+    @else if(getPropertyComponent(propertyForm)==BUTTON){
+    <div class="grid grid-cols-2 gap-2" [ngClass]="{'mt-3': (!isFirst && firstLevel)}">
+      <div class="grid grid-cols-1 gap-2">
+        <div class="block label-large text-gray-700 mb-3">{{getPropertyName(propertyForm)}}</div>
+        <create-consent-form [propertyForm]="propertyForm"></create-consent-form>
+      </div>
+    </div>
+    }
+
+    <!-- Input Type Options -->
+    @else if(getPropertyComponent(propertyForm)==MULTI_BUTTON_TOGGLE){
+    <div class="grid grid-cols-1 gap-2" [ngClass]="{'mt-3': (!isFirst && firstLevel)}">
+      <div class="grid grid-cols-1 gap-2">
+        <div class="grid grid-cols-1 gap-2 mb-2 mt-2">
+          <div class="block label-large text-gray-700">{{getPropertyName(propertyForm)}}</div>
+        </div>
+        <div class="grid grid-cols-1 gap-2 mb-2">
+          <div class="block label-medium text-gray-500">{{getComponentLabel(propertyForm)}}</div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2">
+          <create-consent-form [propertyForm]="propertyForm" [propertyValueList]="inputTypes"></create-consent-form>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Checkboxes -->
+    @else if(getPropertyComponent(propertyForm)==CHECK_BOX){
+    <div class="grid grid-cols-2 gap-2" [ngClass]="{'mt-1': (!isFirst && firstLevel)}">
+      <div class="grid grid-cols-1 gap-2 ms-2">
+        <create-consent-form [propertyForm]="propertyForm" [propertyValueList]="mv1"></create-consent-form>
+      </div>
+    </div>
+    }
+    @else if(getPropertyComponent(propertyForm)==DYNAMIC_FORM){
+    <div class="grid grid-cols-1" [ngClass]="{'mt-3': (!isFirst && firstLevel)}">
+      <create-consent-form [propertyForm]="propertyForm" [isLast]="isLast"
+        (onAddDynamicForm)="onAddDynamicForm($event.property)"></create-consent-form>
+    </div>
+    }
+    @else{
+    <div class="grid grid-cols-1" [ngClass]="{'mt-3': (!isFirst && firstLevel)}">
+      <create-consent-form [propertyForm]="propertyForm"></create-consent-form>
+    </div>
+    }
+    }
+  </div>
+</ng-template>
+
+<ng-template #ngTemplateButtons let-btn1Label="btn1Label" let-btn2Label="btn2Label" let-btn3Label="btn3Label">
+  <!--  Buttons -->
+  <div class="flex justify-between items-center mt-4">
+    <div class="flex gap-4">
+      @if(btn1Label){
+      <loading-button type="primary" (onButtonClick)="preview()">{{btn1Label}}</loading-button>
+      }
+      @if(btn2Label){
+      <loading-button type="secondary" (onButtonClick)="onSave()">{{btn2Label}}</loading-button>
+      }
+    </div>
+    @if(btn3Label){
+    <loading-button type="light" [basicButton]="true">{{btn3Label}}</loading-button>
+    }
+  </div>
+</ng-template>
+
+<mat-drawer-container class="right-sidebar" [hasBackdrop]="true" autosize>
+  <mat-drawer #rightDrawer class="" mode="over" position="end">
+    <consent-drawer-content [drawerType]="drawerType" (onCloseDrawer)="rightDrawer.toggle()"></consent-drawer-content>
+  </mat-drawer>
+</mat-drawer-container>

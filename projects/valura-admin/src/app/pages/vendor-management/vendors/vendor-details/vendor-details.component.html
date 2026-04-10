@@ -1,0 +1,745 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+    <div class="mb-2">
+        <div class="flex justify-between">
+            <div class="flex items-center gap-2">
+                <div class="headline-medium my-auto">
+                    Vendor Overview
+                </div>
+                @if(vendorId){
+                <button [disabled]="disablePrevBtn || isloading" mat-icon-button color="primary"
+                    class="medium-icon d-flex my-auto" (click)="goToPrevRequest()">
+                    <mat-icon class=" material-symbols-outlined"
+                        [ngClass]="(disablePrevBtn || isloading) ? 'text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+                </button>
+                <button [disabled]="disableNextBtn || isloading" mat-icon-button color="primary"
+                    class="medium-icon d-flex my-auto" (click)="goToNextRequest()">
+                    <mat-icon class=" material-symbols-outlined"
+                        [ngClass]="(disableNextBtn || isloading) ? 'text-gray-400' : 'text-primary'">chevron_right</mat-icon>
+                </button>
+                }
+            </div>
+            @if(!hasApiError){
+            <loading-button type="light" [basicButton]="true" (onButtonClick)="openStepperPopup()">View
+                Activity</loading-button>}
+        </div>
+    </div>
+    @if(!isloading && hasApiError){
+    <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+    }
+    @else{
+
+    <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative bg-white rounded">
+        <div class="d-flex h-100 w-100 flex-column main-canvas bg-white">
+            <div class="relative flex-1 overflow-hidden">
+                <mat-tab-group [(selectedIndex)]="selectedTabIndex" disableRipple animationDuration="300ms"
+                    class="custom-tab-group mat-tab-100 mat-tab-disable-ripple"
+                    (selectedIndexChange)="onSelectionChange($event)">
+                    @for (tab of tabHeaderDetails; track tab.key; let i = $index) {
+                    <mat-tab [label]="tab.name">
+                        <ng-template matTabContent>
+                            @if (selectedTabIndex === i) {
+                            @switch (tab.key) {
+                            @case (VendorDetailsKey.DETAILS) {
+                            @if(isloading){
+
+                            <div class="h-100 overflow-hidden flex gap-2 p-3">
+                                <div class="flex-1 overflow-hidden">
+
+                                    <div class="border rounded-md p-4 mb-4">
+                                        <div class="grid grid-cols-5 gap-4">
+                                            <div class="h-5 shimmer rounded col-span-1"></div>
+                                            <div class="h-5 shimmer rounded col-span-1"></div>
+                                            <div class="h-5 shimmer rounded col-span-1"></div>
+                                            <div class="h-5 shimmer rounded col-span-1"></div>
+                                            <div class="h-5 shimmer rounded col-span-1"></div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="grid grid-cols-3 gap-3 mb-4">
+                                        <div class="h-[270px] shimmer rounded-lg"></div>
+                                        <div class="h-[270px] shimmer rounded-lg"></div>
+                                        <div class="h-[270px] shimmer rounded-lg"></div>
+                                    </div>
+
+                                    <div class="h-[350px] shimmer rounded-lg mb-4"></div>
+
+                                    <div class="space-y-3 mb-4">
+                                        <div class="h-4 w-32 shimmer rounded"></div>
+                                        <div class="h-6 w-72 shimmer rounded"></div>
+                                        <div class="h-4 w-24 shimmer rounded mt-4"></div>
+                                        <div class="h-4 w-full shimmer rounded"></div>
+                                        <div class="h-4 w-5/6 shimmer rounded"></div>
+                                    </div>
+
+                                    <div class="h-[200px] shimmer rounded mb-4"></div>
+                                    <div class="h-[200px] shimmer rounded"></div>
+
+                                </div>
+                                <div class="w-[380px] bg-[#F3F5F6] p-3 space-y-4">
+                                    <div class="h-[140px] shimmer rounded-lg"></div>
+                                    <div class="h-[100px] shimmer rounded-lg"></div>
+                                    <div class="h-[100px] shimmer rounded-lg"></div>
+                                </div>
+
+                            </div>
+
+                            }
+
+                            @else {
+                            <ng-container *ngTemplateOutlet="viewTemplateForm"></ng-container>
+                            }
+                            }
+                            @case (VendorDetailsKey.DOCUMENTS) {
+                            <ng-container *ngTemplateOutlet="ngTemplateDoc"></ng-container>
+                            }
+                            @case (VendorDetailsKey.RELATED_COMPONENTS) {
+                            <ng-container *ngTemplateOutlet="linkedComponents"></ng-container>
+                            }
+                            @default {
+                            <div></div>
+                            }
+                            }
+                            }
+                        </ng-template>
+                    </mat-tab>
+                    }
+                </mat-tab-group>
+
+                <div class="action-btns">
+                    @if(selectedTabIndex == 0 && canEditVendor){
+                    <button class="shadow-none bg-transparent pointer" (click)="edit()">
+                        <mat-icon color="primary"
+                            class="material-symbols-outlined mat-md-icon m-2 pointer">edit</mat-icon>
+                    </button>
+
+                    <button class="shadow-none bg-transparent pointer" (click)="delete()">
+                        <mat-icon color="primary" class="material-symbols-outlined mat-md-icon ">delete</mat-icon>
+                    </button>
+                    }@else if( selectedTabIndex == 1){
+                    <div>
+                        <loading-button type="primary" (onButtonClick)="onOpenDrawer()">
+                            <span class="label-large">Upload Document</span>
+                        </loading-button>
+                    </div>}
+                </div>
+
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+<!-- View mode detail template -->
+<ng-template #viewTemplateForm>
+    <div class=" h-100 overflow-hidden flex gap-2">
+        <div class="flex-1 overflow-y-auto scroll-w-0 m-3">
+            <div class="border !border-[#EEEEEE] rounded-md backgound-gray p-3 mb-3">
+                <div class="grid grid-cols-12 label-medium text-gray">
+                    <div class="col-span-2 text-muted-gray">Vendor ID</div>
+                    <div class="col-span-2 text-muted-gray">Created On</div>
+                    <div class="col-span-3 text-muted-gray">Third Party Type</div>
+                    <div class="col-span-2 text-muted-gray">Status</div>
+                </div>
+
+                <div class="grid grid-cols-12">
+                    <div class="col-span-2 body-large">{{ vendorDetails?.id || '-' }}</div>
+                    <div class="col-span-2 body-large">{{ formatDate(vendorDetails?.createdAt) || 'N/A' }}</div>
+                    <div class="col-span-3 body-large">{{ vendorDetails?.vendorType?.name || ' -' }}</div>
+                    <div class="col-span-2 body-large">
+                        {{ vendorDetails?.status ? getStatus(vendorDetails.status) : '-' }}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="mt-4 label-medium text-[#767676]">
+                Vendor Name
+            </div>
+            <div class="mt-2 text-primary title-large">
+                <span class="title-large truncate whitespace-nowrap overflow-hidden"
+                    [appEllipsisTooltip]="vendorDetails?.name || ''" [colorType]="'primary'" [maxWidth]="800"
+                    [matTooltip]="vendorDetails?.name || ''" matTooltipPosition="below"
+                    matTooltipClass="material-tooltip"></span>
+            </div>
+            <div class="mt-4 label-medium text-[#767676]">Description</div>
+            <div class="mt-2 body-large">
+                <span class="body-large block w-full break-words"
+                    [innerHTML]="(vendorDetails?.description || ' -') | safeHtml"></span>
+            </div>
+
+            <div class="grid grid-cols-5">
+                <div class="col-span-4 grid grid-cols-2 gap-y-4">
+                    <div>
+                        <div class="mt-4 label-medium text-[#767676]">Service Type</div>
+                        <div class="mt-2 body-large">
+                            <span class="body-large block w-full break-words">{{ vendorDetails?.serviceType?.name || '
+                                -'}}</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="mt-4 label-medium text-[#767676]">Third Party Type</div>
+                        <div class="mt-2 body-large">
+                            <span class="body-large block w-full break-words">{{ vendorDetails?.vendorType?.name || '
+                                -'}}</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="title-small my-4"> Vendor Contact (External)</div>
+
+            <div class="grid grid-cols-5">
+                <div class="col-span-4 grid grid-cols-2 gap-y-4">
+
+                    <div>
+                        <div class="label-medium text-[#767676]">Vendor POC Name</div>
+                        <div class="body-large break-words">
+                            {{ vendorDetails?.vendorContactExternal?.name || ' -'}}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="label-medium text-[#767676]">Email</div>
+                        <div class="body-large break-words">
+
+                            <span class="body-large truncate whitespace-nowrap overflow-hidden"
+                                [appEllipsisTooltip]="vendorDetails?.vendorContactExternal?.email || '-'"
+                                [maxWidth]="300" [matTooltip]="vendorDetails?.vendorContactExternal?.email || '-'"
+                                matTooltipPosition="below" matTooltipClass="material-tooltip"></span>
+
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="label-medium text-[#767676]">Address</div>
+                        <div class="body-large break-words">
+                            {{ vendorDetails?.vendorContactExternal?.address || ' -'}}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="label-medium text-[#767676]">Location</div>
+                        <div class="body-large break-words">
+                            {{ locationName || '-'}}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="label-medium text-[#767676]">Phone Number</div>
+                        <div class="body-large break-words">
+                            {{ vendorDetails?.vendorContactExternal?.phone || ' -' }}
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="title-small my-4"> Vendor Contact (Internal)</div>
+            <div class="grid grid-cols-5">
+                <div class="col-span-4 grid grid-cols-2 gap-y-4">
+                    <div>
+                        <div class="label-medium text-[#767676]">Business SPOC</div>
+                        <div class="mt-2 body-large">
+                            <span class="body-large block w-full break-words">{{
+                                vendorDetails?.vendorContactInternal?.businessSPOCName || ' -'}}</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="label-medium text-[#767676]">Email</div>
+                        <div class="mt-2 body-large">
+                            <span class="body-large truncate whitespace-nowrap overflow-hidden"
+                                [appEllipsisTooltip]="vendorDetails?.vendorContactInternal?.email || '-'" [maxWidth]="300"
+                                [matTooltip]="vendorDetails?.vendorContactInternal?.email || '-'" matTooltipPosition="below"
+                                matTooltipClass="material-tooltip"></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    <div class="w-[380px] bg-[#F3F5F6] overflow-y-auto">
+        <div class="p-3">
+            <div class="title-small text-gray mb-4">
+                Other Information
+            </div>
+            <div class="bg-white rounded-lg p-3 mb-3 shadow-sm">
+                <div class="justify-between  d-flex label-medium">
+                    <div> Assets Linked </div>
+                    <div class="pointer  text-primary" (click)="navigateToRelatedSection('asset')">View</div>
+                </div>
+                <div class="headline-large mt-1 text-primary">
+                    {{vendorDetails?.assetsLinked}}
+                </div>
+            </div>
+            <div class="bg-white rounded-lg p-3 mb-3 shadow-sm">
+                <div class="justify-between  d-flex label-medium">
+                    <div> BPA Linked</div>
+                    <div class="pointer  text-primary" (click)="navigateToRelatedSection('bpa')">View</div>
+                </div>
+                <div class="headline-large mt-1 text-primary">
+                    {{vendorDetails?.bpaLinked}}
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+</ng-template>
+
+
+<ng-template #ngTemplateTable let-dataSource="dataSource" let-tableHeaders="tableHeaders"
+    let-displayedHeaders="displayedHeaders">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 w-100 custom-table table">
+        @for (header of tableHeaders; track $index) {
+        <ng-container [matColumnDef]="header.columnDef">
+            <th mat-header-cell *matHeaderCellDef class="font-medium text-gray-700">
+                {{ header.header }}
+            </th>
+
+            @switch (header.key) {
+            @case (ASSET_DETAILS) {
+            <td mat-cell *matCellDef="let row;let i=index" class="whitespace-nowrap" color="primary"
+                (click)="viewAssetDetails(row,i)">
+                <span [matTooltip]="row[header.columnDef]" matTooltipPosition="below"
+                    class="label-large  text-primary pointer"
+                    matTooltipClass="material-tooltip">{{row[header.columnDef]||'-'}}
+                </span>
+            </td>
+            }
+            @case (HEADER_HOSTING_DETAILS) {
+            <td mat-cell *matCellDef="let row">
+                <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+                    class="link-button text-dark body-large text-decoration-none"
+                    (click)="showHostingLocationDetail(row[header.columnDef])"
+                    [disabled]="!showDetail(row[header.columnDef])">
+                    {{getHostingLocation(row[header.columnDef])||'-'}}
+                </button>
+            </td>
+            }
+            @case (STATUS) {
+            <td mat-cell *matCellDef="let row">
+                @if(row[header.columnDef]){
+                <div class="status p-2 d-flex align-items-center justify-content-center rounded label-large w-[100px]"
+                    [ngStyle]="{'background-color': getStatusColors(row.status),color: getStatusTextColors(row.status)}">
+                    {{ (row[header.columnDef])||'-' }}
+                </div>
+                }
+            </td>
+            }
+            @default {
+            <td mat-cell *matCellDef="let row" class="body-large"> {{ row[header.columnDef] || '-' }}</td>
+            }
+            }
+        </ng-container>
+        }
+        <tr mat-header-row *matHeaderRowDef="displayedHeaders"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+    </table>
+</ng-template>
+
+<mat-menu class="action-panel" #detailMenu="matMenu">
+    <ul class="px-2 m-2 ms-3 menu-more-detail">
+        @for(dataSubject of detailList; track i; let i=$index) {
+        <li class="mb-1 body-large">{{dataSubject}}</li>
+        }
+    </ul>
+</mat-menu>
+
+<ng-template #errorLoading>
+    <div class="d-flex flex-column rounded overflow-hidden h-screen bg-white p-2 mt-3 justify-content-center">
+        <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    </div>
+</ng-template>
+
+
+<ng-template #linkedComponents>
+    <div class="h-100 overflow-hidden flex gap-2 flex-col">
+        <div class="flex flex-row gap-4 pt-3 px-3">
+            <div class="flex justify-between items-center w-72 p-4 rounded-xl" style="background-color: #CFE5E5;">
+                <div class="flex flex-col">
+                    <div class="text-sm text-gray-500">Processing risk</div>
+                    <div class="text-2xl font-semibold text-primary">High</div>
+                </div>
+
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-white">
+                    <mat-icon class="material-symbols-outlined" style="color:#5F5CF8">monitoring</mat-icon>
+                </div>
+            </div>
+            <div class="flex justify-between items-center w-72 p-4 rounded-xl border border-gray-200 bg-white">
+                <div class="flex flex-col">
+                    <div class="text-sm text-gray-500">Transfer risk</div>
+                    <div class="text-2xl font-semibold text-primary">Low</div>
+                </div>
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-[#E6F4F1]">
+                    <mat-icon class="material-symbols-outlined" style="color: #00CDC6;">query_stats</mat-icon>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center w-72 p-4 rounded-xl" style="background-color: #cfdaa9;">
+                <div class="flex flex-col">
+                    <div class="text-sm text-gray-500">AI Risk</div>
+                    <div class="text-2xl font-semibold text-primary">None</div>
+                </div>
+                <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-white">
+                    <mat-icon class="material-symbols-outlined" style="color: #5F5CF8;">data_usage</mat-icon>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="flex-1 overflow-auto rounded-lg no-scrollbar m-3">
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+                <div class="px-2.5 py-3 bg-[#F3F4F6]">
+                    <button class="w-full flex items-center justify-between bg-transparent border-0 cursor-pointer"
+                        (click)="toggleSection('assessment')">
+                        <div class="font-semibold text-sm">
+                            Assessments
+                        </div>
+                        <mat-icon class="material-symbols-outlined">
+                            {{ isExpanded('assessment') ? 'arrow_drop_up' : 'arrow_drop_down' }}
+                        </mat-icon>
+                    </button>
+                </div>
+                <div *ngIf="isExpanded('assessment')">
+                    <ng-container *ngIf="requestLoading || assessmentDataSource?.data?.length > 0; else noAssessment">
+                        <table mat-table [dataSource]="requestLoading ? shimmerDataSource : assessmentDataSource"
+                            matSort class="mat-elevation-z8 w-100 custom-table table">
+                            <ng-container matColumnDef="assessmentId">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                                    Assessment ID
+                                </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else assessmentIdContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #assessmentIdContent>
+                                        {{ row.assessmentId }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="title">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                                    Assessment Title
+                                </th>
+                                <td mat-cell *matCellDef="let row" class="cursor-pointer text-primary label-large"
+                                    (click)="handleAssessmentNavigation(row.assessmentId)">
+                                    <ng-container *ngIf="requestLoading; else titleContent">
+                                        <div class="shimmer-line shimmer-md"></div>
+                                    </ng-container>
+                                    <ng-template #titleContent>
+                                        {{ row.title }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                                    Status
+                                </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else statusContent">
+                                        <div class="shimmer-line shimmer-md"></div>
+                                    </ng-container>
+                                    <ng-template #statusContent>
+                                        <span class="font-medium px-3 py-1 rounded-full"
+                                            [ngStyle]="getStatusStyle(row.status)">
+                                            {{ getStatus(row.status) }}
+                                        </span>
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="author">
+                                <th mat-header-cell *matHeaderCellDef> Author </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else authorContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #authorContent>
+                                        {{ row.author }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="assessRecords">
+                                <th mat-header-cell *matHeaderCellDef> Assess Records </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else recordContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #recordContent>
+                                        {{ row.assessRecords }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="completeBy">
+                                <th mat-header-cell *matHeaderCellDef> Complete By </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else completeContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #completeContent>
+                                        {{ row.completeBy | date:'dd.MM.yyyy' }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef> Actions </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else actionContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #actionContent>
+                                        <loading-button type="light" [basicButton]="true">
+                                            {{ row.status === 'NOT_STARTED'
+                                            ? 'Start assessment'
+                                            : 'Continue' }}
+                                        </loading-button>
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="assessmentColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: assessmentColumns;"></tr>
+                        </table>
+                    </ng-container>
+                    <ng-template #noAssessment>
+                        <item-not-found [imgHeight]="'200px'" [title]="'No assessments linked to this vendor.'">
+                        </item-not-found>
+                    </ng-template>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+                <div class="px-2.5 py-3 bg-[#F3F4F6]">
+                    <button class="w-full flex items-center justify-between bg-transparent border-0 cursor-pointer"
+                        (click)="toggleSection('bpa')">
+
+                        <div class="font-semibold text-sm">
+                            BPA
+                        </div>
+
+                        <mat-icon class="material-symbols-outlined">
+                            {{ isExpanded('bpa') ? 'arrow_drop_up' : 'arrow_drop_down' }}
+                        </mat-icon>
+                    </button>
+                </div>
+
+                <div *ngIf="isExpanded('bpa')">
+                    <ng-container *ngIf="requestLoading || (bpaDataSource?.data?.length ?? 0) > 0; else noBpa">
+                        <table mat-table [dataSource]="requestLoading ? shimmerDataSource : bpaDataSource" matSort
+                            class="mat-elevation-z8 w-100 custom-table table">
+
+                            <ng-container matColumnDef="bpaId">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> BPA ID </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else bpaIdContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #bpaIdContent>
+                                        {{ row.bpaId }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="bpaName">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> BPA Name </th>
+                                <td mat-cell *matCellDef="let row" class="cursor-pointer text-primary label-large"
+                                    (click)="handleBPANavigation(row.bpaId)">
+                                    <ng-container *ngIf="requestLoading; else bpaNameContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #bpaNameContent>
+                                        {{ row.bpaName }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else statusContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #statusContent>
+                                        <span class="px-2 py-1 rounded-full text-xs"
+                                            [ngStyle]="getStatusStyle(row.status)">
+                                            {{ getStatus(row.status) }}
+                                        </span>
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="processOwner">
+                                <th mat-header-cell *matHeaderCellDef> Process Owner </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else ownerContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #ownerContent>
+                                        {{ row.processOwner }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="department">
+                                <th mat-header-cell *matHeaderCellDef> Department </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else deptContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #deptContent>
+                                        {{ row.department }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="linkedAsset">
+                                <th mat-header-cell *matHeaderCellDef> Linked Asset </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else assetContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #assetContent>
+                                        {{ row.linkedAsset }}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="bpaColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: bpaColumns;"></tr>
+
+                        </table>
+                    </ng-container>
+
+                    <ng-template #noBpa>
+                        <item-not-found [imgHeight]="'200px'" [title]="'No BPA linked to this vendor.'">
+                        </item-not-found>
+                    </ng-template>
+
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+                <div class="px-2.5 py-3 bg-[#F3F4F6]">
+                    <button class="w-full flex items-center justify-between bg-transparent border-0 cursor-pointer"
+                        (click)="toggleSection('asset')">
+                        <div class="font-semibold text-sm">
+                            Asset
+                        </div>
+                        <mat-icon class="material-symbols-outlined">
+                            {{ isExpanded('asset') ? 'arrow_drop_up' : 'arrow_drop_down' }}
+                        </mat-icon>
+                    </button>
+                </div>
+                <div *ngIf="isExpanded('asset')">
+                    <ng-container *ngIf="requestLoading || assetDataSource?.data?.length > 0; else noAsset">
+                        <table mat-table [dataSource]="requestLoading ? shimmerDataSource : assetDataSource" matSort
+                            class="mat-elevation-z8 w-100 custom-table table">
+                            <ng-container matColumnDef="assetId">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Asset ID </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else idContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #idContent>
+                                        {{row.assetId}}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+                                <td mat-cell *matCellDef="let row" class="cursor-pointer text-primary label-large"
+                                    (click)="handleAssetNavigation(row.assetId)">
+                                    <ng-container *ngIf="requestLoading; else nameContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #nameContent>
+                                        {{row.name}}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Type </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else vendorContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #vendorContent>
+                                        {{row.type}}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="linkedBpas">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Linked BPA </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else bpaContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #bpaContent>
+                                        {{row.linkedBpas}}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else statusContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #statusContent>
+                                        <span class="font-medium px-3 py-1 rounded-full"
+                                            [ngStyle]="getStatusStyles(row.status)">
+                                            {{ getStatus(row.status) }}
+                                        </span>
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="processOwner">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Process Owner </th>
+                                <td mat-cell *matCellDef="let row">
+                                    <ng-container *ngIf="requestLoading; else bpaContent">
+                                        <div class="shimmer-line shimmer-sm"></div>
+                                    </ng-container>
+                                    <ng-template #bpaContent>
+                                        {{row.processOwner}}
+                                    </ng-template>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="assetColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: assetColumns;"></tr>
+                        </table>
+                    </ng-container>
+
+                    <ng-template #noAsset>
+                        <item-not-found [imgHeight]="'200px'" [title]="'No assets linked to this vendor.'">
+                        </item-not-found>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #ngTemplateDoc>
+    <vendor-document [documentDataSource]="documentDataSource" (edit)="onEditDocument($event)"
+        (delete)="deleteDocument($event)" (view)="onViewDocument($event)">
+    </vendor-document>
+</ng-template>
+
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" autosize>
+    <mat-drawer #uploadDrawer mode="over" position="end" class="vendor-doc-mat-drawer" [disableClose]="true">
+        <app-vendor-doc-upload [documentData]="selectedDocument" (onClose)="onDrawerClose()" [vendorId]="vendorId"
+            (onUpload)="onUploadSuccess()" [viewMode]="viewMode" (onDelete)="deleteDocument($event)"
+            (onEdit)="onEditDocument($event)" (removedFiles)="handleRemovedFiles($event)">
+        </app-vendor-doc-upload>
+    </mat-drawer>
+</mat-drawer-container>

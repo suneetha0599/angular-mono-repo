@@ -1,0 +1,74 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3">
+  <div class="flex items-center gap-2 mb-1 text-xl font-semibold text-gray-800 justify-between">
+    <div class="flex gap-2">
+      <div class="d-flex my-auto">
+        <div class="headline-medium my-auto regulation-title">
+          {{ regulationDetails?.name || "Regulation" }}
+        </div>
+      </div>
+      <button mat-icon-button color="primary" class="medium-icon d-flex my-auto" [disabled]="disablePrevBtn"
+        (click)="goToPrev()">
+        <mat-icon class="material-symbols-outlined" [ngClass]="disablePrevBtn ? 'text-gray-800' : 'text-primary'">
+          chevron_left
+        </mat-icon>
+      </button>
+      <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+        (click)="goToNext()">
+        <mat-icon class="material-symbols-outlined"
+          [ngClass]="disableNextBtn ? 'text-gray-800' : 'text-primary'">chevron_right</mat-icon>
+      </button>
+    </div>
+    @if(!hasApiError){
+    <loading-button type="light" [basicButton]="true" (onButtonClick)="openStepperPopup()">
+      View Activity
+    </loading-button>
+    }
+  </div>
+
+  @if( hasApiError){
+  <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+  }@else{
+  <div class="d-flex overflow-hidden position-relative h-100">
+    <div class="col w-100 rounded overflow-hidden position-relative h-full bg-white p-2">
+      <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+        [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event.index)">
+        @for(tab of tabHeaderDetails; track tab.key; let i=$index) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span>{{ tab.name }}</span>
+          </ng-template>
+          <ng-template matTabContent>
+            <ng-container *ngTemplateOutlet="ngTabContent; context: {}">
+            </ng-container>
+          </ng-template>
+        </mat-tab>
+        }
+      </mat-tab-group>
+    </div>
+  </div>}
+</div>
+
+
+<!-- Main Content -->
+<ng-template #ngTabContent>
+  @if(selectedTab==CreateRegulationKey.DSSR){
+  <ng-container *ngIf="showDssr">
+    <app-regulation-dssr [regulationId]="regulationId">
+    </app-regulation-dssr>
+  </ng-container>
+  } @else if (selectedTab==CreateRegulationKey.BPA) {
+  <ng-container *ngIf="showDssr">
+    <app-regulation-bpa #bpaComponentRef [actId]="regulationId"></app-regulation-bpa>
+  </ng-container>
+  } @else if(selectedTab == CreateRegulationKey.ASSESSMENT){
+  <ng-container *ngIf="showDssr">
+    <app-assessment-configuration></app-assessment-configuration>
+  </ng-container>
+  }
+</ng-template>
+
+<ng-template #errorLoading>
+  <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2 justify-content-center">
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+  </div>
+</ng-template>

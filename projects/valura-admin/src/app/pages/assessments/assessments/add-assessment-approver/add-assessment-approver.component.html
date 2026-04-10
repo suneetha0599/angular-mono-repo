@@ -1,0 +1,57 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+    Add Level {{ selectedLevel }} Approver
+</h3>
+
+<button mat-icon-button class="close" (click)="onCancel()">
+    <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+    <form [formGroup]="form">
+        <div class="flex flex-wrap gap-6 ">
+            <div class="flex flex-wrap gap-6 w-full">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                    <mat-label>Choose approvers</mat-label>
+                    <mat-select formControlName="name" multiple [compareWith]="comparenames"
+                        (selectionChange)="updateSelectedNameText()" (openedChange)="clearSearch(searchInput)">
+                        <mat-select-trigger>
+                            <div
+                                style="max-width: 97%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ selectedNameText }}
+                            </div>
+                        </mat-select-trigger>
+                        <mat-optgroup class="sticky-searchbar">
+                            <input #searchInput type="text" placeholder="Search Approver"
+                                (keyup)="filterApprovers(searchInput.value)"
+                                class="w-full p-2 border rounded-lg outline-none body-medium search-inputs" />
+                            @if(searchInput.value){
+                            <button type="button" class="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
+                                (click)="clearSearch(searchInput); searchInput.focus(); $event.stopPropagation()">
+
+                                <mat-icon fontIcon="close" class="text-sm material-symbols-outlined close"></mat-icon>
+                            </button>
+                            }
+                        </mat-optgroup>
+                        <mat-option *ngFor="let user of filteredApproverList" [value]="user">
+                            <mat-checkbox [checked]="isUserSelected(user)" (click)="$event.stopPropagation()"
+                                (change)="toggleUser(user)">
+                                {{ user.displayName || user.email }}
+                            </mat-checkbox>
+                        </mat-option>
+
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+        <custom-mat-error [control]="nameControl"></custom-mat-error>
+    </form>
+</div>
+
+<div mat-dialog-actions class="flex justify-end gap-2 mt-4">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+        Cancel
+    </loading-button>
+    <loading-button type="primary" [loading]="submitLoading" (onButtonClick)="onSave()">
+        Save
+    </loading-button>
+</div>

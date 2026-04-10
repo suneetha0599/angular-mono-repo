@@ -1,0 +1,46 @@
+<div class="d-flex flex-column overflow-hidden p-3 h-100">
+    <div class="flex justify-between">
+        <div class="my-auto title-medium">
+            Section Details
+        </div>
+        <div class="my-auto">
+            <button mat-icon-button (click)="closeDrawer()">
+                <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+        </div>
+    </div>
+    <div class="d-flex overflow-hidden position-relative pb-0 h-100">
+        <form [formGroup]="sectionForm" class="d-flex flex-column overflow-hidden py-2 h-100 w-100">
+            <div class="col w-100 flex-1 d-flex flex-column overflow-hidden min-h-0">
+                <div class="my-3">
+                    <mat-form-field appearance="outline" class="me-2 w-100 mat-sm-input mat-mdc-mb-0">
+                        <mat-label>Title</mat-label>
+                        <input matInput formControlName="title" />
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="title.errors" [control]="title"
+                                controlActualName="Title">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="mt-1 pt-2 d-flex flex-column flex-1 overflow-hidden">
+                    <p class="label-large mb-2">Description</p>
+                    <app-custom-editor class="flex-1 d-flex flex-column"
+                        [initialContent]="sectionForm.get('description')?.value" [showInsertVariable]="false"
+                        (contentChange)="onDescriptionChange($event)"></app-custom-editor>
+                    <!-- <mat-error *ngIf="description.invalid && description.touched">
+                        <custom-mat-error class="inline-block ml-4" [errors]="description.errors"
+                            [control]="description" controlActualName="Description">
+                        </custom-mat-error>
+                    </mat-error> -->
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="d-flex justify-end mt-2">
+        <div class="flex gap-2">
+            <loading-button type="secondary" (click)="closeDrawer()">Cancel</loading-button>
+            <loading-button (onButtonClick)="onSave()">Save</loading-button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+@if (type === TYPE_PRIMARY) {
+<button [type]="isSubmitButton ? 'submit': 'button'"
+  [ngClass]="{'w-100' : isFullWidth, 'px-4': !isIconButton && !isIconOnlyButton, 'buton-md':!smallButton,'sm-button': smallButton, 'icon-only-button':isIconOnlyButton}"
+  mat-flat-button color="primary" (click)="onClick()" [disabled]="loading || disabled">
+  <ng-container *ngTemplateOutlet="buttonContent"></ng-container>
+</button>
+}
+@else if(type === TYPE_PRIMARY_WITH_MATTOOLTIP){
+<span [matTooltip]="matTooltip" [matTooltipPosition]="matTooltipPosition" [matTooltipDisabled]="!matTooltip"
+  class="inline-block">
+  <button [type]="isSubmitButton ? 'submit': 'button'"
+    [ngClass]="{'w-100' : isFullWidth, 'px-4': !isIconButton, 'buton-md':!smallButton,'sm-button': smallButton}"
+    mat-flat-button color="primary" (click)="onClick()" [disabled]="loading || disabled" [matTooltip]="matTooltip"
+    [matTooltipPosition]="matTooltipPosition">
+    <ng-container *ngTemplateOutlet="buttonContent"></ng-container>
+  </button>
+</span>
+}
+@else if (type === TYPE_LIGHT) {
+@if(basicButton){
+<button [type]="isSubmitButton ? 'submit': 'button'"
+  [ngClass]="{'w-100' : isFullWidth, 'px-4': !isIconButton && !isIconOnlyButton,'icon-only-button':isIconOnlyButton}"
+  mat-button (click)="onClick()" [disabled]="loading || disabled">
+  <ng-container *ngTemplateOutlet="buttonContent"></ng-container>
+</button>
+}
+@else{
+<button [type]="isSubmitButton ? 'submit': 'button'"
+  [ngClass]="{'w-100' : isFullWidth, 'px-4': !isIconButton && !isIconOnlyButton,'bg-light':true, 'shadow-wrapper':true,'icon-only-button':isIconOnlyButton}"
+  mat-fab extended (click)="onClick()" [disabled]="loading || disabled">
+  <ng-container *ngTemplateOutlet="buttonContent"></ng-container>
+</button>
+}
+}
+@else {
+<button [type]="isSubmitButton ? 'submit': 'button'"
+  [ngClass]="{'w-100' : isFullWidth, 'px-4': !isIconButton && !isIconOnlyButton, 'border-md':true,'buton-md':true,'icon-only-button':isIconOnlyButton}"
+  mat-stroked-button color="primary" (click)="onClick()" [disabled]="loading || disabled">
+  <ng-container *ngTemplateOutlet="buttonContent"></ng-container>
+</button>
+}
+
+<ng-template #buttonContent>
+  <span class="d-flex align-items-center">
+    @if (loading) {
+    @if (showSpinnerOnly) {
+    <mat-spinner [diameter]="20"></mat-spinner>
+    } @else {
+    <mat-spinner class="mx-auto" [diameter]="20"></mat-spinner>
+    <span class="ps-3">
+      {{loadingText}}
+    </span>
+    }
+    } @else {
+    <ng-content></ng-content>
+    }
+  </span>
+</ng-template>

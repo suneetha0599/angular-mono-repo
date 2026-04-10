@@ -1,0 +1,52 @@
+<div class="d-flex flex-column h-100 overflow-hidden">
+
+    <div class="d-flex justify-content-between align-items-center px-4 pt-3">
+        <div class="title-medium">Triggers Raised</div>
+        <button mat-icon-button (click)="close()">
+            <mat-icon class="material-symbols-outlined">close</mat-icon>
+        </button>
+    </div>
+
+    <hr class="my-3">
+
+
+    <div class="flex-fill d-flex flex-column px-4 min-h-0">
+
+        <div class="rounded bg-[#F3F4F6] p-3 mb-4">
+            <div class="label-small">Reason for triggers</div>
+            <div class="body-large">
+                {{triggers?.triggerReason}}
+            </div>
+        </div>
+        <div class="flex-fill overflow-auto min-h-0">
+            @for (trigger of triggers?.triggers; track $index; let last = $last) {
+            <div class="mb-4">
+                <div class="body-large mb-1">
+                    {{ trigger?.name?.trim() }}
+                </div>
+
+                <div class="body-medium text-muted">
+                    {{ trigger?.source?.trim() }}
+                </div>
+
+                @if (!last) {
+                <hr class="my-3">
+                }
+            </div>
+            }
+        </div>
+
+
+    </div>
+<!-- 
+    <div class="d-flex justify-content-end gap-3 px-4 py-3 bg-white">
+        <loading-button type="secondary" (onButtonClick)="close()">
+            Cancel
+        </loading-button>
+        <loading-button type="primary" (onButtonClick)="save()">
+            Save
+        </loading-button>
+    </div> -->
+
+
+</div>

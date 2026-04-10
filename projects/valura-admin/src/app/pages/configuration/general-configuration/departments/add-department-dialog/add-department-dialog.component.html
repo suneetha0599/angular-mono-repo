@@ -1,0 +1,55 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3 fs-5 font-medium">
+  {{ viewMode ? 'View Department' : isEdit ? 'Edit Department' : 'Add Department' }}
+</h3>
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+<div mat-dialog-content class="m-0 p-3 dialog-content-scrollable">
+  <!-- VIEW MODE -->
+  @if (viewMode) {
+  <div class="space-y-6">
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-1">Name</mat-label>
+      <div>{{ departmentName() || '-' }}</div>
+    </div>
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-2">Description</mat-label>
+      <div>{{ departmentDescription() || '-' }}</div>
+    </div>
+  </div>
+  } @else {
+  <form [formGroup]="form" class="space-y-4">
+    <mat-form-field appearance="outline" class="w-full mat-sm-input"
+      [class.mb-4]="name.invalid && (name.dirty || name.touched)">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" maxlength="255" />
+      <mat-error>
+        <custom-mat-error class="inline-block" [control]="name" [errors]="name.errors"
+          controlActualName="Name"></custom-mat-error>
+      </mat-error>
+    </mat-form-field>
+    <app-custom-mat-textarea [control]="description" label="Description" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </form>
+  }
+</div>
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0 px-3 pb-4 pt-2">
+
+    <loading-button type="secondary" (onButtonClick)="closeDialog()">
+      Cancel
+    </loading-button>
+
+    @if (viewMode && departmentId) {
+    <loading-button type="primary" (onButtonClick)="startEditing()">
+      <mat-icon class="me-2 material-symbols-outlined">edit</mat-icon>
+      Edit
+    </loading-button>
+    }
+    @if (!viewMode) {
+    <loading-button type="primary" [disabled]="form.invalid" [loading]="submitLoading" (onButtonClick)="onSave()">
+      {{ departmentId ? 'Update' : 'Save Department' }}
+    </loading-button>
+    }
+  </div>
+</div>

@@ -1,0 +1,142 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <!-- Title -->
+  <div class="p-3 pb-0">
+    <div class=" flex items-center justify-between">
+      <div class="headline-medium my-auto">Regulation Configuration</div>
+      <div class=" flex gap-2 z-1">
+        @if(!showSearch){
+        <button mat-mini-fab class="material-symbols-outlined shadow-none bg-light mat-md-fab-btn"
+          (click)="toggleSearch()">
+          <mat-icon color="primary">search</mat-icon>
+        </button>
+        } @if(showSearch){
+        <div class="flex items-center">
+          <mat-form-field appearance="outline"
+            class="mat-sm-input mat-round-input enabled-mat-input search-bar mat-mdc-mb-0">
+            <mat-icon class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+              matPrefix>search</mat-icon>
+            <input matInput [(ngModel)]="searchText" placeholder="Search..." [debounceTime]="1000"
+              (ngModelDebounceChange)="onSearchChange()" />
+            @if(searchText){
+            <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+              <mat-icon
+                class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey">close</mat-icon>
+            </button>
+            }
+          </mat-form-field>
+          <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()">
+            <mat-icon
+              class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-primary">search</mat-icon>
+          </button>
+        </div>
+        }
+        @if(regulationFullAcess){
+        <loading-button type="primary" (onButtonClick)="onCreateRegulation()">
+          <mat-icon class="mat-md-icon material-symbols-outlined ml-2">add</mat-icon>
+          Add Regulation
+        </loading-button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        <div class="h-full flex flex-col overflow-hidden">
+
+          <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+            @if(!requestLoading && hasApiError){
+            <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+            }
+            @else if(isEmptyRequest){
+            <item-not-found [imgHeight]="'200px'" [heading]=errorTitle></item-not-found>
+            }
+            @else{
+            <ng-container *ngTemplateOutlet="ngTemplateTable; context: {}">
+            </ng-container>
+            }
+          </div>
+          <!-- <div class="bg-white">
+            <mat-paginator #paginator class="bg-white pagination" [pageSize]="pageSize" [length]="totalItems"
+              (page)="onPageChange($event)" [pageSizeOptions]="[10, 50, 100]" aria-label="Select page"></mat-paginator>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="dataSource" matSort
+    class="mat-elevation-z8 w-100 custom-table table table-header table-layout-fixed"
+    (matSortChange)="onSortChange($event)">
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="'40%'"> Name </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.name" [colorType]="regulationFullAcess ? 'primary' : 'default'"
+            [matTooltip]="element.name" matTooltipPosition="below" matTooltipClass="material-tooltip"
+            (click)="regulationFullAcess && goToDetails(element)">
+            {{ element.name }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="jurisdiction">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="'20%'"> Jurisdiction </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.jurisdiction" [colorType]="'default'" [matTooltip]="element.jurisdiction"
+            matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.jurisdiction }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="countries">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="'30%'"> Applicable Countries </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.countries" [colorType]="'default'" [matTooltip]="element.countries"
+            matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.countries }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="action">
+      <th mat-header-cell *matHeaderCellDef [style.width]="'10%'">
+        <span class="text-grey title-small">Actions</span>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <div class="d-flex gap-2">
+          <mat-icon class="material-symbols-outlined mat-md-icon cursor-pointer"
+            [class.text-grey]="!regulationFullAcess" [class.text-primary]="regulationFullAcess"
+            [style.pointer-events]="regulationFullAcess ? 'auto' : 'none'"
+            [style.opacity]="regulationFullAcess ? '1' : '0.8'" (click)="regulationFullAcess && onEdit(row)"
+            title="Edit">
+            edit
+          </mat-icon>
+
+          <mat-icon class="material-symbols-outlined mat-md-icon cursor-pointer"
+            [class.text-grey]="!regulationFullAcess" [class.text-primary]="regulationFullAcess"
+            [style.pointer-events]="regulationFullAcess ? 'auto' : 'none'"
+            [style.opacity]="regulationFullAcess ? '1' : '0.8'" (click)="regulationFullAcess && onDelete(row)"
+            title="Delete">
+            delete
+          </mat-icon>
+        </div>
+      </td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders"></tr>
+  </table>
+</ng-template>

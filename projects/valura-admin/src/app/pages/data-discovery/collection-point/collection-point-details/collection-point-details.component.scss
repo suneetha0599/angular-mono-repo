@@ -1,0 +1,265 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+
+.shimmer-line {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  height: 16px;
+
+  &.shimmer-small {
+    width: 30px;
+  }
+
+  &.shimmer-medium {
+    width: 120px;
+  }
+
+  &.shimmer-large {
+    width: 180px;
+  }
+}
+
+.shimmer-row {
+  .mat-mdc-cell {
+    padding: 12px 16px !important;
+
+    .shimmer-line {
+      margin: 4px 0;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+
+::ng-deep {
+  .mat-tab-100 {
+    height: 100%;
+
+    .mat-mdc-tab-body-wrapper {
+      height: 100%;
+      flex: 1;
+    }
+
+    .mat-mdc-tab-body {
+      height: 100%;
+    }
+
+    .mat-mdc-tab-body-content {
+      height: 100%;
+      overflow: hidden;
+    }
+  }
+}
+
+
+.no-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.no-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.fontColor {
+  color: colors.$primary;
+}
+
+
+.edit-wrapper {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 2;
+}
+
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+th,
+td {
+  white-space: normal;
+  word-break: break-word;
+}
+
+
+
+.icon-search {
+  height: 22px;
+  width: 22px;
+  font-size: 22px;
+}
+
+.configure-accordion {
+  display: block;
+}
+
+.configure-accordion-item {
+  display: block;
+  border: solid 1px colors.$light-grey-border;
+}
+
+.configure-accordion-item+.configure-accordion-item {
+  border-top: none;
+}
+
+.configure-accordion-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+
+.configure-accordion-item-body {
+  padding: 16px;
+}
+
+.configure-accordion-item-header:hover {
+  cursor: pointer;
+  background-color: colors.$med-grey;
+}
+
+.configure-accordion-item:first-child {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.configure-accordion-item:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+// Add these vendor-specific styles to your existing SCSS file
+
+.vendor-table {
+  min-width: 800px;
+
+  .vendor-header-cell {
+    background-color: #f9f9fe !important;
+    font-size: 0.75rem !important;
+    font-weight: 400 !important;
+    color: #767676 !important;
+    padding: 8px 16px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    white-space: nowrap;
+    min-width: 120px;
+
+    &:first-child {
+      border-top-left-radius: 8px !important;
+    }
+
+    &:last-child {
+      border-top-right-radius: 8px !important;
+    }
+  }
+
+  .vendor-cell {
+    font-size: 0.875rem !important;
+    color: #374151 !important;
+    padding: 6px 16px !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    white-space: nowrap;
+    min-width: 120px;
+  }
+
+  .vendor-row {
+    &:hover {
+      background-color: #f8fafc;
+    }
+
+    &:last-child .vendor-cell {
+      border-bottom: none;
+    }
+  }
+
+  .mat-mdc-header-row {
+    background-color: #f9f9fe !important;
+  }
+}
+
+::ng-deep .vendor-table {
+  .mat-mdc-header-cell {
+    background-color: #f9f9fe !important;
+    font-size: 0.75rem !important;
+    font-weight: 400 !important;
+    color: #767676 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 8px 16px !important;
+  }
+
+  .mat-mdc-cell {
+    font-size: 0.875rem !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    padding: 6px 16px !important;
+  }
+}
+
+.chip-input-field {
+  min-width: 200px;
+
+  ::ng-deep .mat-mdc-form-field-wrapper {
+    height: 40px;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 40px !important;
+    border-radius: 8px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: 8px 12px !important;
+    min-height: auto !important;
+  }
+
+  ::ng-deep .mat-mdc-floating-label {
+    color: #666 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+
+    &.mdc-floating-label--float-above {
+      top: 0 !important;
+      transform: translateY(-50%) scale(0.75) !important;
+    }
+  }
+
+
+  &.user-search-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+  }
+
+  @media (max-width: 600px) {
+    min-width: 160px;
+  }
+}
+
+.grayOut-expand {
+  color: #959393 !important;
+}

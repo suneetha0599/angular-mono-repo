@@ -1,0 +1,37 @@
+<mat-form-field [appearance]="appearance" class="w-full  mat-sm-text-area mat-sm-input mat-mdc-mb-0">
+
+  @if (label) {
+    <mat-label>{{ label }}</mat-label>
+  }
+
+  <textarea
+    matInput
+    [formControl]="control"
+    [attr.maxlength]="maxLength"
+    cdkTextareaAutosize
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [cdkAutosizeMinRows]="minRows"
+    [cdkAutosizeMaxRows]="maxRows"
+    (input)="onInput()"
+    (blur)="control.markAsTouched()">
+  </textarea>
+
+  @if (showCounter && maxLength) {
+    <mat-hint align="end" class="text-xs text-gray-500">
+      {{ length }}/{{ maxLength }}
+    </mat-hint>
+  }
+
+  @if (control && (control.touched || control.dirty)) {
+    <mat-error>
+      <custom-mat-error
+        [errors]="control.errors"
+        [control]="control">
+      </custom-mat-error>
+    </mat-error>
+  }
+
+</mat-form-field>
+
+

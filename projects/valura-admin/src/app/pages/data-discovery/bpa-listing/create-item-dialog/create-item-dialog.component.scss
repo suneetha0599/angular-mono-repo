@@ -1,0 +1,107 @@
+.close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+::ng-deep .debug-button {
+  border: 2px solid red !important;
+  background-color: #1C2B70 !important;
+  color: white !important;
+}
+
+textarea {
+  transition: height 0.2s ease;
+  resize: none !important;
+}
+
+::ng-deep {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+
+  .mat-mdc-dialog-title {
+    margin: 0 !important;
+    padding: 8px 16px !important;
+  }
+
+  .mat-mdc-dialog-content {
+    margin: 0 !important;
+    padding: 16px !important;
+    max-height: 60vh;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+  }
+
+  .mat-mdc-dialog-actions {
+    margin: 0 !important;
+    padding: 16px !important;
+    min-height: auto !important;
+  }
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.p-0 {
+  padding: 0;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.my-0 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.fs-5 {
+  font-size: 1.25rem;
+}

@@ -1,0 +1,10 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3 text-sm-start">
+  {{data.title}}
+</h3>
+
+<div mat-dialog-content class="m-0 p-3">
+  <div class="preview-content" [innerHTML]="sanitizedHtml"></div>
+</div>
+<button mat-icon-button tabindex="-1" class="close" (click)="onClose()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>

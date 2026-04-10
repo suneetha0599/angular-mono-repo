@@ -1,0 +1,72 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../styles/custom/typography.scss" as typography;
+
+.title {
+  font-size: typography.$fs-13;
+}
+
+.content {
+  width: 98%;
+  max-height: 100vh;
+  height: 57vh;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.info-icon {
+  font-size: typography.$fs-16;
+}
+
+.percentage {
+  width: 50px;
+}
+
+.match {
+  margin-left: 87px;
+}
+
+.triggers {
+  height: 425px;
+  max-height: 450px;
+  overflow: auto;
+}
+
+.trigger-name {
+  width: 93%;
+  word-wrap: break-word; 
+  white-space: normal;
+}
+
+
+::ng-deep {
+  mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  mat-chip {
+    max-width: 300px !important;
+    width: auto !important;
+  }
+
+ 
+  .mat-mdc-chip-action-label,
+  .mdc-evolution-chip__text-label {
+    display: inline-block !important;
+    max-width: 250px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+
+.sticky-search-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+::ng-deep .sticky-search-field .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}

@@ -1,0 +1,19 @@
+.status-col {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  padding: 0 !important;
+  overflow: visible;
+}
+
+.status {
+  border-radius: 8px;
+  box-sizing: border-box;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100px !important;
+}

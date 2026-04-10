@@ -1,0 +1,172 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+        <button (click)="goBack() "
+          class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200 ">
+          <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+        </button>
+        <div class="headline-medium my-auto ml-2">User Creation</div>
+      </div>
+    </div>
+  </div>
+  <div class="p-4 flex-1 min-h-0">
+    <div class="flex flex-col rounded-lg h-fit max-h-full bg-white overflow-auto p-3 pt-0 pl-8">
+      <form [formGroup]="form" class="h-100 ">
+        <div class="p-6 pb-0">
+          <div class="mb-3">
+            <p class="label-large  mb-2">Email</p>
+            <div class="w-[45%]">
+              <mat-form-field appearance="outline" class="w-full chip-input-field">
+                <input matInput formControlName="email" type="email">
+                <mat-icon matSuffix class="text-primary material-symbols-outlined">email</mat-icon>
+                <mat-error>
+                  <custom-mat-error class="inline-block" [errors]="emailControl.errors" [control]="emailControl"
+                    controlActualName="Email"></custom-mat-error>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="mb-3">
+            <p class="label-large  mb-2">First Name</p>
+            <div class="w-[45%]">
+              <mat-form-field appearance="outline" class="w-full chip-input-field">
+                <input matInput formControlName="firstName">
+                <mat-icon matSuffix class="text-primary material-symbols-outlined">person_outline</mat-icon>
+                <mat-error>
+                  <custom-mat-error class="inline-block" [errors]="firstNameControl.errors" [control]="firstNameControl"
+                    controlActualName="First Name"></custom-mat-error>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="mb-3">
+            <p class="label-large  mb-2">Last Name</p>
+            <div class="w-[45%]">
+              <mat-form-field appearance="outline" class="w-full chip-input-field">
+                <input matInput formControlName="lastName">
+                <mat-icon matSuffix class="text-primary material-symbols-outlined">person_outline</mat-icon>
+                <mat-error *ngIf="hasFieldError('lastName')">
+                  {{ getFieldError('lastName') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="mb-3">
+            <p class="label-large  mb-2">Full Name</p>
+            <div class="w-[45%]">
+              <mat-form-field appearance="outline" class="w-full chip-input-field">
+                <input matInput formControlName="displayName">
+                <mat-icon matSuffix class="text-primary material-symbols-outlined">person_outline</mat-icon>
+                <mat-error>
+                  <custom-mat-error class="inline-block" [errors]="displayNameControl.errors"
+                    [control]="displayNameControl" controlActualName="Full Name"></custom-mat-error>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="mb-3">
+            <p class="label-large  mb-2">Phone Number</p>
+            <div class="w-[45%]">
+              <mat-form-field appearance="outline" class="w-full chip-input-field">
+                <input matInput formControlName="phoneNumber" type="tel">
+                <mat-icon matSuffix class="text-primary material-symbols-outlined">phone</mat-icon>
+                <mat-error *ngIf="hasFieldError('phoneNumber')">
+                  {{ getFieldError('phoneNumber') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="mb-3">
+            <p class="label-large m-0">Roles</p>
+            <div class="flex flex-wrap gap-3 items-center">
+              <div *ngFor="let role of selectedRoles"
+                class="flex items-center bg-blue-100 rounded-full px-4 py-2 gap-2 max-w-xs h-10 relative">
+                <span class="text-md text-blue-700 font-normal truncate pr-4">
+                  {{
+                  role.name}}
+                </span>
+                <button mat-icon-button class="chip-remove-btn" (click)="removeRole(role.id)">
+                  <mat-icon class="text-gray-600 material-symbols-outlined">remove</mat-icon>
+                </button>
+              </div>
+              <div class="flex items-center mt-3" [ngClass]="{
+                        'min-w-[322px]': selectedRoles.length >= 1,
+                        'w-[45%]': selectedRoles.length < 1
+                        }">
+                <mat-form-field appearance="outline" class="w-full chip-input-field field-select">
+                  <!-- <mat-label>Select Role</mat-label> -->
+                  <mat-select formControlName="role" (selectionChange)="onRoleSelected($event)">
+                    <mat-option *ngFor="let role of availableRoles" [value]="role">
+                      {{ role.name }}
+                      <span class="text-xs text-gray-500 ml-2">{{
+                        role.description
+                        }}</span>
+                    </mat-option>
+                  </mat-select>
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="roleControl.errors" [control]="roleControl"
+                      controlActualName="Select Role"></custom-mat-error>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <p class="label-large m-0  mb-2">
+              Departments
+            </p>
+            <div class="flex flex-wrap gap-3 items-center">
+              <div *ngFor="let dept of selectedDepartments"
+                class="flex items-center bg-blue-100 rounded-full px-4 py-2 gap-2 max-w-xs h-10 relative">
+                <span class="text-md text-blue-700 font-normal truncate pr-4">
+                  {{ dept.name }}
+                </span>
+                <button mat-icon-button class="chip-remove-btn" (click)="removeDepartment(dept.id)">
+                  <mat-icon class="text-gray-600 material-symbols-outlined">remove</mat-icon>
+                </button>
+              </div>
+              <div class="flex items-center"
+                [ngClass]="{'min-w-[322px]': selectedDepartments.length >= 1, 'w-[45%]': selectedDepartments.length < 1}">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input enabled-mat-input mat-mdc-mb-0">
+                  <!-- <mat-label>Select Department</mat-label> -->
+                  <input type="text" matInput [formControl]="departmentControl" [matAutocomplete]="autoDepartment"
+                    (input)="onSearchDepartment($any($event.target).value)" />
+                  <button mat-icon-button matSuffix tabindex="-1">
+                    <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  </button>
+                  <mat-autocomplete #autoDepartment="matAutocomplete" [displayWith]="displayDepartmentName"
+                    (optionSelected)="onSelectDepartment($event.option.value)">
+                    @for(department of filteredDepartmentList; track i; let i = $index) {
+                    <mat-option [value]="department">
+                      {{ department.name }}
+                    </mat-option>
+                    }
+                    @if (departmentSearchTerm && !isExistingDepartment(departmentSearchTerm)) {
+                    <mat-option (click)="openAddDialog('userDepartment', departmentSearchTerm)">
+                      Other
+                    </mat-option>
+                    }
+                  </mat-autocomplete>
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="departmentControl.errors"
+                      [control]="departmentControl" controlActualName="Select department">
+                    </custom-mat-error>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end mr-10  border-gray-200">
+          <loading-button type="primary" [disabled]="!isFormValid" (onButtonClick)="onSubmit()">
+            <span class="label-large">Create User</span>
+          </loading-button>
+          <loading-button type="light" [basicButton]="true" class="ml-3" (onButtonClick)="resetForm()">
+            <span class="label-large">Clear</span>
+          </loading-button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

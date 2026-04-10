@@ -1,0 +1,305 @@
+<div class="d-flex flex-column  view-wrapper h-screen overflow-hidden p-4">
+    <!-- Header -->
+    <div class="d-flex justify-between mb-2">
+        <div class="d-flex">
+            <div class="headline-medium d-flex !my-auto ms-1">
+                <span>Approve Mitigation Measures</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card -->
+    <mat-card class="px-3 py-2 header-card">
+        @if(isLoading) {
+        <!-- Shimmer skeletons -->
+        <div class="d-flex justify-between title">
+            <div class="d-flex fw-semibold gap-3">
+                <div class="shimmer-line shimmer-large"></div>
+                <div class="shimmer-line shimmer-large"></div>
+            </div>
+            <div class="shimmer-line shimmer-medium"></div>
+        </div>
+        <div class="d-flex justify-between mt-2">
+            <div class="shimmer-line shimmer-medium"></div>
+            <div class="shimmer-line shimmer-small"></div>
+        </div>
+        }
+        @else {
+        <!-- Actual Content -->
+        <div class="d-flex justify-between title">
+            <div class="d-flex fw-semibold">
+                <div>{{ element?.name }}</div>
+                <div class="ms-3">Owner: {{ element?.owner?.displayName || 'Unknown' }}</div>
+            </div>
+            <!-- Optional right-side content -->
+            <!-- <div class="fw-semibold">
+          Initial Risk Score: <span class="text-primary">(75/100)</span>
+        </div> -->
+        </div>
+
+        <div class="d-flex justify-between mt-2">
+            <div class="body-medium text-gray-600">
+                {{ element?.description || 'No description provided' }}
+            </div>
+            <div class="ms-3 label-large pointer text-primary">
+                <a (click)="onViewDetails()">View Details</a>
+            </div>
+        </div>
+        }
+    </mat-card>
+
+    <!-- Footer Info -->
+    @if(isLoading) {
+    <div class="mt-3 mx-2 d-flex justify-between">
+        <div class="shimmer-line shimmer-large"></div>
+        <div class="d-flex gap-3">
+            <div class="shimmer-line shimmer-large"></div>
+            <div class="shimmer-line shimmer-large"></div>
+        </div>
+    </div>
+    <div class="mx-2 mt-2">
+        <div class="shimmer-line shimmer-medium"></div>
+    </div>
+    }
+    @else {
+    @if(element) {
+    <div class="mt-3 mx-2 d-flex justify-between">
+        <div class="title fw-semibold">
+            <div>Assessment created by: {{ element?.owner?.displayName || 'Unknown' }}</div>
+        </div>
+        <div class="d-flex days">
+            <div>Created on: {{ formatDate(element?.createOn) }}</div>
+            <div class="ms-3">Last update on: {{ formatDate(element?.dueDate) }}</div>
+        </div>
+    </div>
+    <div class="mx-2 days">
+        Status: {{ element?.status || 'Unknown' }}
+    </div>
+    }
+    }
+
+
+    <div class="h-full flex flex-col overflow-hidden  position-relative bg-white rounded p-2">
+        <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+            <ng-container *ngTemplateOutlet="riskTableTemplate"></ng-container>
+        </div>
+
+        <div class="flex justify-end">
+            @if(isApprovalRequested && !submitted) {
+            <loading-button class="w-100" type="primary" class="justify-end p-2" [loading]="submitLoading"
+                (onButtonClick)="onFinalSubmit()">Complete review</loading-button>
+
+            }
+        </div>
+    </div>
+
+
+</div>
+
+
+<ng-template #riskTableTemplate>
+    <table mat-table [dataSource]="riskList" matSort class="mat-elevation-z8 w-100 custom-table table">
+
+
+        <!-- Checkbox Column -->
+        <!-- <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef class="header-index">
+                <mat-checkbox color="primary" (change)="$event ? masterToggle() : null" [checked]="isAllSelected()"
+                    [indeterminate]="selection.hasValue() && !isAllSelected()">
+                </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+                <mat-checkbox color="primary" (click)="$event.stopPropagation()"
+                    (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+                </mat-checkbox>
+            </td>
+        </ng-container> -->
+
+        <!-- Risk ID -->
+        <ng-container matColumnDef="riskId">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-index ">
+                <span class="text-grey title-small">Risk ID</span>
+            </th>
+            <td mat-cell *matCellDef="let risk" class="px-4 whitespace-nowrap">
+                <ng-container *ngIf="!isLoading">
+                    <span class="body-large">{{ risk.riskId }}</span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-small"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+        <!-- Description -->
+        <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-index">
+                <span class="text-grey title-small">Risk description</span>
+            </th>
+            <td mat-cell *matCellDef="let risk" class="px-4" [style.max-width]="'200px'">
+                <ng-container *ngIf="!isLoading">
+                    <div class="d-flex">
+                        <span [appEllipsisTooltip]="risk.description" [colorType]="'default'" [maxWidth]="0"
+                            [matTooltip]="risk.description" matTooltipPosition="below"
+                            matTooltipClass="material-tooltip">
+                        </span>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-large"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+        <!-- Risk Level -->
+        <ng-container matColumnDef="riskLevel">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-index">
+                <span class="text-grey title-small">Risk level</span>
+            </th>
+            <td mat-cell *matCellDef="let risk" class="px-4 whitespace-nowrap">
+                <ng-container *ngIf="!isLoading">
+                    <span class="body-large  font-medium">{{ risk.riskLevel }}</span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-small"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="mitigationId">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-index">
+                <span class="text-grey title-small">Measure Id</span>
+            </th>
+            <td mat-cell *matCellDef="let risk" class="px-4 whitespace-nowrap">
+                <ng-container *ngIf="!isLoading">
+                    <span class="body-large  font-medium">{{ risk.mitigationId }}</span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-small"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="standard">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-index">
+                <span class="text-grey title-small">Standard</span>
+            </th>
+            <td mat-cell *matCellDef="let risk" class="px-4 whitespace-nowrap">
+                <ng-container *ngIf="!isLoading">
+                    <span class="body-large  font-medium">{{ risk.standard }}</span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-small"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="residualRisk">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-index">
+                <span class="text-grey title-small">Residual Risk</span>
+            </th>
+            <td mat-cell *matCellDef="let risk" class="px-4 whitespace-nowrap">
+                <ng-container *ngIf="!isLoading">
+                    <span class="body-large  font-medium">{{ risk.residualRisk }}</span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-small"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+        <!-- Parameter -->
+        <ng-container matColumnDef="mitigationDesc">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-index">
+                <span class="text-grey title-small">Mitigation</span>
+            </th>
+            <td mat-cell *matCellDef="let risk" class="px-4 whitespace-nowrap" [style.max-width]="'200px'">
+                <ng-container *ngIf="!isLoading">
+                    <div class="d-flex">
+                        <span [appEllipsisTooltip]="risk.mitigationDesc" [colorType]="'default'" [maxWidth]="0"
+                            [matTooltip]="risk.mitigationDesc" matTooltipPosition="below"
+                            matTooltipClass="material-tooltip">
+                        </span>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-medium"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="status-column header-index">Status</th>
+            <td mat-cell *matCellDef="let risk" class="status-column">
+                <div class="status p-2 d-flex a!lign-items-center label-large !justify-content-center  "
+                    [ngStyle]="{'background-color': getStatusColors( risk.status),'color':getStatusTextColors( risk.status)}">
+                    {{ getStatusText( risk.status) }}
+                </div>
+            </td>
+        </ng-container>
+
+        <!-- view/add mitigation -->
+        <ng-container matColumnDef="action" [stickyEnd]="true">
+            <th mat-header-cell *matHeaderCellDef class="header-index" [class.sticky-cell]="true">Action
+            </th>
+
+            <td mat-cell *matCellDef="let element">
+                <ng-container *ngIf="!isLoading; else loadingShimmer">
+                    <button mat-icon-button [matMenuTriggerFor]="measureActionMenu" class="action-btn"
+                        matTooltip="Actions">
+                        <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+                    </button>
+
+                    <mat-menu #measureActionMenu="matMenu" class="action-panel">
+                        <button mat-menu-item (click)="editMeasure(element.risk, element.measure)">
+                            <mat-icon class="mat-md-icon text-primary material-symbols-outlined">edit</mat-icon>
+                            <span>Review</span>
+                        </button>
+
+                        <ng-container
+                            *ngIf="element?.measure?.status !== 'APPROVED' && element?.measure?.status !== 'REJECTED'">
+                            <button mat-menu-item
+                                (click)="onApproveMeasure('APPROVED', element?.risk, element?.measure)">
+                                <mat-icon class="mat-md-icon text-primary material-symbols-outlined">done</mat-icon>
+                                <span>Approve</span>
+                            </button>
+
+                            <button mat-menu-item
+                                (click)="onApproveMeasure('REJECTED', element?.risk, element?.measure)">
+                                <mat-icon class="mat-md-icon text-primary material-symbols-outlined">close</mat-icon>
+                                <span>Reject</span>
+                            </button>
+                        </ng-container>
+                    </mat-menu>
+                </ng-container>
+
+                <ng-template #loadingShimmer>
+                    <div class="shimmer-line shimmer-medium"></div>
+                </ng-template>
+            </td>
+        </ng-container>
+
+
+        <!-- Table Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true;" class="bg-gray-100 title-small">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- Empty State -->
+        @if(riskList.length === 0){
+        <tr class="no-data-row">
+            <td [attr.colspan]="displayedColumns.length" class="text-center py-16">
+                <div class="flex flex-col items-center">
+                    <mat-icon class="text-6xl text-gray-400 mb-4 material-symbols-outlined">report_problem</mat-icon>
+                    <p class="text-gray-600 text-lg mb-2">No risks found</p>
+                    <p class="text-gray-500">Add risks to get started</p>
+                </div>
+            </td>
+        </tr>
+        }
+    </table>
+</ng-template>
+
+<mat-drawer-container class="right-sidebar" [hasBackdrop]="true" autosize>
+    <mat-drawer #rightDrawer class="w-75" mode="over" position="end">
+        <app-risk-mitigation-drawer [securityControlList]="securityControlList" [viewMode]="drawerMode.mode"
+            [risk]="drawerMode.data?.risk" [measure]="drawerMode.data?.measure" (onCloseDrawer)="closeDrawer()"
+            (onApproveChange)="loadAssessmentMeasureDetails(assessmentId)" [approver]="true">
+        </app-risk-mitigation-drawer>
+    </mat-drawer>
+</mat-drawer-container>

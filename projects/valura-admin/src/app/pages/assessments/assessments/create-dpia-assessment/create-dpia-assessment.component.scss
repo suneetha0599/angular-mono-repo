@@ -1,0 +1,50 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../styles/custom/typography.scss" as typography;
+
+.card {
+  height: 79vh;
+  background-color: colors.$body-bg;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.header-actions {
+  position: absolute;
+  right: 10px;
+  top: 30px;
+  transform: translateY(-50%);
+  gap: 16px;
+  font-size: typography.$fs-14;
+}
+
+.tab-group {
+  width: 1208px;
+}
+
+::ng-deep .tab-group .mat-mdc-tab-body-content {
+  overflow: hidden !important;
+}
+
+::ng-deep .toggle .mat-button-toggle-checked .mat-button-toggle-button:has(.mat-button-toggle-checkbox-wrapper) {
+  padding-left: 0px !important;
+}
+
+.toggle-group .mat-button-toggle-checked {
+  background-color: colors.$body-bg !important;
+}
+
+::ng-deep .toggle-group .mat-button-toggle-animations-enabled .mat-button-toggle-checkbox-wrapper {
+  display: none;
+}
+
+::ng-deep .custom-panel .mat-expansion-indicator {
+  display: none;
+}
+
+.custom-arrow {
+  transition: transform 200ms ease;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}

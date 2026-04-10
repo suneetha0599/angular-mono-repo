@@ -1,0 +1,222 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{data.type === CreatItemType.RECEPIENT ? 'Edit ' + getTitle() : getTitle()}}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="close dialog">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <form [formGroup]="itemForm" class="w-full">
+    @if (data.type === CreatItemType.DATA_ELEMENTS) {
+
+    <div class="mb-4 w-100">
+      <mat-form-field appearance="outline" class="w-full enabled-mat-input mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="nameControl.errors"
+            [control]="nameControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="mb-4 w-100">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Category</mat-label>
+        <mat-select formControlName="category" [compareWith]="msCompareCategory" multiple>
+          <mat-option *ngFor="let category of data.categories" [value]="category">
+            {{ category.name }}
+          </mat-option>
+          <mat-option>
+            {{ !data.categories ? 'Loading categories...' : 'No categories available' }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="categoryControl.errors"
+            [control]="categoryControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Classification</mat-label>
+        <mat-select formControlName="classification" [compareWith]="msCompareClassification" multiple>
+          <mat-option *ngFor="let classification of classificationMasterList" [value]="classification">
+            {{ classification.name }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="classificationControl.errors"
+            [control]="classificationControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    @if(data.editData){
+    <div class="">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Purpose</mat-label>
+        <mat-select formControlName="purpose" multiple [compareWith]="msComparePurpose">
+          <mat-option *ngFor="let purpose of data.purposeList" [value]="purpose">
+            {{ purpose.purposeName }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="purposeControl.errors"
+            [control]="purposeControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+    }
+
+    }
+
+    @else if(data.type === CreatItemType.SOURCE) {
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="nameControl.errors"
+            [control]="nameControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Category</mat-label>
+        <mat-select formControlName="category">
+          <mat-option *ngFor="let option of sourceCategoryOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="categoryControl.errors"
+            [control]="categoryControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+    @if(showAssetType){
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Asset Type</mat-label>
+        <mat-select formControlName="sourceType">
+          <mat-option *ngFor="let option of assetTypeOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="sourceTypeControl.errors"
+            [control]="sourceTypeControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+    }
+    <div class="">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option *ngFor="let option of currentSourceTypeOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="typeControl.errors"
+            [control]="typeControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    }
+
+    @else if(data.type === CreatItemType.ASSET) {
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="nameControl.errors"
+            [control]="nameControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option *ngFor="let option of assetTypeOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="typeControl.errors"
+            [control]="typeControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+    }
+
+    @else if(data.type === CreatItemType.RECEPIENT) {
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Category</mat-label>
+        <mat-select formControlName="category">
+          <mat-option *ngFor="let option of recipientCategoryOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="categoryControl.errors"
+            [control]="categoryControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="enabled-mat-input w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="nameControl.errors"
+            [control]="nameControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    @if(data.editData){
+    <div class="mb-4">
+      <app-custom-mat-textarea [control]="purposeControl" label="Reason for Sharing Data" [minRows]="1" [maxRows]="5">
+      </app-custom-mat-textarea>
+    </div>
+
+    <div>
+      <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>People with Access</mat-label>
+        <input matInput type="number" formControlName="count" min="1">
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="countControl.errors"
+            [control]="countControl"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+    }
+    }
+  </form>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+
+    <loading-button type="primary" [loading]="isLoading" [basicButton]="true" [disabled]="itemForm.invalid"
+      (onButtonClick)="onCreate()" [loadingText]="getButtonText()">
+      <span class="px-2">{{ getButtonText() }}</span>
+    </loading-button>
+  </div>
+</div>

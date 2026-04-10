@@ -1,0 +1,245 @@
+<!-- Risk Dialog Container -->
+<div class="h-full overflow-y-auto">
+  <div class="px-6 py-3">
+
+    <!-- Dialog Header -->
+    <header class="flex justify-between items-center mb-3">
+      <p class="text-xl font-medium text-gray-900 m-0">Raise Risk</p>
+
+      <button (click)="onCancel()" aria-label="Cancel dialog" class="flex items-center justify-center w-10 h-10
+                 rounded-full hover:bg-gray-200 transition-colors duration-200"
+        style="border-radius: 9999px !important;">
+        <mat-icon class="text-red-600 text-2xl leading-none material-symbols-outlined">close</mat-icon>
+      </button>
+    </header>
+
+    <!-- Risk Form -->
+    <form [formGroup]="riskForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- Parameter Field -->
+      <section class="grid grid-cols-12 gap-4 mt-1" [class]="hasParameterErrors() ? 'mb-7.5' : 'mb-3'">
+        <div class="col-span-12">
+          <div class="space-y-3">
+            <!-- Parameter Selection -->
+            <div class="flex items-start gap-2">
+              <!-- <mat-form-field appearance="outline" class="flex-1 mat-md-input">
+                <mat-label>Parameter</mat-label>
+                <input matInput #parameterInput formControlName="parameterId" placeholder="Search or select a parameter"
+                  [matAutocomplete]="parameterAutocomplete" (input)="onSearchTextChange(parameterInput.value)"
+                  aria-label="Search risk parameter">
+
+                <mat-autocomplete #parameterAutocomplete="matAutocomplete" [displayWith]="displayParameterFn"
+                  (optionSelected)="onParameterSelected()">
+                  @if (isLoadingParameters()) {
+                  <mat-option disabled>
+                    <div class="flex items-center">
+                      <mat-spinner diameter="16" class="mr-2"></mat-spinner>
+                      Loading parameters...
+                    </div>
+                  </mat-option>
+                  } @else {
+                  @for (parameter of filteredParameters(); track parameter.id) {
+                  <mat-option [value]="parameter.id">
+                    <div class="font-medium">{{ parameter.name }}</div>
+                    @if (parameter.description) {
+                    <div class="text-xs text-gray-500 mt-0.5">{{ parameter.description }}</div>
+                    }
+                  </mat-option>
+                  }
+                  @if (shouldShowCreateButton() && searchText() && !isAddingParameter()) {
+                  <mat-option
+                    (mousedown)="onCreateParameterFromSearch(); $event.preventDefault(); $event.stopPropagation()">
+                    <div class="flex items-center text-primary">
+                      <mat-icon class="mr-2 text-sm">add</mat-icon>
+                      <span>Create {{ searchText() }}</span>
+                    </div>
+                  </mat-option>
+                  }
+                  @if (isAddingParameter()) {
+                  <mat-option disabled>
+                    <div class="flex items-center text-gray-500">
+                      <mat-spinner diameter="16" class="mr-2"></mat-spinner>
+                      Creating parameter...
+                    </div>
+                  </mat-option>
+                  }
+                  }
+                </mat-autocomplete>
+
+                @if (isFieldInvalid('parameterId')) {
+                <mat-error>{{ getFieldError('parameterId') }}</mat-error>
+                }
+              </mat-form-field> -->
+
+              <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Parameter</mat-label>
+                <input matInput formControlName="parameterId" aria-label="Search risk parameter">
+                <mat-error>
+                  <custom-mat-error class="inline-block" [errors]="parameterIdControl.errors"
+                    [control]="parameterIdControl" controlActualName="Parameter"></custom-mat-error>
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Add Parameter Form -->
+            @if (showAddParameterForm()) {
+            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+              <div class="flex items-center gap-2 mb-2">
+                <mat-icon class="text-blue-600 text-lg material-symbols-outlined">add_circle</mat-icon>
+                <span class="text-sm font-medium text-gray-700">Add New Parameter</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <mat-form-field appearance="outline" class="flex-1 text-sm mat-sm-input">
+                  <mat-label>Parameter Name</mat-label>
+                  <input matInput id="newParameterInput" [formControl]="newParameterControl"
+                    (keydown)="onParameterNameKeydown($event)" maxlength="100">
+                </mat-form-field>
+
+                <button type="button" mat-mini-fab color="primary" (click)="onAddParameter()"
+                  [disabled]="isAddParameterButtonDisabled()" matTooltip="Save parameter"
+                  aria-label="Save new parameter" class="shrink-0">
+                  @if (isAddingParameter()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                  <mat-icon class="material-symbols-outlined">check</mat-icon>
+                  }
+                </button>
+
+                <button type="button" mat-mini-fab (click)="onCancelAddParameter()" [disabled]="isAddingParameter()"
+                  matTooltip="Cancel" aria-label="Cancel adding parameter" class="shrink-0">
+                  <mat-icon class="material-symbols-outlined">close</mat-icon>
+                </button>
+              </div>
+
+              <div class="text-xs text-gray-500 mt-2">
+                Press Enter to save, Escape to cancel
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Category Field -->
+      @if (!fromAssessment) {
+      <section class="grid grid-cols-12 gap-4" [class]="hasCategoryErrors() ? 'mb-7.5' : 'mb-3'">
+        <div class="col-span-12">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="category" aria-label="Select risk category">
+              @for (category of riskCategories; track category.value) {
+              <mat-option [value]="category.value">
+                {{ category.label }}
+              </mat-option>
+              }
+            </mat-select>
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="categoryControl.errors" [control]="categoryControl"
+                controlActualName="Category"></custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+      }
+      <!-- @if (fromAssessment) {
+      <section class="grid grid-cols-12 gap-4" [class]="hasCategoryErrors() ? 'mb-7.5' : 'mb-3'">
+        <div class="col-span-12">
+          <mat-form-field appearance="outline" class="w-full mat-md-input">
+            <mat-label>Measure Type</mat-label>
+            <mat-select formControlName="measureType"  aria-label="Select risk measure">
+              @for (measure of riskOptions; track $index) {
+              <mat-option [value]="measure.key">
+                {{ measure.label }}
+              </mat-option>
+              }
+            </mat-select>
+            @if (isFieldInvalid('measureType')) {
+            <mat-error>{{ getFieldError('measureType') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+    } -->
+
+
+      <!-- Description Section -->
+      <section class="grid grid-cols-12 gap-2" [class]="hasDescriptionRowErrors() ? 'mb-7.5' : 'mb-6.5'">
+        <div class="col-span-12">
+          <app-custom-mat-textarea [control]="descriptionControl" label="Description" [minRows]="1" [maxRows]="5">
+          </app-custom-mat-textarea>
+        </div>
+      </section>
+
+      <!-- Likelihood Field -->
+      <section class="grid grid-cols-12 gap-4" [class]="hasLikelihoodErrors() ? 'mb-7.5' : 'mb-3'">
+        <div class="col-span-12">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Likelihood</mat-label>
+            <mat-select formControlName="likelihood" aria-label="Select likelihood level">
+              @for (likelihood of likelihoodLevels; track likelihood.value) {
+              <mat-option [value]="likelihood.value">
+                {{ likelihood.label }}
+              </mat-option>
+              }
+            </mat-select>
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="likelihoodControl.errors" [control]="likelihoodControl"
+                controlActualName="Likelihood"></custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Impact Field -->
+      <section class="grid grid-cols-12 gap-4" [class]="hasImpactErrors() ? 'mb-7.5' : 'mb-3'">
+        <div class="col-span-12">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Impact</mat-label>
+            <mat-select formControlName="impact" aria-label="Select impact level">
+              @for (impact of impactLevels; track impact.value) {
+              <mat-option [value]="impact.value">
+                {{ impact.label }}
+              </mat-option>
+              }
+            </mat-select>
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="impactControl.errors" [control]="impactControl"
+                controlActualName="Impact"></custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Risk Level Calculation Display -->
+      @if (calculatedRiskLevel()) {
+      <section class="grid grid-cols-12 gap-2 mb-4">
+        <div class="col-span-12">
+          <div class="text-sm font-medium text-gray-900">
+            Risk Level:
+            <span [class]="getRiskLevelTextClass(calculatedRiskLevel()!)"
+              [attr.aria-label]="'Risk level: ' + calculatedRiskLevel()">
+              {{ calculatedRiskLevel() }}
+            </span>
+          </div>
+        </div>
+      </section>
+      }
+
+    </form>
+
+    <!-- Action Buttons -->
+    <footer class="flex justify-end items-center gap-3 mt-6">
+      <loading-button type="secondary" (onButtonClick)="onCancel()" aria-label="Cancel risk creation">
+        Cancel
+      </loading-button>
+
+      <loading-button [loading]="submissionState().isSubmitting"
+        [disabled]="!canSubmit() || submissionState().isSubmitting" [loadingText]="'Saving...'" [type]="'primary'"
+        [isFullWidth]="false" (onButtonClick)="onSubmit()" [attr.aria-label]="isEditMode ? 'Edit Risk' : 'Create Risk'">
+        {{ isEditMode ? 'Edit Risk' : 'Create Risk' }}
+      </loading-button>
+    </footer>
+
+  </div>
+</div>

@@ -1,0 +1,257 @@
+@use "../../../styles/custom/colors.scss" as colors;
+
+.mat-mdc-header-cell {
+  border-bottom-color: colors.$med-grey;
+
+  &.sticky-actions {
+    border-left: 1px solid #d1d5db !important;
+    border-bottom: none !important;
+  }
+}
+
+.mat-mdc-cell {
+  border: none !important;
+
+  &.sticky-actions {
+    border-left: 1px solid #d1d5db !important;
+    position: sticky !important;
+  }
+}
+
+.mat-mdc-row:nth-child(even) {
+  background-color: colors.$bg-light-grey;
+}
+
+.mat-mdc-row:nth-child(odd) {
+  background-color: colors.$body-bg;
+}
+
+//
+// .actions-cell-header {
+//  border-bottom: none !important;
+//  box-shadow: -1px 0 0 0 #2d2f32 !important;
+//}
+
+
+
+// .mat-table-sticky-border-elem-left {
+//  border-right: 1px solid #{colors.$border-color};
+//}
+//
+
+
+
+//
+//
+//.shadow-left-sticky {
+//  box-shadow: -2px 0 0 0 (colors.$border-color);
+//}
+
+
+.paginator {
+  background-color: colors.$body-bg;
+}
+
+::ng-deep .mat-mdc-tab {
+  max-width: fit-content;
+}
+
+.dashboard-container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  margin: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.card {
+  border-radius: 16px;
+  padding: 16px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 400px;
+}
+
+.card-title {
+  font-size: 14px;
+  color: #555;
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f1f3e;
+}
+
+.card-tags {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background-color: #eee;
+  font-weight: 500;
+}
+
+.tag-yellow {
+  background-color: #fffac2;
+  color: #888600;
+}
+
+.tag-lime {
+  background-color: #ecffd5;
+  color: #447c00;
+}
+
+/* Card colors */
+.card-primary {
+  background-color: #f9f9fb;
+}
+
+.card-purple {
+  background-color: #eef0ff;
+}
+
+.card-white {
+  background-color: #ffffff;
+  width: 100px;
+}
+
+.card-pink {
+  background-color: #ffe5ee;
+  text-align: center;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 200px;
+
+}
+
+.card-teal {
+  background-color: #dbf7f3;
+  text-align: center;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 200px;
+
+}
+
+.card-violet {
+  background-color: #ebeaff;
+  text-align: center;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 200px;
+
+}
+
+/* Icon box */
+.card-icon {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+}
+
+/* Highlight text */
+.highlight-pink {
+  color: #ff5d8f;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.highlight-teal {
+  color: #00b9ae;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.highlight-violet {
+  color: #5d4eff;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.card-text {
+  font-size: 14px;
+  color: #111;
+  line-height: 1.2;
+}
+
+/* Tabs section */
+.with-tabs .tab-section {
+  text-align: center;
+  margin-top: auto;
+}
+
+.tab-label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #4f46e5;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tab-dots {
+  margin-top: 6px;
+}
+
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ccc;
+  margin: 0 2px;
+}
+
+.dot.active {
+  background: #ff2e7e;
+}
+
+.shimmer {
+  background: linear-gradient(90deg,
+      #f0f0f0 25%,
+      #e0e0e0 50%,
+      #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}

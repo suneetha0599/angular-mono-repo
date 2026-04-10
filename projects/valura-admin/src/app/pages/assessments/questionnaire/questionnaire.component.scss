@@ -1,0 +1,456 @@
+@use "../../../../styles/custom/colors.scss" as colors;
+@use "../../../../styles/custom/typography.scss" as typography;
+
+.fs-14 {
+  font-size: typography.$fs-14;
+}
+
+.hr-bold {
+  height: 5px;
+  margin-top: 0px !important;
+}
+
+// .card {
+//   height: 100% !important;
+//   max-height: 50%;
+//   min-height: 96%;
+//   background-color: colors.$body-bg;
+//   border: 1px solid colors.$light-grey-border;
+//   border-radius: 3px;
+//   overflow: auto;
+// }
+
+.add-icon {
+  border-radius: 50%;
+  font-size: typography.$fs-24;
+}
+
+.title {
+  font-size: typography.$fs-13;
+}
+
+.section-title {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.active-section {
+  background-color: colors.$table-primary;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+// .active-section:hover,
+.active-section.mat-focused {
+  background-color: transparent;
+}
+
+.inactive-section {
+  border: 1px solid colors.$light-grey-border;
+  border-radius: 6px;
+}
+
+.section {
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.section.mat-focused {
+  background-color: transparent;
+}
+
+
+// .section-content {
+//   max-height: 385px;
+//   overflow-y: auto;
+//   overflow-x: hidden;
+// }
+
+// .preview-content {
+//   min-height: 0;
+//   max-height: 280px;
+//   height: 320px;
+//   overflow-y: auto;
+//   overflow-x: hidden;
+//   scroll-behavior: smooth;
+// }
+
+.save-icon {
+  color: colors.$stage-success;
+}
+
+.cancel-icon {
+  color: colors.$bg-danger;
+}
+
+.options {
+  margin-left: 31px;
+}
+
+// .option-label {
+//   background-color: colors.$light-primary;
+// }
+
+.header-actions {
+  position: absolute;
+  right: 10px;
+  top: 25px;
+  transform: translateY(-50%);
+  gap: 16px;
+}
+
+// .content {
+//   height: 59vh;
+// }
+
+.question-content {
+  min-width: 0;
+  width: 74% !important;
+}
+
+// .custom-mat-tab-wrapper {
+//   height: 77vh !important;
+// }
+
+::ng-deep .custom-mat-tab-wrapper .mat-tab-wrapper {
+  position: relative;
+}
+
+
+::ng-deep .custom-mdc-text-field .mdc-line-ripple {
+  display: none;
+}
+
+
+::ng-deep .custom-mdc-text-field .mdc-text-field.mdc-text-field--focused .mdc-line-ripple {
+  display: block !important;
+}
+
+::ng-deep .custom-mdc-text-field .mdc-text-field.mdc-text-field--label-floating .mdc-line-ripple {
+  display: block !important;
+}
+
+::ng-deep .custom-mdc-text-field input.mat-mdc-input-element:not(:placeholder-shown) {
+  &~.mat-mdc-form-field-wrapper.active-section {
+    background-color: colors.$light-grey-border;
+  }
+}
+
+::ng-deep .custom-mdc-text-field input.mat-mdc-input-element:focus~.mdc-line-ripple,
+::ng-deep .custom-mdc-text-field input.mat-mdc-input-element:placeholder-shown~.mdc-line-ripple {
+  display: block;
+}
+
+// ::ng-deep .custom-mdc-text-field .mat-mdc-form-field-subscript-wrapper {
+//   display: flex;
+//   justify-content: flex-start;
+// }
+
+::ng-deep .custom-tab-group .mat-tab-header {
+  padding-right: 180px;
+}
+
+::ng-deep .custom-tab-body .mat-tab-body-content-can-animate {
+  overflow: hidden !important;
+}
+
+::ng-deep .custom-tab-body .mat-mdc-tab-body-content.mat-tab-body-content-can-animate {
+  overflow: hidden !important;
+}
+
+::ng-deep .custom-mdc-text-field,
+::ng-deep .custom-mdc-text-field .mat-mdc-form-field-flex,
+::ng-deep .custom-mdc-text-field .mdc-text-field,
+::ng-deep .custom-mdc-text-field .mat-mdc-text-field-wrapper {
+  width: 100% !important;
+}
+
+::ng-deep .custom-mdc-text-field .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  margin: 0 !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: unset !important;
+}
+
+.add-section-btn {
+  border: 1px solid colors.$light-grey-border;
+  border-radius: 6px;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+}
+
+.add-section-btn:hover {
+  background-color: colors.$bg-light-grey;
+}
+
+.section-header {
+  background-color: colors.$table-primary;
+  // border-radius: 5px;
+}
+
+.question-card {
+  width: 96%;
+  background-color: colors.$body-bg;
+  box-shadow: none;
+  border: 1px solid colors.$light-grey-border;
+}
+
+.editing-card {
+  width: 96%;
+  box-shadow: none;
+  background-color: colors.$bg-lightest-grey !important;
+
+}
+
+.helper-text-preview {
+
+  color: #666;
+
+  background-color: #f9fafb;
+  padding: 8px;
+  border-left: 4px solid #D0EBFA;
+  border-radius: 4px;
+
+
+  a {
+    color: #0066cc;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: #0052a3;
+    }
+
+    &.image-link::before {
+      content: '📎';
+      margin-right: 4px;
+    }
+  }
+}
+
+.filekey-link {
+  color: #1976d2;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.text-ellipsis {
+  max-width: 500px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.section-name {
+  // max-width: 600px;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.divider {
+  border-top-color: colors.$light-grey-border !important;
+}
+
+.description {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.section-header-sticky {
+  position: sticky;
+  top: 0;
+  background-color: colors.$body-bg;
+}
+
+
+
+.options-list {
+  padding-right: 8px;
+}
+
+.gf-option-row {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 2px 0;
+  position: relative;
+
+  &:hover .gf-drag-handle {
+    opacity: 1;
+  }
+
+  &:hover .gf-input-underline {
+    border-bottom-color: #dadce0;
+  }
+
+  &:hover .gf-delete-btn {
+    opacity: 1;
+  }
+}
+
+.gf-drag-handle {
+  opacity: 0;
+  font-size: 18px !important;
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 4px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+  cursor: grab;
+}
+
+.gf-drag-handle-placeholder {
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.gf-option-icon {
+  width: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.gf-number-label {
+  font-size: 13px;
+  color: #5f6368;
+  min-width: 24px;
+}
+
+.gf-input-wrapper {
+  flex: 1;
+  position: relative;
+  margin: 0 8px;
+}
+
+.gf-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #202124;
+  padding: 4px 0 6px;
+  line-height: 1.5;
+
+  &::placeholder {
+    color: #9aa0a6;
+    font-style: italic;
+  }
+}
+
+.gf-input-other {
+  color: #5f6368;
+  cursor: default;
+  pointer-events: none;
+}
+
+.gf-input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+  pointer-events: none;
+}
+
+.gf-input-wrapper:focus-within .gf-input-underline {
+  border-bottom: 2px solid colors.$primary;
+}
+
+.gf-delete-btn {
+  font-size: 18px !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0;
+  color: #5f6368;
+  margin-left: 8px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.gf-add-row {
+  cursor: default;
+  margin-top: 2px;
+}
+
+.gf-add-option-text {
+  display: flex;
+  align-items: center;
+  padding: 4px 0 6px;
+  margin: 0 8px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.gf-add-row:hover .gf-add-option-text {
+  border-bottom-color: #dadce0;
+}
+
+.gf-add-label {
+  font-size: 14px;
+  color: #5f6368;
+  cursor: pointer;
+
+}
+
+.gf-or-text {
+  font-size: 14px;
+  color: #5f6368;
+  margin: 0 4px;
+}
+
+.gf-add-other-label {
+  font-size: 14px;
+  color: #1a73e8;
+  cursor: pointer;
+}
+
+.section-container {
+  width: 100%;
+}
+
+.section-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 24px;
+}
+
+.section-name {
+  display: -webkit-box;
+  // width: 85%;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 24px;
+}
+
+.question-total {
+  // overflow: hidden;
+  white-space: nowrap;
+}
+
+.section-width {
+  width: 325px !important;
+}

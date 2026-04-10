@@ -1,0 +1,197 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+    <div class="p-3 pb-0">
+        <div class="d-flex mb-2 justify-between">
+            <div class="headline-medium my-auto">Category details</div>
+        </div>
+    </div>
+
+    <div class="p-3 pt-0 flex-1 overflow-hidden">
+        <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+            <div class="relative flex-1 overflow-hidden">
+
+                <div class="position-absolute w-100 h-100">
+
+                    @if (selectedTabIndex === 1) {
+                    <div class="position-absolute" style="right: 0; top: 8px; z-index: 10;">
+                        <button mat-raised-button color="primary" class="bg-primary text-light fw-500 body-small"
+                            (click)="openAddPDElementDialog()">
+                            Add PD Element
+                        </button>
+                    </div>
+                    }
+
+
+                    <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100 h-full"
+                        [(selectedIndex)]="selectedTabIndex">
+
+
+                        <mat-tab>
+                            <ng-template mat-tab-label>
+                                <span>Details</span>
+                            </ng-template>
+
+                            <div class="h-full overflow-auto p-4 mt-2">
+                                <div class="space-y-8">
+
+                                    <div>
+                                        <div class="text-gray-500 text-sm mb-2">Category ID:</div>
+                                        <ng-container *ngIf="!isLoading">
+                                            <div class="flex items-center gap-1 body-large text-ellipsize">
+                                                {{ category.id }}
+                                            </div>
+                                        </ng-container>
+                                        <ng-container *ngIf="isLoading">
+                                            <div class="shimmer-line shimmer-small"></div>
+                                        </ng-container>
+                                    </div>
+
+                                    <div>
+                                        <div class="text-gray-500 text-sm mb-2">Category Name:</div>
+                                        <ng-container *ngIf="!isLoading">
+                                            <div class="flex items-center gap-1 body-large text-ellipsize">
+                                                {{ category.name }}
+                                            </div>
+                                        </ng-container>
+                                        <ng-container *ngIf="isLoading">
+                                            <div class="shimmer-line shimmer-large"></div>
+                                        </ng-container>
+                                    </div>
+
+                                    <div>
+                                        <div class="text-gray-500 text-sm mb-2">Sensitivity:</div>
+                                        <ng-container *ngIf="!isLoading">
+                                            <div class="flex items-center gap-1 body-large text-ellipsize">
+                                                {{ category.sensitivity }}
+                                            </div>
+                                        </ng-container>
+                                        <ng-container *ngIf="isLoading">
+                                            <div class="shimmer-line shimmer-medium"></div>
+                                        </ng-container>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </mat-tab>
+
+
+                        <mat-tab>
+                            <ng-template mat-tab-label>
+                                <span>Data Elements</span>
+                            </ng-template>
+                            <div class="h-full flex flex-col overflow-hidden mt-2">
+                                <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+                                    <table mat-table
+                                        [dataSource]="isLoading ? shimmerDataElements : (dataElementsDataSource.data.length === 0 ? [] : dataElementsDataSource)"
+                                        matSort class="mat-elevation-z8 w-100 custom-table table">
+
+                                        <ng-container matColumnDef="name">
+                                            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                class="title-small !text-center">
+                                                <span
+                                                    class="text-grey title-small !text-center whitespace-nowrap">Name</span>
+                                            </th>
+                                            <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                                <ng-container *ngIf="!isLoading">
+                                                    <span class="body-large">{{ row.name }}</span>
+                                                </ng-container>
+                                                <ng-container *ngIf="isLoading">
+                                                    <div class="shimmer-line shimmer-large"></div>
+                                                </ng-container>
+                                            </td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="categoryName">
+                                            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                class="title-small !text-center">
+                                                <span
+                                                    class="text-grey title-small !text-center whitespace-nowrap">Category
+                                                    name</span>
+                                            </th>
+                                            <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                                <ng-container *ngIf="!isLoading">
+                                                    <span class="body-large">{{ row.categoryName }}</span>
+                                                </ng-container>
+                                                <ng-container *ngIf="isLoading">
+                                                    <div class="shimmer-line shimmer-medium"></div>
+                                                </ng-container>
+                                            </td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="sensitivity">
+                                            <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                class="px-4 title-small whitespace-nowrap sensitivity-col">
+                                                <span class="text-grey title-small">Sensitivity</span>
+                                            </th>
+                                            <td mat-cell *matCellDef="let row"
+                                                class="px-4 whitespace-nowrap sensitivity-col">
+                                                <ng-container *ngIf="!isLoading">
+                                                    <span
+                                                        class="px-3 py-1 rounded-full text-xs label-large sensitivity-badge status "
+                                                        [ngClass]="getSensitivityClass(row.sensitivity)">
+                                                        {{ getSensitivityLabel(row.sensitivity) }}
+                                                    </span>
+                                                </ng-container>
+                                                <ng-container *ngIf="isLoading">
+                                                    <div class="shimmer-line shimmer-medium"></div>
+                                                </ng-container>
+                                            </td>
+                                        </ng-container>
+
+
+                                        <ng-container matColumnDef="actions">
+                                            <th mat-header-cell *matHeaderCellDef
+                                                class="px-4 title-small whitespace-nowrap actions-col">
+                                                <span class="text-grey title-small">Actions</span>
+                                            </th>
+                                            <td mat-cell *matCellDef="let row"
+                                                class="px-4 whitespace-nowrap actions-col">
+                                                <ng-container *ngIf="!isLoading">
+                                                    <button mat-icon-button [matMenuTriggerFor]="menu"
+                                                        class="more-actions-btn">
+                                                        <mat-icon
+                                                            class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+                                                    </button>
+                                                    <mat-menu #menu="matMenu">
+                                                        <button mat-menu-item (click)="editPDElement(row)"
+                                                            class="text-sm">
+                                                            <mat-icon
+                                                                class="mat-md-icon text-primary material-symbols-outlined">edit</mat-icon>
+                                                            <span class="text-gray-700">Edit</span>
+                                                        </button>
+                                                        <button mat-menu-item (click)="deletePDElement(row)"
+                                                            class="text-sm">
+                                                            <mat-icon
+                                                                class="mat-md-icon text-primary material-symbols-outlined">delete</mat-icon>
+                                                            <span class="text-gray-700">Delete</span>
+                                                        </button>
+                                                    </mat-menu>
+                                                </ng-container>
+                                                <ng-container *ngIf="isLoading">
+                                                    <div class="shimmer-line shimmer-small"></div>
+                                                </ng-container>
+                                            </td>
+                                        </ng-container>
+
+                                        <tr mat-header-row *matHeaderRowDef="dataElementsColumns; sticky: true"
+                                            class="bg-gray-100 title-small"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: dataElementsColumns;"
+                                            [class.shimmer-row]="isLoading"></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </mat-tab>
+
+                    </mat-tab-group>
+                </div>
+            </div>
+
+            <div class="p-2 pt-2 flex justify-end">
+                <loading-button type="secondary" (onButtonClick)="goBack()">
+                    Cancel
+                </loading-button>
+            </div>
+
+        </div>
+    </div>
+
+</div>

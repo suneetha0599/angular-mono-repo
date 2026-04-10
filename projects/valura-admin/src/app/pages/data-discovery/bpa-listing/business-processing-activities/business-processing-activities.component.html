@@ -1,0 +1,160 @@
+<div class="d-flex flex-column h-100 overflow-hidden">
+    <div class="p-3 pb-0">
+        <div class="outer-wrapper p-2 bg-white d-flex w-fit-content d-none">
+            <div>
+                <!-- <loading-button type="secondary" (onButtonClick)="onCancel()">
+                    <mat-icon class="text-primary download-icn">download</mat-icon>
+                    <span class="text-primary label-medium">Export</span>
+                </loading-button> -->
+            </div>
+        </div>
+
+        <div class="row header mx-0 mt-3">
+            @for(data of sampleData;track data;){
+            <div class="col-md-2 header-wrapper label-large border-xsm p-2 me-2 br-8 text-center">
+                {{data.name}}
+            </div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex editor-wrapper overflow-hidden position-relative h-100 p-3 pb-0">
+        <div class="zoom-controls">
+            <button mat-icon-button class="zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel >= maxZoom">
+                <mat-icon class="material-symbols-outlined mat-md-icon">add</mat-icon>
+            </button>
+            <button mat-icon-button class="zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel <= minZoom">
+                <mat-icon class="material-symbols-outlined mat-md-icon">remove</mat-icon>
+            </button>
+        </div>
+
+        <div class="col w-100 h-100 overflow-auto main-canvas">
+            <ng-container *ngTemplateOutlet="ngTemplateNgxGraph; context:{}">
+            </ng-container>
+        </div>
+    </div>
+
+    <div class="d-flex justify-between p-3 pt-0 d-none">
+        <div class="d-flex my-auto">
+            @for(legend of legends;track legend;){
+            <div class="me-3 d-flex">
+                <div class="dash-line my-auto" [style.backgroundColor]="legend.color"></div>
+                <div class="ms-1 label-large my-auto">{{legend.name}}</div>
+            </div>
+            }
+        </div>
+        <div class="outer-wrapper p-2 bg-white d-flex w-fit-content">
+            <mat-slide-toggle class="my-auto">
+                <span class="label-large">Show table</span>
+            </mat-slide-toggle>
+        </div>
+    </div>
+</div>
+
+<ng-template #ngTemplateNgxGraph>
+
+    <button #menuTriggerButton #menuTrigger="matMenuTrigger" mat-icon-button [matMenuTriggerFor]="nodeMenu"
+        style="opacity: 0; position: fixed; pointer-events: none;">
+    </button>
+
+    <ngx-graph class="flow-diagram" [nodes]="nodes" [links]="links" [curve]="curve" [layout]="layout"
+        [layoutSettings]="layoutSettings" [enableZoom]="false" [autoZoom]="autoZoom" [autoCenter]="autoCenter"
+        [zoomLevel]="zoomLevel" [panOnZoom]="panOnZoom" (zoom)="onZoom($event)">
+
+        <ng-template #defsTemplate>
+            <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="4" markerHeight="4"
+                orient="auto">
+                <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+            </svg:marker>
+        </ng-template>
+
+        <ng-template #nodeTemplate let-node>
+            <svg:g class="node">
+                <svg:foreignObject [attr.width]="node.data.width || MIN_WIDTH"
+                    [attr.height]="node.data.height || MIN_HEIGHT" (mouseenter)="hoveredNodeId = node.id"
+                    (mouseleave)="hoveredNodeId = null" (mousedown)="startDrag()" (mousemove)="markDragging()"
+                    (click)="handleNodeClick($event, node)"
+                    [ngClass]="{'hover-shadow': hoveredNodeId === node.id && selectedNodeId !== node.id,'clicked-shadow': selectedNodeId === node.id}">
+                    <xhtml:div class="data-card br-8" xmlns="http://www.w3.org/1999/xhtml" [style]="getStyles(node)"
+                        contentMeasure (size)="onNodeSize($event, node)">
+                        <div class="p-3">
+                            <div>
+                                @if (node.data.icon) {
+                                <span class="material-symbols-outlined">
+                                    {{ node.data.icon }}
+                                </span>
+                                }
+                                @if (node.label) {
+                                <div class="label-large text-dark  my-auto">
+                                    {{ node.label }}
+                                </div>
+                                }
+                                @if (node.data.countType) {
+                                <div class="d-flex mt-1">
+                                    <div class="label-large text-secondary my-auto me-2">
+                                        {{ node.data.countType }}
+                                    </div>
+                                    <div class="badge text-white p-1 label-small">
+                                        {{ node.data.count }}
+                                    </div>
+                                </div>
+                                }
+                                @if (node.data.keyType) {
+                                <div class="label-large text-secondary mt-1">
+                                    <span> {{ node.data.keyType }}: </span>
+                                    <span>{{ node.data.type }}</span>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </xhtml:div>
+                </svg:foreignObject>
+            </svg:g>
+        </ng-template>
+
+        <ng-template #linkTemplate let-link>
+            <svg:g class="edge">
+                <svg:path class="line" stroke-width="2" marker-end="url(#arrow)"></svg:path>
+                <svg:text class="edge-label" text-anchor="middle">
+                    <textPath class="text-path" [attr.href]="'#' + link.id" startOffset="50%">
+                        {{ link.label }}
+                    </textPath>
+                </svg:text>
+            </svg:g>
+            <svg:g class="linkMidpoint" *ngIf="link.midPoint"
+                [attr.transform]="'translate(' + link.midPoint.x + ',' + link.midPoint.y + ')'">
+                <svg:text alignment-baseline="central">{{ link.data.linkText }}</svg:text>
+            </svg:g>
+        </ng-template>
+    </ngx-graph>
+
+
+
+    <mat-menu #nodeMenu="matMenu">
+        <div class="p-3 w-64">
+            <div class="font-medium">Name: {{ selectedNode?.label || 'N/A' }}</div>
+
+            <ng-container *ngIf="selectedNode?.key !== 'DS'">
+                <div class="text-gray-600">PD Elements: {{ selectedNode?.count || 'N/A' }}</div>
+            </ng-container>
+
+            <ng-container *ngIf="selectedNode?.key === 'ASSET'">
+                <div class="text-gray-600">Type : {{ selectedNode?.type }}</div>
+                <div class="text-gray-600">Hosting Sites: {{ selectedNode?.hostingLocation?.join(', ') || 'N/A' }}
+                </div>
+                <div class="text-gray-600">Data Subjects: {{ selectedNode?.dataSubjectLength || 'N/A' }}</div>
+            </ng-container>
+
+            <ng-container *ngIf="selectedNode?.key === 'SOURCE'">
+                <div class="text-gray-600">Category: {{ selectedNode?.category || 'N/A' }}</div>
+                <div class="text-gray-600">Type: {{ selectedNode?.type || 'N/A' }}</div>
+            </ng-container>
+
+            <ng-container *ngIf="selectedNode?.key === 'RECIPIENT'">
+                <div class="text-gray-600">Category: {{ selectedNode?.type || 'N/A' }}</div>
+                <div class="text-gray-600">Number of People having Access: {{ selectedNode?.numberOfPeopleHavingAccess
+                    || 'N/A' }}</div>
+            </ng-container>
+        </div>
+    </mat-menu>
+</ng-template>

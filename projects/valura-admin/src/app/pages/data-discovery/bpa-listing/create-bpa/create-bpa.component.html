@@ -1,0 +1,195 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+    <div class="mb-2">
+
+        <div class="my-auto flex items-center gap-2">
+            @if(showBackButton){
+            <button (click)="goBack()"
+                class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+                <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+            </button>
+            }
+            <div class="headline-medium">{{pageTitle}} </div>
+            @if(bpaMode=='VIEW' &&!isCollectionPointNavigation){
+            <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                (click)="goToPrevRequest()">
+                <mat-icon class="material-symbols-outlined"
+                    [ngClass]="disablePrevBtn ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+            </button>
+            <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                (click)="goToNextRequest()" [ngClass]="disableNextBtn ? '!text-gray-400' : 'text-primary'">
+                <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+            </button>
+            }
+            @else{
+            <button [disabled]="disablePrevBtnCP" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                (click)="goPrevAsset()">
+                <mat-icon class="material-symbols-outlined"
+                    [ngClass]="disablePrevBtnCP ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+            </button>
+            <button [disabled]="disableNextBtnCP" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                (click)="goNextAsset()" [ngClass]="disableNextBtnCP ? '!text-gray-400' : 'text-primary'">
+                <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+            </button>
+            }
+        </div>
+
+    </div>
+    @if(!isLoading && hasApiError){
+    <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+    }@else{
+    <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative rounded">
+        <div class="d-flex h-100 w-100 flex-column main-canvas mat-tab-bpa">
+            <mat-tab-group disableRipple animationDuration="300ms"
+                class="custom-tab-group mat-tab-100 mat-tab-disable-ripple" [(selectedIndex)]="selectedTabIndex"
+                (selectedTabChange)="onTabChange($event.index);">
+                @for(tab of tabHeaderDetails; track tab.key; let i=$index) {
+                <mat-tab [disabled]="isLoading">
+                    <ng-template mat-tab-label>
+                        <span [class.tab-error]="tabHasError(tab.key)">{{ tab.name }}</span>
+                    </ng-template>
+                    <ng-template matTabContent>
+                        <div class="h-full flex flex-col overflow-hidden">
+                            <div class="flex-1 overflow-hidden rounded-lg no-scrollbar main-wrapper bg-white">
+                                <ng-container *ngTemplateOutlet="ngTabContent; context:{bpaTab: tab, index: i}">
+                                </ng-container>
+                            </div>
+                        </div>
+                    </ng-template>
+                </mat-tab>
+                }
+            </mat-tab-group>
+        </div>
+        @if(_showEditButton){
+        <div class="edit-wrapper">
+            <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="onEditBpaDetail()">
+                <mat-icon color="primary" class="text-primary material-symbols-outlined">edit</mat-icon>
+            </button>
+        </div>
+        }
+    </div>
+
+    @if(isEditMode){
+    <div class="bg-white p-3">
+        <div class="d-flex justify-between">
+            <div>
+                <loading-button type="secondary" class="" (onButtonClick)="onCancel()">
+                    <span>Cancel</span>
+                </loading-button>
+            </div>
+            @if(showFooterButtons){
+            <div>
+                @if(showDraftButton){
+                <loading-button type="secondary" class="ms-2" (onButtonClick)="saveAsDraft()" [loading]="isDraftLoading"
+                    [loadingText]="'Saving...'" [disabled]="isFinalSaved">
+                    <span>Save Draft</span>
+                </loading-button>
+                }
+                <loading-button class="ms-2" (onButtonClick)="onSave()" [loading]="isSubmitLoading"
+                    [loadingText]="'Saving...'">
+                    <span>Save progress</span>
+                </loading-button>
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    }
+</div>
+
+<ng-template #ngTabContent let-i="index" let-tab="bpaTab">
+    @if (selectedTabIndex === i) {
+    @switch (tab.key) {
+    @case (CreateBpaTabKey.OVERVIEW) {
+    <app-overview-tab [formGroup]="overviewForm" (goToDataElements)="goToNextTab()" [departments]="departments"
+        [actsWithLegalBasis]="actsWithLegalBasis" [countryMasterList]="countryMasterList"
+        [dataSubjectUserTypesList]="dataSubjectUserTypesList" [purposeList]="purposeList" [dataUpdated]="dataUpdated"
+        [editMode]="isEditMode" [viewMode]="isViewModeType" (onDataSubjectChange)="onDataSubjectChange($event)"
+        (onRemovePurpose)="onRemovePurpose($event.purpose)">
+    </app-overview-tab>
+    }
+
+    @case (CreateBpaTabKey.DATA_ELEMENTS) {
+    <app-data-management-screen [selectedTab]="CreateBpaTabKey.DATA_ELEMENTS" [dataElements]="dataElements"
+        [dataUpdated]="dataUpdated" [purposeList]="processPurposeList"
+        (onDataSubjectTabChange)="onDataSubjectTabChange($event.dataSubject, $event.index)"
+        (onNewItemAdded)="onNewItemAdded($event)" (onPdElementsDeleted)="onPdElementsDeleted($event)">
+    </app-data-management-screen>
+
+    }
+    @case (CreateBpaTabKey.SOURCES) {
+    <app-data-management-screen [selectedTab]="CreateBpaTabKey.SOURCES" [source]="source" [dataUpdated]="dataUpdated"
+        (openViewDrawer)="handleOpenViewDrawer($event)" (onNewItemAdded)="onNewItemAdded($event)">
+    </app-data-management-screen>
+    }
+    @case (CreateBpaTabKey.ASSETS) {
+    <app-data-management-screen [selectedTab]="CreateBpaTabKey.ASSETS" [dataUpdated]="dataUpdated"
+        [assetPdElementsMapping]="assetPdElementsMapping" (openViewDrawer)="handleOpenViewDrawer($event)"
+        (onNewItemAdded)="onNewItemAdded($event)">
+    </app-data-management-screen>
+    }
+    @case (CreateBpaTabKey.RECIPIENTS) {
+    <app-data-management-screen [selectedTab]="CreateBpaTabKey.RECIPIENTS" [dataUpdated]="dataUpdated"
+        [recipientsPdElementsMapping]="recipientsPdElementsMapping" (openViewDrawer)="handleOpenViewDrawer($event)"
+        (onNewItemAdded)="onNewItemAdded($event)">
+    </app-data-management-screen>
+    }
+
+    @case (CreateBpaTabKey.DATA_FLOW) {
+    <business-processing-activities [createBpaForm]="createBpaForm"></business-processing-activities>
+    }
+    @case (CreateBpaTabKey.SECURITY_CONTROLS) {
+    <app-security-controls-tab [formGroup]="securityControlForm" [securityControlList]="securityControlList"
+        [editModeSecurityControls]="isEditMode"></app-security-controls-tab>
+    }
+    <!-- Risk Summary Tab -->
+    @case (CreateBpaTabKey.RISK_SUMMARY) {
+    <app-risk-summary-page (onCreateNewAssessment)="onCreateNewAssessment($event)"></app-risk-summary-page>
+    }
+    @default {
+    <div></div>
+    }
+    }
+    }
+</ng-template>
+
+<mat-drawer-container class="right-sidebar bpa-drawer" [hasBackdrop]="true" autosize>
+    <mat-drawer #rightDrawer class="" mode="over" position="end"
+        [ngClass]="{ 'risk-summary-drawer': selectedTab === CreateBpaTabKey.RISK_SUMMARY }">
+
+        @if(selectedTab === CreateBpaTabKey.SOURCES){
+        <bpa-drawer-data-elements [drawerType]="CreateBpaTabKey.SOURCES" [purposeList]="processPurposeList"
+            [dataSubjectPdElementMapping]="dataSubjectPdElementList" [sourceMappingList]="sourcePdElementsMappingList"
+            [selectedIndex]="selectedSourceIndex" (onCloseDrawer)="rightDrawer.toggle()"
+            (onNewItemAdded)="onNewItemAdded($event)" (onUpdatePdElements)="onUpdatePdElements($event)"
+            (onApplyChanges)="onApplyChanges($event)">
+        </bpa-drawer-data-elements>
+        }
+        @else if(selectedTab === CreateBpaTabKey.ASSETS){
+        <bpa-drawer-data-elements [drawerType]="CreateBpaTabKey.ASSETS" [purposeList]="processPurposeList"
+            [dataSubjectPdElementMapping]="dataSubjectPdElementList" [assetMappingList]="assetPdElementsMappingList"
+            [selectedIndex]="selectedAssetIndex" (onCloseDrawer)="rightDrawer.toggle()"
+            (onNewItemAdded)="onNewItemAdded($event)" (onUpdatePdElements)="onUpdatePdElements($event)"
+            (onApplyChanges)="onApplyChanges($event)">
+        </bpa-drawer-data-elements>
+        }
+        @else if(selectedTab === CreateBpaTabKey.RECIPIENTS){
+        <bpa-drawer-data-elements [drawerType]="CreateBpaTabKey.RECIPIENTS" [purposeList]="processPurposeList"
+            [dataSubjectPdElementMapping]="dataSubjectPdElementList" (onUpdatePdElements)="onUpdatePdElements($event)"
+            [recipientsMappingList]="recipientsPdElementsMappingList" [selectedIndex]="selectedRecepientIndex"
+            (onCloseDrawer)="rightDrawer.toggle()" (onNewItemAdded)="onNewItemAdded($event)"
+            (onApplyChanges)="onApplyChanges($event)">
+        </bpa-drawer-data-elements>
+        }
+        @else if(selectedTab === CreateBpaTabKey.RISK_SUMMARY){
+        <app-risk-mitigation-drawer [formGroup]="securityControlForm" [securityControlList]="securityControlList"
+            (onCloseDrawer)="closeDrawer()">
+        </app-risk-mitigation-drawer>}
+    </mat-drawer>
+</mat-drawer-container>
+
+<ng-template #errorLoading>
+    <div class="d-flex flex-column rounded overflow-hidden h-screen bg-white p-2 mt-3 justify-content-center">
+        <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    </div>
+</ng-template>

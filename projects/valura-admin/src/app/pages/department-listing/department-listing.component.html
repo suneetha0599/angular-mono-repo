@@ -1,0 +1,114 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="flex justify-end">
+      <button mat-stroked-button class="bg-primary text-light fw-500 add-department-btn" (click)="addDepartment()">
+        Add Department
+      </button>
+    </div>
+  </div>
+
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="overflow-x-auto flex-1 flex flex-col">
+          <ng-container *ngTemplateOutlet="departmentTableTemplate"></ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #departmentTableTemplate>
+  <table mat-table [dataSource]="isLoading ? shimmerDataSource : (departments.length === 0 ? [] : departments)" matSort
+    class="mat-elevation-z8 w-100 department-table table">
+
+    <ng-container matColumnDef="sno">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap sno-col">
+        <span class="text-grey title-small">S.No</span>
+      </th>
+      <td mat-cell *matCellDef="let department; let i = index" class="px-4 whitespace-nowrap sno-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{i + 1}}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap name-col">
+        <span class="text-grey title-small">Department Name</span>
+      </th>
+      <td mat-cell *matCellDef="let department" class="px-4 whitespace-nowrap name-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="label-large text-primary department-badge pointer" (click)="viewDepartmentDetails(department)">
+            {{department.name}}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap description-col">
+        <span class="text-grey title-small">Description</span>
+      </th>
+      <td mat-cell *matCellDef="let department" class="px-4 whitespace-nowrap description-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{department.description || 'No description'}}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-extra-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap actions-col">
+        <span class="text-grey title-small">Actions</span>
+      </th>
+      <td mat-cell *matCellDef="let department" class="px-4 whitespace-nowrap actions-col">
+        <ng-container *ngIf="!isLoading">
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="more-actions-btn">
+            <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="viewDepartmentDetails(department)" class="text-sm">
+              <mat-icon
+                class="material-symbols-outlined mat-md-icon text-primary my-auto">quick_reference_all</mat-icon>
+              <span class="text-gray-700">Details</span>
+            </button>
+            <button mat-menu-item (click)="editDepartment(department)" class="text-sm">
+              <mat-icon class="material-symbols-outlined mat-md-icon text-primary">edit</mat-icon>
+              <span class="text-gray-700">Edit</span>
+            </button>
+            <button mat-menu-item (click)="deleteDepartment(department)" class="text-sm">
+              <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+              <span class="text-gray-700">Delete</span>
+            </button>
+          </mat-menu>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.shimmer-row]="isLoading"></tr>
+
+    <tr *ngIf="!isLoading && departments.length === 0" class="no-data-row">
+      <td [attr.colspan]="displayedColumns.length" class="text-center py-16">
+        <div class="flex flex-col items-center">
+          <mat-icon class="text-6xl text-gray-400 mb-4 material-symbols-outlined">business</mat-icon>
+          <p class="text-gray-600 text-lg mb-2">No departments found</p>
+          <p class="text-gray-500">Add departments to get started</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</ng-template>

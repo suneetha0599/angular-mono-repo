@@ -1,0 +1,47 @@
+<div class="d-flex flex-column h-full overflow-hidden view-wrapper">
+
+
+  <div class="flex justify-between p-3">
+    <div class="my-auto title-medium">Filter Collection Points</div>
+    <div class="my-auto">
+      <button mat-icon-button (click)="closeDrawer()">
+        <mat-icon class="material-symbols-outlined">close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-auto p-2">
+    <div class="my-1">
+      <mat-form-field appearance="outline" class="w-full mat-sm-input">
+        <mat-label>Collection Type</mat-label>
+        <mat-select [(ngModel)]="filterConfiguration.tempselectedCollectionType" multiple>
+          @if (filterConfiguration.tempselectedCollectionType.length > 2) {
+            <mat-select-trigger>
+              <span class="example-additional-selection">
+                {{ filterConfiguration.tempselectedCollectionType[0]?.label }}
+                (+{{ (filterConfiguration.tempselectedCollectionType.length || 0) - 1 }}
+                {{ filterConfiguration.tempselectedCollectionType.length === 2 ? 'other' : 'others' }})
+              </span>
+            </mat-select-trigger>
+          }
+          @for (type of collectionTypes; track $index) {
+            <mat-option [value]="type">{{ type.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+
+  </div>
+
+
+  <div class="p-3 bg-white mt-auto">
+    <div class="d-flex justify-end">
+      <div class="flex gap-2">
+        <loading-button type="secondary" (click)="onClose.emit()">Cancel</loading-button>
+        <loading-button (onButtonClick)="onApplyFilter()">Apply</loading-button>
+      </div>
+    </div>
+  </div>
+
+</div>

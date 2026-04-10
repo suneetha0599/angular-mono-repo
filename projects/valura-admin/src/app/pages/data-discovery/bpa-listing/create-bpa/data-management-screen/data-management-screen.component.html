@@ -1,0 +1,535 @@
+<div class="d-flex flex-column view-wrapper">
+  <div class="p-3 pb-0">
+    <div class="d-flex justify-between">
+      <div class="label-large my-auto">{{ getTitle() }}</div>
+      <div class="d-flex align-items-center">
+        @if(showSearch){
+        <div class="flex items-center">
+          <mat-form-field appearance="outline" class="mat-sm-input mat-round-input enabled-mat-input search-bar">
+            <mat-icon class="mat-md-icon pe-2 material-symbols-outlined" matPrefix>search</mat-icon>
+            <input matInput [(ngModel)]="searchText" placeholder="Search..." (ngModelChange)="onSearchChange()" />
+            @if(searchText){
+            <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+              <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+            </button>
+            }
+          </mat-form-field>
+          <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn mb-0" (click)="toggleSearch()">
+            <mat-icon color="primary" class="material-symbols-outlined">search</mat-icon>
+          </button>
+        </div>
+        }
+        @else{
+        <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="toggleSearch()">
+          <mat-icon color="primary" class="material-symbols-outlined">search</mat-icon>
+        </button>
+        }
+        @if(isEditMode){
+        @if(selectedTab === DATA_MANAGMENT_TABS.DATA_ELEMENTS) {
+        <div class="ms-2" style="width: 412px;">
+          <app-item-selector [config]="{
+               type: CreatItemType.DATA_ELEMENTS,
+               placeholder: 'Select Data Elements',
+               title: 'Add Data Elements'
+               }" [availableItems]="availableDataElements" [selectedDataSubject]="selectedDataSubjectMapping"
+            [alreadyAddedItems]="pdElementsMapping.value" (onItemsSelected)="handleItemSelectorData($event)"
+            (onCreateNew)="onCreateNewDataElement($event)">
+          </app-item-selector>
+        </div>
+        }
+        @else if(selectedTab === DATA_MANAGMENT_TABS.ASSETS) {
+        <div class="ms-2" style="width: 412px;">
+          <app-item-selector [config]="{
+               type: CreatItemType.ASSET,
+               placeholder: 'Select Assets',
+               title: 'Add Assets'
+               }" [availableItems]="availableAssets" (onItemsSelected)="handleAssetSelectorData($event)"
+            [alreadyAddedItems]="assetPdElementsMapping.value" (onCreateNew)="onCreateNewAsset($event)">
+          </app-item-selector>
+        </div>
+        }
+        @else if(selectedTab === DATA_MANAGMENT_TABS.SOURCES){
+        <div class="ms-2" style="width: 412px;">
+          <app-item-selector [config]="{
+               type: CreatItemType.SOURCE,
+               placeholder: 'Select Sources',
+               title: 'Add Sources'
+               }" [availableItems]="availableSources" [alreadyAddedItems]="sourcePdElementsMappingList"
+            (onItemsSelected)="handleSourceSelectorData($event)" (onCreateNew)="onCreateNewSource($event)">
+          </app-item-selector>
+        </div>
+        }
+        @else if(selectedTab === DATA_MANAGMENT_TABS.RECIPIENTS){
+        <div class="ms-2" style="width: 412px;">
+          <app-item-selector [config]="{
+               type: CreatItemType.RECEPIENT,
+               placeholder: 'Select Recipients',
+               title: 'Add Recipients'
+               }" [availableItems]="availableRecipients" (onItemsSelected)="handleRecipientSelectorData($event)"
+            [alreadyAddedItems]="recipientsPdElementsMapping.value" (onCreateNew)="onCreateNewRecipient($event)">
+          </app-item-selector>
+        </div>
+        }
+        @else {
+        <button mat-stroked-button class="bg-primary text-light fw-500 add-user-btn body-small ms-2"
+          (click)="onAddClick()">
+          {{ getAddButtonText() }}
+        </button>
+        }
+        }
+      </div>
+    </div>
+  </div>
+  <div class="p-3 py-0 d-flex flex-column overflow-hidden">
+    <div class="relative d-flex flex-column overflow-hidden">
+      @if(selectedTab === DATA_MANAGMENT_TABS.DATA_ELEMENTS){
+      <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+         <ng-template [ngTemplateOutlet]="dataElement"></ng-template>
+      </div>
+      }
+      @if(selectedTab === DATA_MANAGMENT_TABS.SOURCES){
+      <ng-template [ngTemplateOutlet]="sourceTable"></ng-template>
+      }
+      @if(selectedTab === DATA_MANAGMENT_TABS.ASSETS){
+      <ng-template [ngTemplateOutlet]="assetTable"></ng-template>
+      }
+      @if(selectedTab === DATA_MANAGMENT_TABS.RECIPIENTS){
+      <ng-template [ngTemplateOutlet]="recipientTable"></ng-template>
+      }
+      <div class="bg-white z-10">
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #dataElement>
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar" [formGroup]="dataElements">
+    @if(dataSubjectsControlsSize > 1){
+    <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+      [(selectedIndex)]="selectedDataSubjectIndex" (selectedTabChange)="onDsTabChange($event.index);">
+      @for(dataSubject of dataSubjectsControls; track dataSubject; let i=$index) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>{{ dataSubject.value.dataSubjectType!.name }}</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <ng-container *ngTemplateOutlet="tabContent; context:{ dataSubject : dataSubject }">
+          </ng-container>
+        </ng-template>
+      </mat-tab>
+      }
+    </mat-tab-group>
+    }
+    @else{
+    @for(dataSubject of dataSubjectsControls; track dataSubject; let i=$index) {
+    <ng-container *ngTemplateOutlet="tabContent; context:{ dataSubject : dataSubject }">
+    </ng-container>
+    }
+    }
+  </div>
+</ng-template>
+
+<ng-template #tabContent let-dataSubject="dataSubject">
+  <div [formGroup]="dataElements" class="h-full flex flex-col overflow-hidden">
+    @if(isEditMode){
+    <div class="grid grid-cols-12 gap-4 py-2 mt-1">
+      <div class="col-span-4">
+        <div class="grid grid-cols-9 gap-2">
+          @if(showPurposeSelection){
+          <div class="col-span-5">
+            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0 enabled-mat-select">
+              <mat-label>Purpose</mat-label>
+              <mat-select formControlName="selectedPurpose" multiple>
+                @for(purpose of purposeList; track purpose.id){
+                <mat-option [value]="purpose">{{ purpose.purposeName }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          }
+          @if(dataElements.value.showPurposeSection){
+          <div class="col-span-2">
+            <loading-button type="light" [basicButton]="true" [isFullWidth]="true" class="me-2"
+              (onButtonClick)="onBulkSave()">
+              Save
+            </loading-button>
+          </div>
+          <div class="col-span-2">
+            <loading-button class="me-2" type="light" [basicButton]="true" [isFullWidth]="true"
+              (onButtonClick)="onCancel()">
+              Cancel
+            </loading-button>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+    <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+      <ng-template *ngTemplateOutlet="dataElementTable; context:{}"></ng-template>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #dataElementTable>
+  @if(dataSource.filteredData.length){
+  <div [formGroup]="dataElements">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+      <ng-container matColumnDef="select" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'50px'" [style.minWidth]="'50px'">
+          <mat-checkbox [formControl]="selectAllControl" [indeterminate]="isIndeterminate"
+            (change)="onChangeSelectAll($event)">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let element" [style.width]="'50px'" [style.minWidth]="'50px'">
+          <div class="my-auto">
+            <mat-checkbox [formControl]="element.get('selected')" class="label-medium me-2 my-auto"
+              (change)="onChangeEvent($event)">
+            </mat-checkbox>
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="personalDataElement" sticky>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="personalDataElement" [style.width]="'300px'">
+          Personal Data Element
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <div class="my-auto">{{element.get('pdElement').value?.name}}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="purpose" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'233.75px'" mat-sort-header="purpose">Purpose</th>
+        <td mat-cell *matCellDef="let element">
+          @let purposes = element.get('purpose').value;
+
+          <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+            class="link-button text-dark body-large text-decoration-none" (click)="showPurposeDetails(purposes)"
+            [disabled]="!showDetail(purposes)">
+            {{ getPurposeNames(purposes) }}
+          </button>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="dataCategory" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'233.75px'" mat-sort-header="dataCategory">
+          Personal Data Category
+        </th>
+        <td mat-cell *matCellDef="let element">
+          @let categories = element.get('pdElement').value?.categoryNames;
+
+          <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+            class="link-button text-dark body-large text-decoration-none" (click)="showCategoryDetails(categories)"
+            [disabled]="!showDetail(categories)">
+            {{ getSelectedPdCategory(categories) }}
+          </button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="classification" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'233.75px'" mat-sort-header="classification">
+          Classification
+        </th>
+        <td mat-cell *matCellDef="let element">
+          @let classifications = element.get('pdElement').value?.classification;
+
+          <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+            class="link-button text-dark body-large text-decoration-none"
+            (click)="showClassificationDetails(classifications)" [disabled]="!showDetail(classifications)">
+            {{ getSelectedPdClassification(classifications) }}
+          </button>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'100px'">Actions</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          <!-- <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn" [disabled]="!isEditMode">
+                  <mat-icon class="mat-md-icon text-primary">more_vert</mat-icon>
+                  </button>
+                  <mat-menu class="action-panel" #actionMenu="matMenu">
+                  <button mat-menu-item class="d-flex" (click)="onEditDataElement(element, i)">
+                    <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item class="d-flex" (click)="onDeleteItems(element, i)">
+                    <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                  </mat-menu> -->
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon me-2"
+            (click)="onEditDataElement(element, i)">
+            <mat-icon class="icons material-symbols-outlined">edit</mat-icon>
+          </button>
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon"
+            (click)="onDeleteItems(element, i)">
+            <mat-icon class="icons material-symbols-outlined">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+    </table>
+  </div>
+  }
+  @else if(!isLoading && searchText){
+  <item-not-found heading="No personal data elements match your search criteria" [imgHeight]="'200px'">
+  </item-not-found>
+  }
+  @else if(dataSource.filteredData.length === 0){
+  <item-not-found [imgHeight]="'200px'"
+    heading="No personal data elements have been added to this processing activity"></item-not-found>
+  }
+</ng-template>
+
+<ng-template #assetTable>
+  @if(assetPdElementsMapping){
+  @if(dataSource.filteredData.length){
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+      <ng-container matColumnDef="assetName" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'310px'" mat-sort-header="assetName">Asset Name</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="my-auto">{{element.get('asset').value!.name}}</div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="type" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'197px'" mat-sort-header="type">Asset Type</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="status w-fit-content p-2 d-flex align-items-center justify-content-center label-large"
+            [ngStyle]="{ 'background-color': getSensitivityColors(element.get('asset').value!.type),color: getSensitivityTextColors(element.get('asset').value!.type)}">
+            {{element.get('asset').value!.type}}
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="category" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'278px'" mat-sort-header="category">Asset Category</th>
+        <td mat-cell *matCellDef="let element">
+          @if(element.get('asset').value?.categoryName) {
+          <div>{{element.get('asset').value!.categoryName}}</div>
+          }
+          @else {
+          <div>-</div>
+          }
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="personalDataElement" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'278px'" mat-sort-header="personalDataElement">Personal
+          Data Elements
+        </th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          <span class="me-1">
+            {{element.get('pdElementMappingList').value?.length ? element.get('pdElementMappingList').value?.length:''}}
+          </span>
+          <button [disabled]="disablePdMappingButton(element)" mat-button color="primary" class="body-large"
+            (click)="openPdElementMapping(i)">
+            {{element.get('pdElementMappingList').value?.length ? 'View' :'Add'}}
+          </button>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions" sticky>
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          <!-- <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn" [disabled]="!isEditMode">
+                  <mat-icon class="mat-md-icon text-primary">more_vert</mat-icon>
+                  </button>
+                  <mat-menu class="action-panel" #actionMenu="matMenu">
+                  <button mat-menu-item class="d-flex" (click)="onEditAsset(element, i)">
+                    <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item class="d-flex" (click)="onDeleteItems(element, i)">
+                    <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                  </mat-menu> -->
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon me-2"
+            (click)="onEditAsset(element, i)">
+            <mat-icon class="icons material-symbols-outlined">edit</mat-icon>
+          </button>
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon"
+            (click)="onDeleteItems(element, i)">
+            <mat-icon class="icons material-symbols-outlined">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+    </table>
+  </div>
+  }
+  @else if(!isLoading && searchText){
+  <item-not-found heading="No assets match your search criteria" [imgHeight]="'200px'">
+  </item-not-found>
+  }
+  @else if(!isLoading){
+  <item-not-found [imgHeight]="'200px'"
+    heading="No assets have been linked to this processing activity"></item-not-found>
+  }
+  }
+</ng-template>
+
+<ng-template #recipientTable>
+  @if(dataSource.filteredData.length){
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+      <ng-container matColumnDef="recipientName" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'219.25px'" mat-sort-header="recipientName">Recipients Name
+        </th>
+        <td mat-cell *matCellDef="let element" [style.maxWidth]="'450px'">
+          <div class="my-auto">{{ element.get('recipient').value?.name }}</div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="category" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'219.25px'" mat-sort-header="category">Recipients Category
+        </th>
+        <td mat-cell *matCellDef="let element" [style.maxWidth]="'219.25px'">
+          <div class="status w-fit-content p-2 d-flex align-items-center justify-content-center label-large"
+            [ngStyle]="{ 'background-color': getSensitivityColors(element.get('type').value), color: getSensitivityTextColors(element.get('type').value) }">
+            {{ getCategoryName(element.get('type').value) }}
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="purpose" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'219.25px'" mat-sort-header="purpose">Reason for Access
+        </th>
+        <td mat-cell *matCellDef="let element" [style.maxWidth]="'219.25px'">
+          <span [appEllipsisTooltip]="element.get('purpose')?.value" [colorType]="'default'" [maxWidth]="218"
+            [matTooltip]="element.get('purpose')?.value" matTooltipPosition="below" matTooltipClass="material-tooltip">
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="count" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'219.25px'" mat-sort-header="count">People with Access</th>
+        <td mat-cell *matCellDef="let element" [style.maxWidth]="'219.25px'">
+          <div class="my-auto">{{ element.get('numberOfPersonHavingAccess').value }}</div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="pdElements" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'203px'" mat-sort-header="pdElements">Personal Data
+          Elements
+        </th>
+        <td mat-cell *matCellDef="let element; let i = index" [style.maxWidth]="'203px'">
+          <span class="me-1">
+            {{element.get('pdElementMappingList').value?.length ? element.get('pdElementMappingList').value?.length:''}}
+          </span>
+          <button [disabled]="disablePdMappingButton(element)" mat-button color="primary" class="body-large"
+            (click)="openPdElementMapping(i)">
+            {{element.get('pdElementMappingList').value?.length ? 'View' :'Add'}}
+          </button>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions" sticky>
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let element; let i = index" [style.maxWidth]="'200px'">
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon me-2"
+            (click)="onEditRecipient(element, i)">
+            <mat-icon class="icons material-symbols-outlined">edit</mat-icon>
+          </button>
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon"
+            (click)="onDeleteItems(element, i)">
+            <mat-icon class="icons material-symbols-outlined">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="recipientColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: recipientColumns;"></tr>
+    </table>
+  </div>
+  }@else if(!isLoading && searchText){
+  <item-not-found heading="No recipients match your search criteria" [imgHeight]="'200px'">
+  </item-not-found>
+  }
+  @else if(!isLoading){
+  <item-not-found [imgHeight]="'200px'"
+    heading="No recipients have been added to this processing activity"></item-not-found>
+  }
+</ng-template>
+
+<ng-template #sourceTable>
+  @if(dataSource.filteredData.length){
+  <div [formGroup]="source" class="flex-1 overflow-auto rounded-lg no-scrollbar">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+      <ng-container matColumnDef="sourceName" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'310px'" mat-sort-header="sourceName">Source Name</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="my-auto">{{element.get('source').value!.name}}</div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="category" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'278px'" mat-sort-header="category">Source Category</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="my-auto">{{formatEnum(element.get('source')?.value?.category)}}</div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="type" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'197px'" mat-sort-header="type">Source Type</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="my-auto">
+            @if(element.get('type')?.value) {
+            {{formatEnum(element.get('type').value )|| ''}}
+            }
+            @else {
+            -
+            }
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="pdElements" sticky>
+        <th mat-header-cell *matHeaderCellDef [style.width]="'278px'" mat-sort-header="pdElements">Personal Data
+          Elements</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          <span class="me-1">
+            {{element.get('pdElementMappingList').value?.length ? element.get('pdElementMappingList').value?.length:''}}
+          </span>
+          <button [disabled]="disablePdMappingButton(element)" mat-button color="primary" class="body-large"
+            (click)="openPdElementMapping(i)">
+            {{element.get('pdElementMappingList').value?.length ? 'View' :'Add'}}
+          </button>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions" sticky>
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          <!-- <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn" [disabled]="!isEditMode">
+                  <mat-icon class="mat-md-icon text-primary">more_vert</mat-icon>
+                  </button>
+                  <mat-menu class="action-panel" #actionMenu="matMenu">
+                  <button mat-menu-item class="d-flex" (click)="onEditSource(element, i)">
+                    <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item class="d-flex" (click)="onDeleteItems(element, i)">
+                    <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                  </mat-menu> -->
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon me-2"
+            (click)="onEditSource(element, i)">
+            <mat-icon class="icons material-symbols-outlined">edit</mat-icon>
+          </button>
+          <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon"
+            (click)="onDeleteItems(element, i)">
+            <mat-icon class="icons material-symbols-outlined">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="sourceColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: sourceColumns;"></tr>
+    </table>
+  </div>
+  }@else if(!isLoading && searchText){
+  <item-not-found heading="No sources match your search criteria" [imgHeight]="'200px'">
+  </item-not-found>
+
+  } @else if(!isLoading){
+  <item-not-found [imgHeight]="'200px'"
+    heading="No sources have been added to this processing activity"></item-not-found>
+  }
+</ng-template>
+
+<mat-menu class="action-panel" #detailMenu="matMenu">
+  <ul class="px-2 m-2 ms-3 menu-more-detail">
+    @for(dataSubject of detailList; track i; let i=$index) {
+    <li class="mb-1 body-large">{{dataSubject}}</li>
+    }
+  </ul>
+</mat-menu>

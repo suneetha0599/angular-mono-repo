@@ -1,0 +1,17 @@
+@use "../../../../../styles/custom/typography.scss" as typography;
+
+.header {
+  font-size: typography.$fs-22;
+}
+
+.description {
+  font-size: typography.$fs-13;
+}
+
+.title {
+  font-size: typography.$fs-16;
+}
+
+.content {
+  font-size: typography.$fs-12;
+}

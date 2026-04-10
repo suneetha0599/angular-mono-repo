@@ -1,0 +1,226 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  @if (isAssigneeMode()) {
+  Edit Assignee
+  } @else if (isPriorityMode()) {
+  Edit Priority
+  } @else if (isPauseMode()) {
+  Pause Request
+  } @else if (isResumeMode()) {
+  Resume Request
+  }
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="Close dialog">
+  <mat-icon class="text-lg material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3 overflow-auto max-h-[60vh]">
+
+  <ng-container [ngSwitch]="loadingState()">
+
+    <ng-container *ngSwitchCase="'loading'">
+      <ng-container *ngTemplateOutlet="loadingTemplate"></ng-container>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'error'">
+      <ng-container *ngTemplateOutlet="errorTemplate"></ng-container>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'success'">
+
+      @if (requestTitle && !isPauseMode() && !isResumeMode()) {
+      <div class="text-muted text-xl mt-1 leading-tight px-1">
+        {{ requestTitle }}
+      </div>
+      }
+
+      @if (isAssigneeMode()) {
+      <ng-container *ngTemplateOutlet="assigneeFormTemplate"></ng-container>
+      } @else if (isPriorityMode()) {
+      <ng-container *ngTemplateOutlet="priorityFormTemplate"></ng-container>
+      } @else if (isPauseMode()) {
+      <ng-container *ngTemplateOutlet="pauseFormTemplate"></ng-container>
+      } @else if (isResumeMode()) {
+      <ng-container *ngTemplateOutlet="resumeFormTemplate"></ng-container>
+      }
+
+    </ng-container>
+
+    <ng-container *ngSwitchDefault>
+      <ng-container *ngTemplateOutlet="loadingTemplate"></ng-container>
+    </ng-container>
+
+  </ng-container>
+
+</div>
+
+<div mat-dialog-actions class="px-3 pt-2 pb-3 flex gap-3 justify-end border-t">
+  <loading-button type="secondary" (onButtonClick)="onCancel()" [disabled]="isSubmitting()" aria-label="Cancel">
+    Cancel
+  </loading-button>
+
+  <loading-button type="primary" [loading]="isSubmitting()" [disabled]="isSubmitDisabled()" loadingText="Processing..."
+    (onButtonClick)="onSubmit()">
+    @if (isPauseMode()) {
+    Pause Request
+    } @else if (isResumeMode()) {
+    Resume Request
+    } @else {
+    Update
+    }
+  </loading-button>
+</div>
+
+
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <div class="flex flex-col items-center text-center py-8" role="status" aria-live="polite">
+    <mat-progress-spinner mode="indeterminate" diameter="40"
+      [attr.aria-label]="'Loading ' + (isAssigneeMode() ? 'users' : 'priorities')">
+    </mat-progress-spinner>
+    <p class="mt-3 text-gray-600 text-sm">
+      Loading {{ isAssigneeMode() ? 'users' : 'priorities' }}...
+    </p>
+  </div>
+</ng-template>
+
+<!-- Error Template -->
+<ng-template #errorTemplate>
+  <div class="text-center py-8" role="alert" aria-live="assertive">
+    <mat-icon class="text-red-600 text-3xl mb-2 material-symbols-outlined">error_outline</mat-icon>
+    <h3 class="text-lg font-medium text-gray-900 mb-1">
+      Unable to Load {{ isAssigneeMode() ? 'Users' : 'Priorities' }}
+    </h3>
+    <p class="mb-4 text-red-600 text-sm">
+      {{ errorMessage() || 'An error occurred while loading the ' + (isAssigneeMode() ? 'user list' : 'priority list') +
+      '.' }}
+    </p>
+    <button mat-stroked-button (click)="retryLoading()" class="inline-flex items-center"
+      [attr.aria-label]="'Retry loading ' + (isAssigneeMode() ? 'users' : 'priorities')">
+      <mat-icon class="mr-2 text-lg material-symbols-outlined">refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+</ng-template>
+
+<!-- Assignee Form Template -->
+<ng-template #assigneeFormTemplate>
+  <form [formGroup]="assigneeForm" class="space-y-3">
+    <!-- Assignee Selection with Integrated Search -->
+    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+      <mat-label>Search or Select New Assignee</mat-label>
+      <input #assigneeInput matInput [formControl]="assigneeSearchControl" [matAutocomplete]="assigneeAuto"
+        placeholder="Type name or email..." [attr.aria-label]="getSearchAriaLabel()">
+
+      @if (assigneeSearchControl.value && assigneeForm.get('toUserId')?.value) {
+      <button class="icon-md-button" type="button" matSuffix mat-icon-button (click)="clearAssigneeSelection()">
+        <mat-icon class="material-symbols-outlined  mat-md-icon">clear</mat-icon>
+      </button>
+      }
+
+      <mat-autocomplete #assigneeAuto="matAutocomplete" [displayWith]="displayUserName.bind(this)"
+        (optionSelected)="onAssigneeSelected($event)">
+
+        @if (filteredUserList().length === 0) {
+        <mat-option disabled class="text-sm text-gray-600 italic">
+          {{ getEmptyStateMessage() }}
+        </mat-option>
+        } @else {
+        @for (user of filteredUserList(); track user.applicationUserId) {
+        <mat-option [value]="user" [disabled]="!isUserSelectable(user)" [attr.aria-label]="formatUserAriaLabel(user)"
+          [class.bg-gray-50]="user.isCurrentAssignee" [class.opacity-60]="user.isCurrentAssignee">
+          <ng-container *ngTemplateOutlet="userOptionTemplate; context: { $implicit: user }">
+          </ng-container>
+        </mat-option>
+        }
+        }
+      </mat-autocomplete>
+
+      @if (assigneeForm.get('toUserId')?.invalid && assigneeForm.get('toUserId')?.touched) {
+      <mat-error>
+        @if (assigneeForm.get('toUserId')?.hasError('required')) {
+        Please select an assignee
+        } @else if (assigneeForm.get('toUserId')?.hasError('sameAssignee')) {
+        Please select a different assignee than the current one
+        }
+      </mat-error>
+      }
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<!-- Priority Form Template -->
+<ng-template #priorityFormTemplate>
+  <form [formGroup]="priorityForm" class="space-y-3">
+    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+      <mat-label>Select Priority</mat-label>
+      <mat-select formControlName="priority" [attr.aria-label]="getSelectAriaLabel()">
+
+        @if (priorityList().length === 0) {
+        <mat-option disabled class="text-sm text-gray-600 italic">
+          {{ getEmptyStateMessage() }}
+        </mat-option>
+        } @else {
+        @for (priority of priorityList(); track $index) {
+        <mat-option [value]="priority" [disabled]="isPriorityDisabled(priority)"
+          [class.bg-gray-50]="isPriorityDisabled(priority)" [class.opacity-60]="isPriorityDisabled(priority)">
+          <div class="flex items-center w-full min-h-[24px] py-1">
+            <span class="flex-1 text-sm font-normal">
+              {{ priority }}
+              @if (isPriorityDisabled(priority)) {
+              <span class="text-gray-500 ml-1">(Current)</span>
+              }
+            </span>
+            @if (isPriorityDisabled(priority)) {
+            <mat-icon class="text-gray-400 ml-2 text-base material-symbols-outlined" [inline]="true">lock</mat-icon>
+            }
+          </div>
+        </mat-option>
+        }
+        }
+      </mat-select>
+
+      @if (priorityForm.get('priority')?.invalid && priorityForm.get('priority')?.touched) {
+      <mat-error>Please select a priority</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<!-- Pause Form Template -->
+<ng-template #pauseFormTemplate>
+  <form [formGroup]="pauseForm" class="space-y-3">
+    <app-custom-mat-textarea label="Reason for pausing" [control]="reasonControl" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </form>
+</ng-template>
+
+<!-- Resume Form Template -->
+<ng-template #resumeFormTemplate>
+  <div class="text-center py-4">
+    <mat-icon class="text-green-500 mb-2 material-symbols-outlined" style="font-size: 48px;">play_arrow</mat-icon>
+    <p class="text-gray-700 mb-2">Are you sure you want to resume this request?</p>
+    <p class="text-sm text-gray-500">The request will continue processing from where it was paused.</p>
+  </div>
+</ng-template>
+
+<!-- User Option Template -->
+<ng-template #userOptionTemplate let-user>
+  <div class="flex items-center w-full min-h-[24px] py-1">
+    @if (!user.isCurrentAssignee) {
+    <span class="flex-1 leading-tight">
+      <span class="text-sm font-normal block">{{getUserDisplayName(user)}}</span>
+    </span>
+    } @else {
+    <span class="flex-1 leading-tight">
+      <span class="text-sm font-normal">
+        {{getUserDisplayName(user)}}
+        <span class="text-gray-500 ml-1">(Current)</span>
+      </span>
+    </span>
+    <mat-icon class="text-gray-400 ml-2 text-base material-symbols-outlined" [inline]="true">
+      lock
+    </mat-icon>
+    }
+  </div>
+</ng-template>

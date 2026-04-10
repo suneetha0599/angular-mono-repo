@@ -1,0 +1,304 @@
+<div class="d-flex flex-column overflow-hidden create-risk-drawer-wrapper">
+
+  <div class="flex justify-between items-center px-6 py-2">
+    <div class="text-xl font-medium text-gray-900">{{ isEditMode ? 'Edit Risk' : 'Create New Risk' }}</div>
+    <button mat-icon-button (click)="closeDrawer()" aria-label="Close drawer"
+      class="w-6 h-6 min-w-6 hover:bg-gray-100 rounded-full transition-colors duration-200">
+      <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+    </button>
+  </div>
+  <div class="border-t border-gray-200"></div>
+
+  <div #drawerScrollContainer class="flex-1 overflow-y-auto overflow-x-hidden px-6 pt-3 pb-2">
+    @if (isLoadingDetail) {
+    <div class="w-full">
+
+      <!-- Title field shimmer -->
+      <div class="mb-3 mt-3">
+        <div class="shimmer-box h-4 w-12 rounded mb-2"></div>
+        <div class="w-full px-3 py-3 border border-gray-200 rounded min-h-[56px] bg-gray-50">
+          <div class="shimmer-box h-4 w-2/3 rounded"></div>
+        </div>
+      </div>
+
+      <!-- Description shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-4 w-24 rounded mb-2"></div>
+        <div class="w-full border border-gray-200 rounded min-h-[120px] bg-gray-50 px-3 py-3">
+          <div class="shimmer-box h-4 w-full rounded mb-2"></div>
+          <div class="shimmer-box h-4 w-4/5 rounded mb-2"></div>
+          <div class="shimmer-box h-4 w-3/5 rounded"></div>
+        </div>
+      </div>
+
+      <!-- Likelihood / Impact / Risk Level shimmer -->
+      <div class="grid grid-cols-3 gap-3 mb-3">
+        @for (item of [1,2,3]; track item) {
+        <div
+          class="w-full px-3 py-3 border border-gray-200 rounded min-h-[56px] bg-gray-50 flex items-center justify-between">
+          <div class="shimmer-box h-4 w-3/4 rounded"></div>
+          <div class="shimmer-box h-4 w-4 rounded"></div>
+        </div>
+        }
+      </div>
+
+      <!-- Measure Type pills shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-4 w-28 rounded mb-2"></div>
+        <div class="flex gap-2">
+          @for (item of [1,2,3,4]; track item) {
+          <div class="shimmer-box h-9 w-24 rounded border border-gray-200"></div>
+          }
+        </div>
+      </div>
+
+      <!-- Measure fields shimmer (2 rows of 2) -->
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        @for (item of [1,2]; track item) {
+        <div class="w-full px-3 py-3 border border-gray-200 rounded min-h-[56px] bg-gray-50">
+          <div class="shimmer-box h-4 w-3/4 rounded"></div>
+        </div>
+        }
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        @for (item of [1,2]; track item) {
+        <div class="w-full px-3 py-3 border border-gray-200 rounded min-h-[56px] bg-gray-50">
+          <div class="shimmer-box h-4 w-3/4 rounded"></div>
+        </div>
+        }
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        @for (item of [1,2]; track item) {
+        <div
+          class="w-full px-3 py-3 border border-gray-200 rounded min-h-[56px] bg-gray-50 flex items-center justify-between">
+          <div class="shimmer-box h-4 w-1/2 rounded"></div>
+          <div class="shimmer-box h-4 w-4 rounded"></div>
+        </div>
+        }
+      </div>
+
+    </div>
+    } @else if (riskForm) {
+    <form [formGroup]="riskForm" class="w-full">
+
+      @if (!isEditMode || editData?.attachedTo === AssessmentAttachedTo.ASSESSMENT_QUESTION || editData?.attachedTo
+      ===AssessmentAttachedTo.ASSESSMENT_VENDOR_QUESTION || editData?.attachedTo === AssessmentAttachedTo.ASSESSMENT ||
+      editData?.attachedTo ===AssessmentAttachedTo.ASSESSMENT_VENDOR ) {
+      <div class="mb-3">
+        <mat-checkbox formControlName="chooseParameter" color="primary">Related Parameter
+        </mat-checkbox>
+      </div>
+      }
+
+
+      @if (riskForm.get('chooseParameter')?.value) {
+      <div class="grid grid-cols-2 gap-3 mb-1 mt-1">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Select Section</mat-label>
+          <mat-select #sectionSelect formControlName="sectionId" (selectionChange)="onSectionChange($event.value)"
+            (openedChange)="onSectionDropdownOpened($event)">
+            @for (section of drawerSections; track section.id) {
+            <mat-option [value]="section.id">{{ section.sectionName }}</mat-option>
+            }
+            @if (isLoadingSections || isLoadingMoreSections) {
+            <mat-option disabled>Loading...</mat-option>
+            }
+          </mat-select>
+          @if (riskForm.get('sectionId')?.hasError('required') && riskForm.get('sectionId')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Choose Question</mat-label>
+          <mat-select #questionSelect formControlName="questionId"
+            (openedChange)="onQuestionDropdownOpened($event)">
+            @if (isLoadingQuestions) {
+            <mat-option disabled>Loading...</mat-option>
+            } @else {
+            @for (q of availableQuestions; track q.id) {
+            <mat-option [value]="q.id">{{ getQuestionText(q.text) }}</mat-option>
+            }
+            }
+          </mat-select>
+          @if (riskForm.get('questionId')?.hasError('required') && riskForm.get('questionId')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      }
+
+
+      <div class="mb-3 mt-3">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Title</mat-label>
+          <input title="parameter" matInput formControlName="parameter" maxlength="200">
+          @if (riskForm.get('parameter')?.hasError('required') && riskForm.get('parameter')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description*</label>
+
+        <app-custom-editor [initialContent]="editorInitialContent" [showInsertVariable]="false"
+          placeholder="Enter risk description..." (contentChange)="onDescriptionChange($event)"
+          (blur)="descriptionControl.markAsTouched()">
+        </app-custom-editor>
+
+        @if (riskForm.get('description')?.hasError('required') && riskForm.get('description')?.touched) {
+        <mat-error class="text-xs mt-1 ml-4">This field is mandatory</mat-error>
+        }
+      </div>
+
+
+
+      <div class="grid grid-cols-3 gap-3 mb-1">
+        <!-- Likelihood -->
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Likelihood</mat-label>
+          <mat-select formControlName="likelihood" (selectionChange)="onRiskFieldChange()">
+            @for (level of likelihoodLevels; track level.value) {
+            <mat-option [value]="level.value">{{ level.label }}</mat-option>
+            }
+          </mat-select>
+          @if (riskForm.get('likelihood')?.hasError('required') && riskForm.get('likelihood')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Impact -->
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Impact</mat-label>
+          <mat-select formControlName="impact" (selectionChange)="onRiskFieldChange()">
+            @for (level of impactLevels; track level.value) {
+            <mat-option [value]="level.value">{{ level.label }}</mat-option>
+            }
+          </mat-select>
+          @if (riskForm.get('impact')?.hasError('required') && riskForm.get('impact')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Risk Level -->
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Risk Level</mat-label>
+          <input matInput [value]="calculatedRiskLevelLabel" disabled />
+        </mat-form-field>
+      </div>
+
+      <!-- Measure Type Pills -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Measure Type</label>
+        <div class="flex gap-2 flex-wrap">
+          @for (option of measureTypeOptions; track option.key) {
+          <button type="button"
+            class="measure-chip label-large px-4 py-2 border rounded min-h-[36px] flex items-center justify-center"
+            [ngClass]="riskForm.get('measureType')?.value === option.key ? 'selected' : 'unselected'"
+            (click)="selectMeasureType(option.key)">
+            <span class="checkmark-wrapper" [class.visible]="riskForm.get('measureType')?.value === option.key">
+              <mat-icon class="checkmark-icon material-symbols-outlined mat-md-icon">check</mat-icon>
+            </span>
+            {{ option.label }}
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- Mitigate-specific Fields -->
+      @if (riskForm.get('measureType')?.value === 'MITIGATE') {
+      <div class="mb-4">
+
+        <div class="grid grid-cols-2 gap-3 mb-1">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Mitigate Measure</mat-label>
+            <input matInput formControlName="mitigateMeasure" maxlength="200">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Standard</mat-label>
+            <input matInput formControlName="standard" maxlength="200">
+          </mat-form-field>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-1">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Control Category</mat-label>
+            <input matInput formControlName="controlCategory" maxlength="200">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Control Description</mat-label>
+            <input matInput formControlName="controlDescription" maxlength="200">
+          </mat-form-field>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Effect on Risk</mat-label>
+            <mat-select formControlName="effectOnRisk">
+              @for (option of effectOnRiskOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Residual Risk</mat-label>
+            <mat-select formControlName="residualRisk">
+              @for (option of residualRiskOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+      </div>
+      }
+
+      <!-- Accept / Avoid / Transfer Fields -->
+      @if (riskForm.get('measureType')?.value && riskForm.get('measureType')?.value !== 'MITIGATE') {
+      <div class="grid grid-cols-2 gap-3 mb-1">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Description</mat-label>
+          <input matInput formControlName="measureDescription" maxlength="200">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Residual Risk</mat-label>
+          <mat-select formControlName="residualRisk">
+            @for (option of residualRiskOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+
+
+
+    </form>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="px-6 py-2 bg-white border-t border-gray-200">
+    <div class="flex justify-end gap-3">
+      @if (isLoadingDetail) {
+      <div
+        class="px-5 py-2 border border-gray-200 rounded bg-gray-50 min-h-[36px] w-20 flex items-center justify-center">
+        <div class="shimmer-box h-4 w-12 rounded"></div>
+      </div>
+      <div
+        class="px-5 py-2 border border-blue-200 rounded bg-blue-50 min-h-[36px] w-24 flex items-center justify-center">
+        <div class="shimmer-box h-4 w-14 rounded"></div>
+      </div>
+      } @else {
+      <loading-button type="secondary" (onButtonClick)="closeDrawer()">
+        Cancel
+      </loading-button>
+      <loading-button type="primary" [loading]="isSaving" [disabled]="saveRiskDisabled" (onButtonClick)="onSave()">
+        {{ isEditMode ? 'Update' : 'Save' }}
+      </loading-button>
+      }
+    </div>
+  </div>
+
+</div>

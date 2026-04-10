@@ -1,0 +1,114 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="flex justify-end">
+      <loading-button  (click)="addClient()">
+        Add IDP
+      </loading-button>
+    </div>
+  </div>
+
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full  bg-white p-2">
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="overflow-x-auto flex-1 flex flex-col">
+
+          <ng-container *ngTemplateOutlet="idpTableTemplate"></ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #idpTableTemplate>
+  <table
+    mat-table
+    [dataSource]="isLoading ? shimmerDataSource : idpList"
+        class="mat-elevation-z8 w-100 role-table table">
+
+    <!-- ID-->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let row; let i = index">
+        @if (!isLoading) {
+          {{ row.id }}
+        } @else {
+          <div class="shimmer-line shimmer-small"></div>
+        }
+      </td>
+    </ng-container>
+
+    <!-- DISPLAY NAME -->
+    <ng-container matColumnDef="displayName">
+      <th mat-header-cell *matHeaderCellDef>Display Name</th>
+      <td mat-cell *matCellDef="let row">
+        @if (!isLoading) {
+          <span class="text-primary font-medium" (click)="viewDetails(row)" >
+            {{ row.displayName }}
+          </span>
+        } @else {
+          <div class="shimmer-line shimmer-medium"></div>
+        }
+      </td>
+    </ng-container>
+
+    <!-- TYPE -->
+    <ng-container matColumnDef="idpType">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let row">
+        @if (!isLoading) {
+          {{ row.idpType || 'N/A' }}
+        } @else {
+          <div class="shimmer-line shimmer-large"></div>
+        }
+      </td>
+    </ng-container>
+
+    <!-- STATUS -->
+    <ng-container matColumnDef="active">
+      <th mat-header-cell *matHeaderCellDef>Active</th>
+      <td mat-cell *matCellDef="let row">
+        @if (!isLoading) {
+         {{row.active}}
+        } @else {
+          <div class="shimmer-line shimmer-large"></div>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap actions-col">
+        <span class="text-grey title-small">Actions</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap actions-col">
+        <ng-container *ngIf="!isLoading">
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="more-actions-btn">
+            <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="deleteIdp(row)" class="text-sm">
+              <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+              <span class="text-gray-700">Delete</span>
+            </button>
+          </mat-menu>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <!-- NO DATA -->
+    @if (!isLoading && idpList.length === 0) {
+      <tr>
+        <td [attr.colspan]="displayedColumns.length" class="text-center py-10">
+          <mat-icon class="text-5xl text-gray-400">security</mat-icon>
+          <p class="mt-2 text-gray-600">No IDP configurations found</p>
+        </td>
+      </tr>
+    }
+
+  </table>
+</ng-template>

@@ -1,0 +1,338 @@
+<mat-drawer-container class="task-filter-container" [hasBackdrop]="true">
+  <mat-drawer #filterDrawer mode="over" position="end" class="task-filter-drawer"
+    [class.task-filter-drawer--master]="assessmentTaskMaster">
+    <div class="filter-drawer-container">
+      <div class="filter-drawer-header">
+        <span class="title-large">Filters</span>
+        <button mat-icon-button (click)="filterDrawer.close()">
+          <mat-icon class="material-symbols-outlined">close</mat-icon>
+        </button>
+      </div>
+
+      <div class="filter-drawer-body">
+        <div class="filter-section">
+          <div class="filter-section-title title-small text-grey">Basis</div>
+          @for (opt of basisOptions; track opt.value) {
+          <div class="filter-option">
+            <mat-checkbox [checked]="opt.selected" (change)="onBasisOptionChange(opt, $event.checked)">
+              {{ opt.label }}
+            </mat-checkbox>
+          </div>
+          }
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-section-title title-small text-grey">Risk</div>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="mat-sm-input w-100">
+            <mat-select [(ngModel)]="draftAttachedToId" placeholder="Select Risk">
+              <mat-option [value]="0">None</mat-option>
+              @if (isRisksLoading) {
+              <mat-option [value]="-1" disabled>Loading...</mat-option>
+              }
+              @for (risk of riskOptions; track risk.id) {
+              <mat-option [value]="risk.id">{{ risk.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="filter-drawer-footer">
+        <button mat-button (click)="resetAllFilters()">Reset All</button>
+        <loading-button (onButtonClick)="applyFilterFromDrawer()">Apply</loading-button>
+      </div>
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div class="d-flex flex-column overflow-hidden"
+      [ngClass]="{'p-3 view-wrapper': !assessmentId, 'h-100': assessmentId }">
+      <div class="">
+        @if(!assessmentId) {
+        <div class="flex justify-between items-center pb-2 gap-2">
+          <div class="headline-medium my-auto">Tasks</div>
+        </div>
+        }
+      </div>
+      <div class="p-0 d-flex flex-column overflow-hidden rounded bg-white h-100">
+        <div class="relative d-flex p-3 flex-column overflow-hidden h-100">
+
+          <!-- Toolbar -->
+          <div class="flex justify-between items-center gap-2 flex-wrap mb-2">
+
+            <!-- Filter chips -->
+            <div class="flex items-center gap-2 flex-wrap">
+              @if (selectedBasis.length) {
+              <div class="custom-multi-select d-flex align-items-center whitespace-nowrap">
+                <button mat-button class="dropdown-button">
+                  <div class="d-flex align-items-center">
+                    <span class="overflow-hidden text-ellipsis max-w-[150px]">{{ getSelectedBasisLabel() }}</span>
+                    @if (selectedBasis.length > 1) {
+                    <span class="ml-1 shrink-0 rounded-full filter-badge">+{{ selectedBasis.length - 1 }}</span>
+                    }
+                  </div>
+                  <mat-icon class="clear-icon material-symbols-outlined"
+                    (click)="clearBasisFilter(); $event.stopPropagation()">close</mat-icon>
+                </button>
+              </div>
+              }
+
+              @if (filterApplied) {
+              <button mat-button class="button" (click)="resetAllFilters()">
+                <mat-icon class="material-symbols-outlined">close</mat-icon>
+                Clear all
+              </button>
+              }
+            </div>
+
+            <!-- Right-side actions -->
+            <div class="flex items-center gap-2 ms-auto">
+              @if (showSearch) {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                class="mat-sm-input mat-round-input enabled-mat-input search-bar search-bar-aligned">
+                <mat-icon class="mat-md-icon material-symbols-outlined pe-2" matPrefix>search</mat-icon>
+                <input matInput [(ngModel)]="searchText" placeholder="Search..." (ngModelChange)="onSearchChange()" />
+                @if (searchText) {
+                <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+                  <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+                </button>
+                }
+              </mat-form-field>
+              }
+
+              <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()"
+                matTooltip="Search">
+                <mat-icon class="material-symbols-outlined">search</mat-icon>
+              </button>
+
+              <div class="position-relative">
+                @if (filterApplied) {
+                <div class="position-absolute right-[3px] top-[3px]">
+                  <div class="custom-badge-count rounded-full"></div>
+                </div>
+                }
+                <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" matTooltip="Filter"
+                  (click)="openFilterDrawer()">
+                  <mat-icon class="material-symbols-outlined">filter_list</mat-icon>
+                </button>
+              </div>
+
+              @if(assessmentId && showCreateTaskButton) {
+              <loading-button type="secondary" (onButtonClick)="onCreateTask()">
+                <mat-icon class="material-symbols-outlined me-1">add</mat-icon>
+                Create New Task
+              </loading-button>
+              }
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+            @if (!isLoading && !dataSource.data.length) {
+            <item-not-found [imgHeight]="'180px'"></item-not-found>
+            } @else {
+            <ng-container *ngTemplateOutlet="ngTemplateTable"></ng-container>
+            }
+          </div>
+          <div class="bg-white z-10 pb-0">
+            <mat-paginator #paginator class="bg-white" [pageSize]="pageSize" [length]="totalElements"
+              (page)="onPageChange($event)" [pageSizeOptions]="[10, 50, 100]" aria-label="Select page"></mat-paginator>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>
+
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="isLoading ? shimmerDataSource : dataSource" matSort
+    (matSortChange)="onSortChange($event)" class="mat-elevation-z8 w-100 custom-table table table-md-row">
+
+    <ng-container matColumnDef="taskId">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="taskId" disableClear="true"
+        class="px-4 title-small whitespace-nowrap header-bg">
+        <span class="text-grey title-small">Task ID</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        @if (isLoading) { <div class="shimmer-line shimmer-medium"></div> }
+        @else { <span class="body-large">{{ row.taskId ?? '-' }}</span> }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="taskType">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-bg col-task-type">
+        <span class="text-grey title-small">Task Type</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 col-task-type">
+        @if (isLoading) { <div class="shimmer-line shimmer-medium"></div> }
+        @else { <span class="cell-ellipsis" [matTooltip]="row.taskType" matTooltipPosition="above">{{ row.taskType ||
+          '-' }}</span> }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="title">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="title" disableClear="true"
+        class="px-4 title-small whitespace-nowrap header-bg col-title">
+        <span class="text-grey title-small">Task Title</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 col-title">
+        @if (isLoading) {
+        <div class="shimmer-line shimmer-medium"></div>
+        } @else {
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="row.title" [colorType]="'primary'" [matTooltip]="row.title"
+            matTooltipPosition="below" matTooltipClass="material-tooltip" (click)="openTaskDrawer(row)">
+          </span>
+        </div>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="assessment">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="assessment" disableClear="true"
+        class="px-4 title-small whitespace-nowrap header-bg col-title">
+        <span class="text-grey title-small">Assessment</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 col-title">
+        @if (isLoading) {
+        <div class="shimmer-line shimmer-medium"></div>
+        } @else {
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="row.assessmentTitle" [colorType]="'primary'" [matTooltip]="row.assessmentTitle"
+            matTooltipPosition="below" matTooltipClass="material-tooltip" (click)="onAssessmentClick(row)">
+          </span>
+        </div>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="assignedTo">
+      <th mat-header-cell *matHeaderCellDef disableClear="true"
+        class="px-4 title-small whitespace-nowrap header-bg col-assigned">
+        <span class="text-grey title-small">Assignee</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 col-assigned">
+        @if (isLoading) {
+        <div class="shimmer-line shimmer-medium"></div>
+        } @else {
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="row.assignedTo" [matTooltip]="row.assignedTo" matTooltipPosition="below"
+            matTooltipClass="material-tooltip">
+          </span>
+        </div>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="priority">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="priority" disableClear="true"
+        class="px-4 title-small whitespace-nowrap header-bg">
+        <span class="text-grey title-small">Priority</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        @if (isLoading) { <div class="shimmer-line shimmer-medium"></div> }
+        @else {
+        <div class="flex items-center">
+          <mat-icon class="priority-icon priority-material-icons"
+            [ngStyle]="{color:row.priority === 'HIGH' ? '#B41214' :row.priority === 'LOW' ? '#15974B' :'#AA6E31'}">
+            {{ row.priority === 'HIGH' ? 'arrow_upward' : row.priority === 'LOW' ? 'arrow_downward' :
+            'check_indeterminate_small' }}
+          </mat-icon>
+          <span class="risk-level-badge" [ngStyle]="{ color: getPriorityTextColor(row.priority) }">
+            {{ getPriority(row.priority) || '-' }}
+          </span>
+        </div>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="dueDate">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap header-bg col-due-date">
+        <span class="th-content">
+          <span class="text-grey title-small">Due Date</span>
+          <mat-icon class="sort-icon material-symbols-outlined">unfold_more</mat-icon>
+        </span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        @if (isLoading) { <div class="shimmer-line shimmer-medium"></div> }
+        @else { <span class="body-large" style="color: #4A5565">{{ row.dueDate || '-' }}</span> }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdOn">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="createdOn" disableClear="true"
+        class="px-4 title-small whitespace-nowrap header-bg">
+        <span class="text-grey title-small">Created On</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        @if (isLoading) { <div class="shimmer-line shimmer-medium"></div> }
+        @else { <span class="body-large">{{ row.createdOn || '-' }}</span> }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="basis">
+      <th mat-header-cell *matHeaderCellDef disableClear="true" class="px-4 title-small whitespace-nowrap header-bg">
+        <span class="text-grey title-small">Basis</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        @if (isLoading) { <div class="shimmer-line shimmer-medium"></div> }
+        @else {
+        <span [appEllipsisTooltip]="row.basis" [colorType]="'primary'" (click)="onBasisClick(row, $event)">
+          {{ row.basis || '-' }}
+        </span>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="status" disableClear="true"
+        class="px-4 title-small whitespace-nowrap header-bg">
+        <span class="text-grey title-small">Status</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        @if (isLoading) { <div class="shimmer-line shimmer-medium"></div> }
+        @else {
+        <div class="rounded-lg p-2 d-flex align-items-center justify-content-center label-large" [style.width]="'140px'"
+          [ngStyle]="{ 'background-color': getStatusColors(row.state), color: getStatusTextColors(row.state)}">
+          <span>{{ row.status }}</span>
+        </div>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="action">
+      <th mat-header-cell *matHeaderCellDef [style.width]="'50px'">Action</th>
+      <td mat-cell *matCellDef="let row" [style.width]="'50px'">
+        @if (isLoading) { <div class="shimmer-line shimmer-small"></div> }
+        @else {
+        <div class="flex !gap-2">
+          @if (!isAssessmentReadOnly) {
+          <button (click)="onEdit(row)" [disabled]="disableActionButton">
+            <mat-icon class="mat-md-icon material-symbols-outlined text-primary">edit</mat-icon>
+          </button>
+          <button (click)="onDelete(row)" [disabled]="disableActionButton">
+            <mat-icon class="mat-md-icon material-symbols-outlined text-primary">delete</mat-icon>
+          </button>
+          }
+        </div>
+        }
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+  </table>
+</ng-template>
+
+<!-- Task detail drawer -->
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #editTaskDrawer mode="over" position="end" [disableClose]="true" class="w-75 section-mat-drawer">
+    <ng-container>
+      <app-assessment-task-detail-drawer [taskDetails]="selectedTaskDetails"
+        [attachedToDetail]="selectedAttachedToDetail" [isLoading]="isDrawerLoading" [assessmentId]="drawerAssessmentId"
+        [sections]="sections" [assessmentTaskMaster]="assessmentTaskMaster" [assessmentStatus]="assessmentStatus"
+        [highlightMessageId]="drawerHighlightMessageId" (onCloseDrawer)="editTaskDrawer.close()"
+        (onTaskDeleted)="editTaskDrawer.close()" (onActionChanged)="loadData()">
+      </app-assessment-task-detail-drawer>
+    </ng-container>
+  </mat-drawer>
+</mat-drawer-container>

@@ -1,0 +1,103 @@
+<div class="d-flex flex-column h-100 overflow-hidden"  [formGroup]="formGroup">
+  <div class="flex-1 overflow-auto p-4 scroll-w-0">
+    <div class="label-large mb-4">
+    Specify the controls implemented to safeguard the personal data in this procesing activity
+    </div>
+
+
+    <div class="grid grid-cols-12">
+      <div class="col-span-8">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-1 flex flex-col">
+
+
+            <mat-form-field appearance="outline" class="w-full mat-sm-auto-input">
+              <mat-label class="body-medium">Security Control</mat-label>
+
+              <mat-chip-grid #chipGrid>
+                @for (sc of formGroup.get('securityControl')?.value || []; track sc.id) {
+                <mat-chip-row (removed)="removeControl(sc)">
+                  {{ sc.name }}
+                    @if(editModeSecurityControls){
+                  <button matChipRemove>
+                    <mat-icon class="material-symbols-outlined">close</mat-icon> 
+                  </button>
+                }
+                </mat-chip-row>
+                }
+              </mat-chip-grid>
+
+              <input matInput [matChipInputFor]="chipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event)"
+                [matAutocomplete]="auto" [(ngModel)]="searchTerm" [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onSearchControl($event)"  [disabled]="!editModeSecurityControls"  />
+
+              <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectControl($event.option.value)">
+                @for (item of filteredSecurityControlList; track item.id) {
+                <mat-option [value]="item">
+                  {{ item.name }}
+                </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+
+
+          </div>
+          <div></div>
+          <div>
+
+            <mat-form-field appearance="outline" floatLabel="always"
+              class="w-full mat-sm-xl-input retention-field enabled-mat-select">
+              <mat-label>Retention Period</mat-label>
+
+              <div class="retention-wrapper">
+                <input matInput type="number" formControlName="days" placeholder="days" maxlength="3"
+                  (keypress)="($event.charCode >= 48 && $event.charCode <= 57) ? null : $event.preventDefault()"
+                  class="prefix-input" (click)="$event.stopPropagation()" />
+
+                <mat-select formControlName="retentionPeriod" placeholder="Retention Period" class="mat-"
+                  (click)="$event.stopPropagation()">
+                  @for (security of retentionPeriod; track security) {
+                  <mat-option [value]="security">
+                    {{ security }}
+                  </mat-option>
+                  }
+
+                </mat-select>
+              </div>
+            </mat-form-field>
+
+          </div>
+        </div>
+
+
+
+
+
+
+
+        <!--        <div class="body-large !font-bold my-4">Controls</div>-->
+
+        <!--        <div class="grid grid-cols-2 gap-4 mt-4">-->
+        <!--          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">-->
+        <!--            <mat-label class="body-medium">Standard</mat-label>-->
+        <!--            <input matInput formControlName="standard" />-->
+        <!--          </mat-form-field>-->
+
+        <!--          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">-->
+        <!--            <mat-label class="body-medium"> Control category</mat-label>-->
+        <!--            <input matInput formControlName="controlCategory" />-->
+        <!--          </mat-form-field>-->
+
+        <!--          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">-->
+        <!--            <mat-label class="body-medium">Control description</mat-label>-->
+        <!--            <textarea matInput formControlName="controlDescription" cdkAutosizeMinRows="2" cdkTextareaAutosize-->
+        <!--              cdkAutosizeMaxRows="3" #autosize="cdkTextareaAutosize" placeholder=" Describe the process"-->
+        <!--              class="body-medium"></textarea>-->
+        <!--          </mat-form-field>-->
+        <!--        </div>-->
+      </div>
+    </div>
+  </div>
+
+</div>

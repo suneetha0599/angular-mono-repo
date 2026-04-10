@@ -1,0 +1,139 @@
+@if (propertyForm) {
+<div [formGroup]="propertyForm">
+    @switch(componentTypeRid) {
+    @case(CHECK_BOX) {
+    @for (mv of propertyValueList; track mv) {
+    <mat-checkbox color="primary" class="label-md" (change)="onCheckBoxChange($event)">
+        <span>{{mv.value}}</span>
+    </mat-checkbox>
+    }
+    }
+    @case(DROP_DOWN) {
+    <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+        @if(label.value){
+        <mat-label>{{label.value}}</mat-label>
+        }
+        <mat-select formControlName="valueRid">
+            @for (mv of propertyValueList; track mv) {
+            <mat-option [value]="mv">
+                <span>{{mv.value}}</span>
+            </mat-option>
+            }
+        </mat-select>
+    </mat-form-field>
+    }
+    @case(TEXT_ALPHA_NUMERIC) {
+    <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+        @if(label.value){
+        <mat-label>{{label.value}}</mat-label>
+        }
+        <input matInput placeholder="" formControlName="value" class="w-full body-medium" />
+    </mat-form-field>
+    }
+    @case(TEXT_NUMERIC) {
+    <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+        @if(label.value){
+        <mat-label>{{label.value}}</mat-label>
+        }
+        <input matInput placeholder="" formControlName="value" class="w-full body-medium" />
+    </mat-form-field>
+    }
+    @case(TEXT_AREA) {
+      <app-custom-mat-textarea label="label.value" [minRows]="1" [maxRows]="5">
+            </app-custom-mat-textarea>
+    }
+    @case(TEXT_BUTTON){
+    <!-- <a  class="fontColor text-sm font-medium cursor-pointer"> -->
+    <loading-button type="light" [basicButton]="true" [isIconButton]="true" class="me-2 mb-2"
+        (onButtonClick)="onBtnClick()">
+        <mat-icon class="material-symbols-outlined me-1">
+            add
+        </mat-icon> <span class="label-large">{{label.value}}</span>
+    </loading-button>
+    <!-- </a> -->
+    }
+    @case(BUTTON){
+    <loading-button type="primary" class="mx-2" (onButtonClick)="preview()">Preview</loading-button>
+    }
+    @case(MULTI_BUTTON_TOGGLE){
+    <div class="flex flex-wrap gap-3 custom-button-toggle">
+        <mat-button-toggle-group multiple formControlName="valueRid">
+            @for (mv of propertyValueList; track $index) {
+            <mat-button-toggle [value]="mv" class="mb-2">
+                <span class="label-large">{{mv.value}}</span></mat-button-toggle>
+            }
+        </mat-button-toggle-group>
+    </div>
+    }
+    @case(DYNAMIC_FORM){
+    <ng-container *ngTemplateOutlet="ngTemplateDynamicForm; context:{}">
+    </ng-container>
+    }
+    @default {
+    <span>No match</span>
+    }
+    }
+</div>
+}
+
+<ng-template #ngTemplateDynamicForm [formGroup]="propertyForm">
+    <div class="grid grid-cols-12 gap-2">
+        <div cdkDrag [cdkDragData]="propertyForm"
+            class="col-span-10 gap-2 bg-white border rounded p-3 border-2 border-gray-300 mb-3">
+            <div class="grid grid-cols-12 gap-2">
+                <div class="col-span-2">
+                    <mat-icon cdkDragHandle class="material-symbols-outlined text-primary cursor-drag">
+                        drag_indicator
+                    </mat-icon>
+                </div>
+                <div class="col-span-5">
+                    <div class="label-large mb-2">Label name</div>
+                    <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+                        <!-- <mat-label></mat-label> -->
+                        <input matInput placeholder="" formControlName="value" class="w-full body-medium" />
+                    </mat-form-field>
+                </div>
+                <div class="col-span-5">
+                    <div class="label-large mb-2">Choose type</div>
+                    <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+                        <!-- <mat-label></mat-label> -->
+                        <input matInput placeholder="" formControlName="value2" class="w-full body-medium" />
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="mt-2">
+                @for (pv of propValueListControls; track pv;let propIndex = $index;) {
+                <div class="label-large mb-2">
+                    Option {{propIndex}}
+                </div>
+                }
+            </div>
+            <div class="flex justify-between mt-3">
+                <div>
+                    <loading-button type="secondary" class="me-2 mb-2" (onButtonClick)="addPropertyValues()">
+                        <mat-icon class="material-symbols-outlined me-1">
+                            add
+                        </mat-icon> <span class="label-large">Add</span>
+                    </loading-button>
+                </div>
+                <div>
+                    <mat-checkbox color="primary" class="label-md me-2" formControlName="value2"
+                        (change)="onCheckBoxChange($event)">
+                        <span>Required</span>
+                    </mat-checkbox>
+                    <mat-checkbox color="primary" class="label-md" formControlName="value2"
+                        (change)="onCheckBoxChange($event)">
+                        <span>Numeric type</span>
+                    </mat-checkbox>
+                </div>
+            </div>
+        </div>
+        @if(isLast){
+        <div class="col-span-2">
+            <button mat-icon-button class="border rounded-full border-gray-300" (click)="addDynamicForm()">
+                <mat-icon class="material-symbols-outlined text-primary">add</mat-icon>
+            </button>
+        </div>
+        }
+    </div>
+</ng-template>

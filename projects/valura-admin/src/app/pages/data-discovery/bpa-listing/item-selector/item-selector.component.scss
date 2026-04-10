@@ -1,0 +1,355 @@
+.item-selector-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+
+
+}
+
+.selector-trigger {
+  height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #e5e5ef;
+  border-radius: 8px;
+  background: #F8F8F8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  pointer-events: all;
+  position: relative;
+  z-index: 1001;
+
+  &:hover {
+    border-color: #1C2B70;
+  }
+
+  .category-chip {
+  background: #eef2ff;
+  color: #1e3a8a;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-right: 6px;
+}
+
+
+  &.open {
+    border-color: #1C2B70;
+    box-shadow: 0 0 0 2px rgba(28, 43, 112, 0.1);
+  }
+
+  .selected-chips-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto; 
+    overflow-y: hidden;
+    align-items: center;
+    padding: 2px 0;
+
+    
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    scroll-behavior: smooth;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid #e5e5e5 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+
+    .chip-remove {
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      min-width: 20px;
+      color: #000000 !important;
+      flex-shrink: 0;
+
+      .small-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #000000 !important;
+      }
+    }
+  }
+
+  .chips-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    color: #2d2b2b;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+
+  .placeholder {
+    flex: 1;
+    color: #767676;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dropdown-icon {
+    color: #767676;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 4px;
+  }
+
+  &.open .dropdown-icon {
+    transform: rotate(180deg);
+  }
+}
+
+
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e5ef;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: all;
+}
+
+.search-section {
+  padding: 10px;
+  background-color: #E9EFEE;
+
+  .search-field {
+    width: 100%;
+    margin-bottom: 0;
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    ::ng-deep .mdc-text-field {
+      background-color: #ffffff !important;
+      border-radius: 8px !important;
+      padding: 0 !important;
+    }
+  }
+}
+
+.search-section {
+  padding: 10px;
+  background-color: #E9EFEE;
+
+  .search-field {
+    width: 100%;
+    margin-bottom: 0;
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    ::ng-deep .mdc-text-field {
+      background-color: #ffffff !important;
+      border-radius: 8px !important;
+      padding: 0 !important;
+    }
+
+    // Style the search icon
+    .search-icon {
+      color: #767676;
+      font-size: 20px;
+      cursor: default;
+    }
+  }
+}
+
+
+.items-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 300px;
+  padding: 8px;
+  scroll-behavior: smooth;
+  background-color: #E9EFEE;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+
+    &:hover {
+      background: #555;
+    }
+  }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px;
+    border-radius: 6px;
+
+
+    .item-checkbox {
+      height: 20px;
+      width: 20px;
+      display: flex;
+      margin-right: 10px;
+    }
+
+    .item-details {
+      flex: 1;
+      min-width: 0;
+
+      .item-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+      }
+
+      .item-meta {
+        font-size: 12px;
+        color: #767676;
+
+        .meta-label {
+          padding: 2px 8px;
+          background: #f3f4f6;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    color: #999;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+}
+
+
+.dropdown-footer {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding: 10px;
+
+  background: #E9EFEE;
+
+  .create-new-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #1C2B70;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 999;
+  pointer-events: all;
+}
+
+.loading-more,
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  color: #666;
+  font-size: 14px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

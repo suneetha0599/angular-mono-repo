@@ -1,0 +1,60 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{
+  isViewMode
+  ? 'View Channel'
+  : isEditMode
+  ? 'Edit Channel'
+  : 'Add Channel'
+  }}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" aria-label="Close dialog" (click)="onCancel()">
+  <mat-icon class="material-symbols-outlined">close</mat-icon>
+</button>
+
+@if (isViewMode) {
+<div mat-dialog-content class="p-3">
+  <div class="mb-3">
+    <mat-label class="fs-sm-med text-grey">Channel Name</mat-label>
+    <div>{{ form.get('label')?.value || '-' }}</div>
+  </div>
+</div>
+
+<div mat-dialog-actions class="justify-end p-3">
+  <loading-button type="primary" (onButtonClick)="onEdit()">
+    <mat-icon class="me-2 material-symbols-outlined">edit</mat-icon>
+    Edit
+  </loading-button>
+</div>
+
+
+<div mat-dialog-actions class="justify-end p-3">
+  <loading-button type="primary" (onButtonClick)="onEdit()">
+    <mat-icon class="me-2 material-symbols-outlined">edit</mat-icon>
+    Edit
+  </loading-button>
+</div>
+}
+@else {
+<div mat-dialog-content class="p-3" [formGroup]="form">
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2 enabled-mat-input">
+    <mat-label>Channel Name</mat-label>
+    <input matInput formControlName="label" />
+    <mat-error>
+      <custom-mat-error class="inline-block" [control]="labelControl" [errors]="labelControl.errors"
+        controlActualName="Channel Name">
+      </custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions class="justify-end gap-2 p-3">
+  <loading-button type="secondary" (onButtonClick)="onCancel()">
+    Cancel
+  </loading-button>
+
+  <loading-button type="primary" [loading]="submitLoading" [disabled]="form.invalid" (onButtonClick)="onSave()">
+    {{ isEditMode ? 'Update Channel' : 'Save Channel' }}
+  </loading-button>
+</div>
+}

@@ -1,0 +1,84 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3 fs-5 font-medium">
+  {{
+  mode === 'edit'
+  ? 'Edit Legal Ground'
+  : mode === 'view'
+  ? 'View Legal Ground'
+  : 'Add Legal Ground'
+  }}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="material-symbols-outlined fs-5">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+
+  @if (!isEdit) {
+  <div class="space-y-7">
+
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-1">Provision</mat-label>
+      <div>{{ form.value.provision || '-' }}</div>
+    </div>
+
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-1">Legal Ground</mat-label>
+      <div>{{ form.value.legalGround || '-' }}</div>
+    </div>
+
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-1">Simplified Legal Ground</mat-label>
+      <div class="whitespace-pre-line">{{ form.value.simplifiedDescription || '-' }}</div>
+    </div>
+
+  </div>
+  }
+
+  @if (isEdit) {
+  <form [formGroup]="form" class="space-y-2">
+
+    <mat-form-field appearance="outline" class="w-full mat-sm-input"
+      [class.mb-3]="form.get('provision')?.invalid && (form.get('provision')?.touched || form.get('provision')?.dirty)">
+      <mat-label>Provision</mat-label>
+      <input title="provision" matInput formControlName="provision">
+      <mat-error>
+        <custom-mat-error class="inline-block" [control]="provisionControl" [errors]="provisionControl.errors"
+          controlActualName="Provision">
+        </custom-mat-error>
+      </mat-error>
+    </mat-form-field>
+
+    <app-custom-mat-textarea [control]="legalGroundControl" label="Legal Ground" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+
+    <div style="margin-top: 35px;">
+      <app-custom-mat-textarea [control]="simplyiedLegalGroundControl" label="Simplified Legal Ground" [minRows]="1"
+        [maxRows]="5">
+      </app-custom-mat-textarea>
+    </div>
+
+
+  </form>
+  }
+
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="closeDialog()">Cancel</loading-button>
+
+    @if (!isEdit && legalBasisId) {
+    <loading-button type="primary" (onButtonClick)="startEditing()">
+      <mat-icon class="me-2 material-symbols-outlined">edit</mat-icon> Edit
+    </loading-button>
+    }
+
+    @if (isEdit) {
+    <loading-button type="primary" [disabled]="form.invalid" [loading]="isSaving" (onButtonClick)="onSave()">
+      {{ legalBasisId ? 'Update' : 'Save' }}
+    </loading-button>
+    }
+
+  </div>
+</div>

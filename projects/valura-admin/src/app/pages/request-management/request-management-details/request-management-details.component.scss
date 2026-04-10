@@ -1,0 +1,231 @@
+@use "../../../../styles/custom/colors.scss" as us;
+
+.btnColor {
+    background-color: us.$primary;
+}
+
+.fontColor {
+    color: us.$primary;
+    ;
+}
+
+.blue {
+    background-color: #E5F6FD;
+}
+
+.textb {
+    border-color: #A7E2FA;
+}
+
+.small-checkbox .mat-checkbox-inner-container {
+    transform: scale(0.4);
+}
+
+.small-checkbox .mat-checkbox-layout {
+    gap: 1px !important;
+}
+
+.search-bar {
+    width: 220px;
+}
+
+.small-checkbox .mat-checkbox-label {
+    font-size: 6px;
+}
+
+::ng-deep .sticky .mat-tab-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.clippath-start {
+    position: absolute;
+    right: -10px;
+    clip-path: polygon(58% 1%, 100% 50%, 60% 100%, 0% 100%, 53% 50%, 0% 0%);
+    height: 100%;
+    width: 30px;
+    background-color: yellow;
+    border: 2px solid pink;
+}
+
+.clippath-end {
+    position: absolute;
+    left: -50px;
+    clip-path: polygon(58% 1%, 100% 50%, 60% 100%, 0% 100%, 53% 50%, 0% 0%);
+    height: 100%;
+    width: 30px;
+    background-color: yellow;
+    border: 2px solid pink;
+}
+
+.poligon {
+    display: inline-block;
+    position: relative;
+    background: red;
+    -webkit-clip-path: polygon(58% 1%, 100% 50%, 60% 100%, 0% 100%, 53% 50%, 0% 0%);
+    clip-path: polygon(58% 1%, 100% 50%, 60% 100%, 0% 100%, 53% 50%, 0% 0%);
+
+}
+
+.poligon div {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 146px;
+    height: 146px;
+    -webkit-clip-path: polygon(58% 1%, 100% 50%, 60% 100%, 0% 100%, 53% 50%, 0% 0%);
+    clip-path: polygon(58% 1%, 100% 50%, 60% 100%, 0% 100%, 53% 50%, 0% 0%);
+}
+
+
+.main-wrapper {
+    margin-top: 10px;
+}
+
+
+.test {
+    padding: 4px 0px 0 30px;
+    background-color: #ffffff;
+    color: white;
+    display: inline-block;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+    min-width: 200px;
+    text-align: left;
+}
+
+.doc-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+}
+
+.progress-section {
+    position: absolute;
+    right: 0;
+    // background-color: #ffffff;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
+.shimmer-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.shimmer-card {
+    height: 80px;
+    width: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -400px 0;
+    }
+
+    100% {
+        background-position: 400px 0;
+    }
+}
+
+.shimmer-wrapper,
+.tab-content {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.shimmer-wrapper {
+    opacity: 1;
+}
+
+.tab-content-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.stage-icon {
+    height: 14px;
+    width: 14px;
+    font-size: 14px;
+}
+
+// Fix for stage tab animations
+.clip-mat-tab {
+    ::ng-deep .mat-mdc-tab-body-wrapper {
+        overflow: hidden !important;
+        position: relative !important;
+    }
+
+    ::ng-deep .mat-mdc-tab-body {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+
+        // Smooth fade transition for stage changes
+        transition: opacity 200ms ease-in-out !important;
+
+        // Prevent blur by using backface-visibility instead of will-change
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    ::ng-deep .mat-mdc-tab-body-content {
+        height: 100%;
+        overflow: auto;
+    }
+
+    // Ensure active tab is visible
+    ::ng-deep .mat-mdc-tab-body-active {
+        opacity: 1 !important;
+    }
+
+    // Reverse animation for Stage 1 right arrow navigation
+    &.reverse-stage-animation {
+        ::ng-deep .mat-mdc-tab-body {
+            &.mat-mdc-tab-body-active {
+                // Apply slide-from-right animation to the incoming active tab
+                animation: slideFromRight 300ms cubic-bezier(0.35, 0, 0.25, 1) forwards !important;
+            }
+        }
+    }
+
+    // Prev navigation animation (chevron_left) - slide incoming tab from left
+    &.prev-stage-animation {
+        ::ng-deep .mat-mdc-tab-body {
+            &.mat-mdc-tab-body-active {
+                animation: slideFromLeft 300ms cubic-bezier(0.35, 0, 0.25, 1) forwards !important;
+            }
+        }
+    }
+}
+
+@keyframes slideFromRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0%);
+    }
+}
+
+@keyframes slideFromLeft {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0%);
+    }
+}

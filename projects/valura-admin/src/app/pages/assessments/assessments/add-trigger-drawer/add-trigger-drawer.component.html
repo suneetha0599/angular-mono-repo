@@ -1,0 +1,68 @@
+<div class="d-flex flex-column overflow-hidden p-3 h-100">
+    <div class="flex justify-between">
+        <div class="my-auto title-medium">
+            Add Triggers
+        </div>
+        <div class="my-auto">
+            <button mat-icon-button (click)="closeDrawer()">
+                <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+        </div>
+    </div>
+    <div class="overflow-auto position-relative pb-0 flex-grow-1">
+        <div class="d-flex">
+            <mat-chip-set class="mt-2">
+                @for(reg of regulations; track reg.id) {
+                <mat-chip [removable]="true" (removed)="removeRegulation(reg.id)">
+                    {{ reg.name }}
+                    <button matChipRemove><mat-icon class="material-symbols-outlined">close</mat-icon></button>
+                </mat-chip>
+                }
+            </mat-chip-set>
+        </div>
+        <div>
+            <!-- <form [formGroup]="triggerForm"> -->
+                <div class="trigger-wrapper">
+                    @if(regulations && regulations.length > 0) {
+                        <div class="ms-2 d-flex align-items-center justify-between trigger-header">
+                            <div class="w-50 ps-1 label-large fw-semibold">
+                                Trigger Name
+                            </div>
+                            <div class="w-50 ps-1 label-large fw-semibold d-flex justify-end">
+                                Match % with AI
+                            </div>
+                        </div>
+                        <div class="trigger-body">
+                            @if(localTriggers.length > 0) {
+                                @for (item of localTriggers; track item.id) {
+                                    <div class="d-flex justify-between border-bottom px-2 py-2">
+                                        <div class="w-75 d-flex align-items-center">
+                                            <mat-checkbox
+                                                [checked]="tempSelection[item.id]"
+                                                (change)="onCheckboxChange(item.id, $event.checked)">
+                                            </mat-checkbox>
+                                            <div class="ms-2">
+                                                <div class="label-medium">{{ item.name }}
+                                                </div>
+                                                <div class="label-medium text-grey">{{ item.source }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="label-medium text-grey">100%</div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+            <!-- </form> -->
+        </div>
+    </div>
+    <div class="position-absolute bottom-0 start-0 end-0 bg-white p-3 d-flex justify-end">
+        <div class="flex gap-2">
+            <loading-button type="secondary" (click)="closeDrawer()">Cancel</loading-button>
+            <loading-button (onButtonClick)="onSave()">Save</loading-button>
+        </div>
+    </div>
+</div>

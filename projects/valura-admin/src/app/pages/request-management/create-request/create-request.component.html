@@ -1,0 +1,12 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+  <div class="mb-2">
+    <div class="headline-medium">{{pageTitle}}</div>
+  </div>
+  <div class="d-flex flex-row justify-center overflow-hidden bg-white rounded-xl view-wrapper p-3">
+    <div class="d-flex flex-column main-wrapper  w-[660px]  overflow-hidden position-relative h-100">
+      <div class="col w-100 h-100 overflow-auto no-scrollbar">
+        <dsr-form [formConfiguration]="formConfiguration" [viewType]="RequestFormViewType.DSR"></dsr-form>
+      </div>
+    </div>
+  </div>
+</div>

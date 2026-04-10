@@ -1,0 +1,114 @@
+<div class="flex p-3 justify-center overflow-hidden h-full">
+    <div class="flex flex-column w-100 overflow-hidden drawer-wrapper">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-2">
+            @if(drawerType === DRAWER_SELECTION){
+            <ng-container>
+                <p class="title-large text-gray-700">Data Elements</p>
+                <button mat-icon-button class="mb-2" (click)="close()">
+                    <mat-icon class="material-symbols-outlined">close</mat-icon>
+                </button>
+            </ng-container>
+            }@else{
+            <ng-container class="mb-2">
+                <button mat-button (click)="goBack()" class="text-sm font-medium flex items-center text-primary-40">
+                    <mat-icon class=" mr-1 material-symbols-outlined">arrow_back</mat-icon> Back
+                </button>
+                <span class="!text-right px-3 fontColor label-medium">{{ totalSelected }} selected</span>
+            </ng-container>
+            }
+        </div>
+
+        <div class=" d-flex overflow-hidden position-relative h-100">
+            <div class="col w-100 h-100 overflow-auto px-3">
+                @if(drawerType === DRAWER_SELECTION){
+                <div class="!text-right">
+                    <button (click)="goToSummary()" class="fontColor label-medium">
+                        {{ totalSelected }} selected
+                    </button>
+                </div>
+
+                <div class="flex flex-col gap-4 flex-grow">
+                    <mat-form-field appearance="outline" class="w-full mb-4">
+                        <mat-label>Choose category</mat-label>
+                        <mat-select [(value)]="selectedCategory">
+                            @for (cat of categories; track cat) {
+                            <mat-option [value]="cat">{{ cat }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <div class="mb-4">
+                        <p class="mb-2 label-medium">Sensitivity</p>
+                        <div class="flex gap-2">
+                            <button
+                                class="bg-green-100 text-green-800 label-large px-3 py-2 rounded-md !rounded-xl">Low</button>
+                            <button
+                                class="bg-yellow-100 text-yellow-800 label-large px-3 py-2 rounded-md !rounded-xl">Medium</button>
+                            <button
+                                class="bg-red-100 text-red-800 label-large text-xs px-3 py-2 rounded-md !rounded-xl">High</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="label-medium">Data types</p>
+                        <button mat-button class="text-sm font-medium rounded hover:bg-gray-100 !rounded-xl ">
+                            <mat-icon class="material-symbols-outlined !text-base fontColor">add</mat-icon> <span class="fontColor">Add</span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        @for (item of dataElements[selectedCategory]; track item.name) {
+                        <div class="flex justify-between items-center">
+                            <mat-checkbox [(ngModel)]="item.selected" class="label-medium">{{ item.name
+                                }}</mat-checkbox>
+                            <span class="px-3 py-2 rounded label-large" [ngClass]="{
+              'bg-green-100 text-green-800': item.sensitivity === 'Low',
+              'bg-yellow-100 text-yellow-800': item.sensitivity === 'Mid',
+              'bg-red-100 text-red-800': item.sensitivity === 'High'
+            }">{{ item.sensitivity }}</span>
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                }@else{
+                <div class="flex-grow overflow-auto p-2">
+                    @for (cat of categories; track cat) {
+                    @if (isCategorySelected(cat)) {
+                    <div class="mb-4">
+                        <p class="label-medium text-gray-700 mb-2">{{ cat }}</p>
+
+                        @for (el of dataElements[selectedCategory]; track el.name) {
+                        @if (el.selected) {
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <mat-checkbox [(ngModel)]="el.selected" class="label-medium">{{ el.name
+                                    }}</mat-checkbox>
+                            </div>
+                            <span class="rounded label-large px-3 py-1" [ngClass]="{
+                                          'bg-green-100 text-green-800': el.sensitivity === 'Low',
+                                          'bg-yellow-100 text-yellow-800': el.sensitivity === 'Mid',
+                                          'bg-red-100 text-red-800': el.sensitivity === 'High'
+                                        }">{{ el.sensitivity }}</span>
+                        </div>
+                        }
+                        }
+                    </div>
+                    }
+                    }
+
+                </div>
+                }
+
+            </div>
+        </div>
+        <!-- Footer -->
+        <div class="p-2 flex flex-column  border-t border-gray-200">
+            <div class="flex justify-center gap-2 mt-1 mb-3 w-full ">
+                <loading-button type="primary" class="mx-2">Apply</loading-button>
+                <loading-button type="secondary" class="mx-2" (onButtonClick)="close()">Cancel</loading-button>
+            </div>
+        </div>
+    </div>
+</div>

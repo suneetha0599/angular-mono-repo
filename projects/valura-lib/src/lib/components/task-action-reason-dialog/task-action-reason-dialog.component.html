@@ -1,0 +1,30 @@
+<div class="flex justify-between items-center px-3 py-2">
+  <h3 mat-dialog-title class="my-0 p-0">
+    {{ data.title |titlecase }}
+  </h3>
+  <button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="confirm dialog close button">
+    <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+  </button>
+</div>
+
+<div mat-dialog-content class="m-0 p-3">
+  <div>
+    <mat-form-field appearance="outline" class="mat-sm-text-area w-full mat-sm-text-area mat-mdc-mb-0">
+      <mat-label>Reason</mat-label>
+      <textarea title="reason" matInput [(ngModel)]="reason" cdkAutosizeMinRows="1" cdkTextareaAutosize
+        cdkAutosizeMaxRows="5" class="body-medium"></textarea>
+    </mat-form-field>
+  </div>
+</div>
+
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="flex w-full justify-end gap-2">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      {{ data.cancelText || 'Cancel' }}
+    </loading-button>
+    <loading-button type="primary" (onButtonClick)="onConfirm()" [disabled]="data.reasonRequired && !reason.trim()">
+      <span class="px-2">{{ data.confirmText || 'Submit' }}</span>
+    </loading-button>
+  </div>
+</div>

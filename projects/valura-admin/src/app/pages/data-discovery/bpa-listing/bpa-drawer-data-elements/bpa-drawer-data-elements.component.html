@@ -1,0 +1,169 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3">
+    <div class="flex justify-between items-center mb-2">
+        <ng-container>
+            <div class="title-medium my-auto">{{drawerTitle}}</div>
+            <div class="my-auto">
+                <button mat-icon-button (click)="close()">
+                    <mat-icon class="material-symbols-outlined">close</mat-icon>
+                </button>
+            </div>
+        </ng-container>
+    </div>
+    <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative rounded">
+        <div class="d-flex h-100 w-100 flex-column main-canvas">
+            <ng-template [ngTemplateOutlet]="dataElement"></ng-template>
+        </div>
+    </div>
+    @if(isEditMode){
+    <div class="d-flex justify-content-end mt-2">
+        <div class="flex gap-2">
+            <loading-button type="secondary" (onButtonClick)="onCloseClick()">
+                Cancel
+            </loading-button>
+            <loading-button type="primary" (onButtonClick)="onApplyClick()" [loading]="isSubmitLoading"
+                [disabled]="isSubmitLoading" [loadingText]="'Save'">
+                Save
+            </loading-button>
+        </div>
+    </div>
+    }
+</div>
+
+
+<ng-template #dataElement>
+    <div class="flex-1 overflow-auto rounded-lg no-scrollbar position-relative">
+        <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+            [(selectedIndex)]="selectedDataSubjectIndex" (selectedTabChange)="onDsTabChange($event.index);">
+            @for(dataSubjectMapping of tempDataSubjectPdElementMapping; track i; let i=$index) {
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <span>{{ dataSubjectMapping.dataSubjectType!.name }}</span>
+                </ng-template>
+                <ng-template matTabContent>
+                    <div class="h-full flex flex-col overflow-hidden">
+                        <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+                            <ng-template
+                                *ngTemplateOutlet="dataElementTable; context:{ dataSubjectMapping: dataSubjectMapping }">
+                            </ng-template>
+                        </div>
+                    </div>
+                </ng-template>
+            </mat-tab>
+            }
+        </mat-tab-group>
+        <div class="absolute top-2 right-2 flex gap-2 z-1">
+            @if(showSearch){
+            <div class="flex items-center">
+                <mat-form-field appearance="outline" class="mat-sm-input mat-round-input enabled-mat-input search-bar">
+                    <mat-icon class="mat-md-icon pe-2 material-symbols-outlined" matPrefix>search</mat-icon>
+                    <input matInput [(ngModel)]="searchText" placeholder="Search..."
+                        (ngModelChange)="onSearchChange()" />
+                    @if(searchText){
+                    <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+                        <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+                    </button>
+                    }
+                </mat-form-field>
+            </div>
+            }
+            @else{
+            <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn my-auto" (click)="toggleSearch()">
+                <mat-icon class="material-symbols-outlined" color="primary">search</mat-icon>
+            </button>
+            }
+            @if(isEditMode){
+            <div class="ms-2" style="min-width: 280px;">
+                <app-item-selector [config]="{
+               type: CreatItemType.DATA_ELEMENTS,
+               placeholder: 'Select Data Elements',
+               title: 'Add Data Elements'
+               }" [availableItems]="availableDataElements" [selectedDataSubject]="selectedDataSubjectMapping"
+                    (onItemsSelected)="handleItemSelectorData($event)" (onCreateNew)="onCreateNewDataElement($event)">
+                </app-item-selector>
+            </div>
+            }
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #dataElementTable let-dataSubjectMapping="dataSubjectMapping">
+    <div>
+        <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+            <ng-container matColumnDef="select" sticky>
+                <th mat-header-cell *matHeaderCellDef [style.width]="'50px'" [style.minWidth]="'50px'">
+                    <mat-checkbox [disabled]="!isEditMode" [checked]="isAllSelected(dataSubjectMapping)"
+                        [indeterminate]="isSomeSelected(dataSubjectMapping)" class="label-medium me-2 my-auto"
+                        (change)="onChangeSelectAll($event, dataSubjectMapping)">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let element" [style.width]="'50px'" [style.minWidth]="'50px'">
+                    <div class="my-auto">
+                        <mat-checkbox [disabled]="!isEditMode" [checked]="element.selected"
+                            class="label-medium me-2 my-auto"
+                            (change)="onChangeEvent($event, element, dataSubjectMapping)">
+                        </mat-checkbox>
+                    </div>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="personalDataElement" sticky>
+                <th mat-header-cell *matHeaderCellDef [style.width]="'190px'" mat-sort-header="personalDataElement">
+                    Personal Data Element</th>
+                <td mat-cell *matCellDef="let element">
+                    <div class="my-auto">{{element.pdElement!.name}}</div>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="dataCategory" sticky>
+                <th mat-header-cell *matHeaderCellDef [style.width]="'190px'" mat-sort-header="dataCategory">
+                    Data Category
+                </th>
+                <td mat-cell *matCellDef="let element">
+                    @let categories = element.pdElement?.categoryNames;
+                    <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+                        class="link-button text-dark body-large text-decoration-none"
+                        (click)="showDetailList(categories)" [disabled]="!showDetail(categories)">
+                        {{ getSelectedPdCategory(categories) }}
+                    </button>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="classification" sticky>
+                <th mat-header-cell *matHeaderCellDef [style.width]="'190px'" mat-sort-header="classification">
+                    Sensitivity
+                </th>
+                <td mat-cell *matCellDef="let element">
+                    @let classifications = element.pdElement?.classification;
+                    <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+                        class="link-button text-dark body-large text-decoration-none"
+                        (click)="showDetailList(classifications)" [disabled]="!showDetail(classifications)">
+                        {{ getSelectedPdClassification(classifications) }}
+                    </button>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="actions" sticky>
+                <th mat-header-cell *matHeaderCellDef [style.width]="'100px'">Actions</th>
+                <td mat-cell *matCellDef="let element; let i = index">
+                    <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon me-2"
+                        (click)="onEditPdElement(element)">
+                        <mat-icon class="icons material-symbols-outlined">edit</mat-icon>
+                    </button>
+                    <button [disabled]="!isEditMode" mat-icon-button color="primary" class="medium-icon"
+                        (click)="onDeletePdElement(element, i)">
+                        <mat-icon class="icons material-symbols-outlined">delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+        </table>
+    </div>
+</ng-template>
+
+
+<mat-menu class="action-panel" #detailMenu="matMenu">
+    <ul class="px-2 m-2 ms-3 menu-more-detail">
+        @for(item of detailList; track item) {
+        <li class="mb-1 body-large">{{item}}</li>
+        }
+    </ul>
+</mat-menu>

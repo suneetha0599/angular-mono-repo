@@ -1,0 +1,30 @@
+<!-- Header -->
+<h3 mat-dialog-title class="my-0  p-2 px-3">
+  User Invitation
+</h3>
+<button mat-icon-button (click)="onCancel()" aria-label="confirm dialog close button" class="close">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<!-- Content -->
+<div mat-dialog-content class="px-4 py-2">
+  <mat-checkbox [(ngModel)]="inviteUser" class="my-2 custom-checkbox">
+    Invite User
+  </mat-checkbox>
+</div>
+
+<!-- Actions -->
+<div mat-dialog-actions class="px-4 py-2 flex justify-end ">
+  <div class="flex w-full justify-end gap-2">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+
+
+    <loading-button type="primary" [loading]="data.submitLoading" [loadingText]="'Submit'" [disabled]="disabled"
+      (onButtonClick)="onInviteUser()">
+      <span class="label-large">Submit</span>
+    </loading-button>
+
+  </div>
+</div>

@@ -1,0 +1,621 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <!-- Title -->
+  <div class="p-3 pb-0">
+    <div class="d-flex justify-between">
+      <div class="headline-medium my-auto">Requests</div>
+      @if(createDsrRequest){
+      <div>
+        <loading-button type="primary" (onButtonClick)="onCreateRequest()" [appLogClick]="'Create Request'">
+          Create Request
+        </loading-button>
+      </div>
+      }
+    </div>
+  </div>
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+          [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="applyTabFilter($event.index)">
+          @for(tab of tabHeaderDetails; track tab.key;) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>{{ tab.name }}</span>
+              <span class="body-small badge ml-2 fw-600 text-light rounded-pill px-2 py-1"
+                style="font-size: 0.75rem; height: 1.5rem; border-radius: 0.75rem;">
+                {{tab.count}}
+              </span>
+            </ng-template>
+            <div class="h-full flex flex-col overflow-hidden">
+              <ng-container *ngTemplateOutlet="filtersTemplate"></ng-container>
+              <div #scrollContainer class="flex-1 overflow-auto rounded-lg no-scrollbar">
+                @if(!requestLoading && hasApiError){
+                <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+                }
+                @else if(!requestLoading && isEmptyRequest){
+                <item-not-found [imgHeight]="'200px'" [heading]="errorTitle"></item-not-found>
+                }
+                @else{
+                <ng-container *ngTemplateOutlet="ngTemplateTable; context: {}">
+                </ng-container>
+                }
+              </div>
+              <div class="bg-white z-10">
+                <mat-paginator #paginator class="bg-white" [pageSize]="pageSize" [length]="totalItems"
+                  (page)="onPageChange($event)" [pageSizeOptions]="[10, 50, 100]"
+                  aria-label="Select page"></mat-paginator>
+              </div>
+            </div>
+          </mat-tab>
+          }
+        </mat-tab-group>
+        <div class="absolute top-2 right-2 flex gap-2 z-1">
+          @if(!showSearch){
+          <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()">
+            <mat-icon color="primary" class="material-symbols-outlined">search</mat-icon>
+          </button>
+          } @if(showSearch){
+          <div class="flex items-center">
+            <mat-form-field appearance="outline" class="mat-sm-input mat-round-input enabled-mat-input search-bar">
+              <mat-icon class="mat-md-icon pe-2 material-symbols-outlined" matPrefix>search</mat-icon>
+              <input matInput [(ngModel)]="filterConfiguration.searchText" placeholder="Search..." [debounceTime]="1000"
+                (ngModelDebounceChange)="onSearchChange()" />
+              @if(filterConfiguration.searchText){
+              <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+                <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+              </button>
+              }
+            </mat-form-field>
+            <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn mb-4" (click)="toggleSearch()">
+              <mat-icon color="primary" class="material-symbols-outlined">search</mat-icon>
+            </button>
+          </div>
+          }
+          <div class="position-relative">
+            @if(filterApplied && drawerView !== 'EXPORT'){
+            <div class="position-absolute right-[3px] top-[3px]">
+              <div class="custom-badge-count rounded-full"></div>
+            </div>
+            }
+            <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="searchFilter()">
+              <mat-icon color="primary" class="material-symbols-outlined">filter_list</mat-icon>
+            </button>
+          </div>
+          @if(dsrExport){
+          <button [disabled]="isDownloadInProgress" mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn"
+            (click)="exportReport()">
+            <mat-icon color="primary" class="material-symbols-outlined">
+              download
+            </mat-icon>
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="requestLoading ? shimmerDataSource : dataSource" matSort
+    class="mat-elevation-z8 w-100 custom-table table mt-2" (matSortChange)="onSortChange($event)">
+    @for (header of tableHeaders; track header) {
+    <ng-container [matColumnDef]="header.columnDef">
+      <!-- HEADER -->
+      <th mat-header-cell *matHeaderCellDef disableClear="true"
+        [mat-sort-header]="!requestLoading && header.sortable ? header.columnDef : null"
+        class="px-4 title-small whitespace-nowrap header-bg" [style.maxWidth]="header.maxWidth">
+        <ng-container>
+          <span class=" text-grey title-small">{{ header.headerName }}</span>
+        </ng-container>
+      </th>
+
+      <!-- CELL -->
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap" [style.maxWidth]="header.maxWidth"
+        [style.width]="header.width">
+        <ng-container *ngIf="requestLoading">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+
+        <ng-container *ngIf="!requestLoading">
+          @switch (header.key) {
+          @case (HEADER_STATUS) {
+          <div class="status p-2 d-flex align-items-center justify-content-center label-large" [style.width]="'100px'"
+            [ngStyle]="{ 'background-color': getStatusColors(row.status), color: getStatusTextColors(row.status) }">
+            {{ getStatusText(row.status) }}
+          </div>
+          }
+          @case (HEADER_NAME) {
+          <div class="d-flex">
+            <span [appEllipsisTooltip]="getRequesterName(row)" [colorType]="'primary'" [style.maxWidth]="'150px'"
+              [matTooltip]="getRequesterName(row)" matTooltipPosition="below" matTooltipClass="material-tooltip"
+              (click)="onClickName(row)">
+            </span>
+          </div>
+          }
+          @case(HEADER_REQUEST_TYPE){
+          <div class="d-flex">
+            @if(isRequestIsLocked(row)){
+            <mat-icon [matTooltip]="getRequestLockMessage(row)"
+              class="mat-md-icon text-primary my-auto me-2 material-symbols-outlined">lock</mat-icon>
+            }
+            <span class="body-large">{{ row[header.columnDef] ? row[header.columnDef] : "-" }}</span>
+          </div>
+          }
+          @case(HEADER_THROUGH){
+          <div class="whitespace-nowwrap">
+            {{ formatText(row.requestedByType) }}
+          </div>
+          }
+
+          @case (HEADER_DATE) {
+          <span class="body-large">{{ row[header.columnDef] | date : "dd.MM.yyyy" }}</span>
+          }
+          <!--            @case (HEADER_ACTION) {-->
+          <!--            <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">-->
+          <!--                <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn" matTooltip="Actions">-->
+          <!--                    <mat-icon class="mat-md-icon text-primary">more_vert</mat-icon>-->
+          <!--                </button>-->
+          <!--                <mat-menu class="action-panel" #actionMenu="matMenu">-->
+          <!--                    @if(!requestIsCompleted(row)){-->
+          <!--                    <button mat-menu-item class="d-flex"-->
+          <!--                        (click)="openAssigneeSelectionDialog(row,RequestDialogTypes.ASSIGNEE_CHANGE)">-->
+          <!--                        <mat-icon class="mat-md-icon text-primary my-auto">person</mat-icon>-->
+          <!--                        <span>Assignee change</span>-->
+          <!--                    </button>-->
+          <!--                    <button mat-menu-item class="d-flex"-->
+          <!--                        (click)="openAssigneeSelectionDialog(row,RequestDialogTypes.PRIORITY_CHANGE)">-->
+          <!--                        <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">priority</mat-icon>-->
+          <!--                        <span>Priority change</span>-->
+          <!--                    </button>-->
+          <!--                    }-->
+          <!--                </mat-menu>-->
+          <!--            </td>-->
+          <!--            }-->
+          @default {
+          <span class="body-large">{{ row[header.columnDef] ? row[header.columnDef] : "-" }}</span>
+          }
+          }
+        </ng-container>
+
+      </td>
+    </ng-container>
+    }
+
+    <!-- Rows -->
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true" class="bg-gray-100 title-small"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders"></tr>
+  </table>
+</ng-template>
+
+
+<ng-template #filtersTemplate>
+  @if (filterApplied) {
+  <div class="d-flex align-items-center overflow-auto scroll-w-0">
+    <div class="my-2 d-flex align-items-center">
+      @if (selectedStatus && selectedTab === ALL){
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="showStatusFilter ? statusMenu : null"
+          #statusTrigger="matMenuTrigger">
+          @if(showStatusFilter){
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          }
+          <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showStatusFilter }">
+            <div class="d-flex align-items-center">
+              <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                Status: {{ selectedCountryName }}
+              </span>
+              @if(filterConfiguration.selectedStatus.length > 1){
+              <span class="ml-1 shrink-0 rounded-full filter-badge">
+                +{{ filterConfiguration.selectedStatus.length - 1 }}
+              </span>
+              }
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)="clearSelection(RequestFilterKey.STATUS); statusTrigger.closeMenu(); $event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu class="status-menu filter-menu" #statusMenu="matMenu" yPosition="below" xPosition="after"
+          (closed)="onCloseMenu(RequestFilterKey.STATUS)">
+          <div (click)="stopDefaultBehaviour($event)">
+            <div class="menu-wrapper p-2">
+              @for (status of filterConfiguration.statusList;track i;let i = $index) {
+              <button mat-menu-item class="px-0" (click)="toggleSelection(RequestFilterKey.STATUS, status)">
+                <mat-checkbox [checked]="status.selected" [disabled]="status.disabled">
+                  {{ status.name }}
+                </mat-checkbox>
+              </button>
+              }
+            </div>
+            <div class="p-2 text-end">
+              <loading-button [smallButton]="true" [appLogClick]="'Status Apply'"
+                (onButtonClick)="onApplyOptionFilter(RequestFilterKey.STATUS, statusTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      @if(selectedCountry){
+      <div class="custom-multi-select d-flex align-items-center mb-2 mr-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="showCountryList ? countryMenu : null"
+          #countryTrigger="matMenuTrigger">
+          @if(showCountryList){
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          }
+          <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showCountryList }">
+            <div class="d-flex align-items-center">
+              <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                Country:
+
+              </span>
+              @if(filterConfiguration.selectedCountry.length > 1){
+              <span class="ml-1 shrink-0 rounded-full filter-badge">
+                +{{ filterConfiguration.selectedCountry.length - 1 }}
+              </span>
+              }
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)="clearSelection(RequestFilterKey.COUNTRY); countryTrigger.closeMenu();$event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu class="assigned-to-menu filter-menu" #countryMenu="matMenu" yPosition="below" xPosition="after"
+          (closed)="onCloseMenu(RequestFilterKey.COUNTRY)">
+          <div (click)="stopDefaultBehaviour($event)">
+            <div class="menu-wrapper p-2">
+              @for (country of filterConfiguration.countryList;track i;let i = $index) {
+              <button mat-menu-item class="px-0" (click)="toggleSelection(RequestFilterKey.COUNTRY, country)">
+                <mat-checkbox [checked]="country.selected">
+                  {{ country.name }}
+                </mat-checkbox>
+              </button>
+              }
+            </div>
+            <div class="p-2 text-end">
+              <loading-button [smallButton]="true" [appLogClick]="'Country Filter Apply'"
+                (onButtonClick)="onApplyOptionFilter(RequestFilterKey.COUNTRY, countryTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      @if(selectedRequestType){
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="showRequestType ? requestMenu : null"
+          #requestMenuTrigger="matMenuTrigger">
+          @if(showRequestType){
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          }
+          <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showRequestType }">
+            <div class="d-flex align-items-center">
+              <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                Request Type:
+                {{ filterConfiguration.selectedRequestType[0]?.title }}
+              </span>
+              @if(filterConfiguration.selectedRequestType.length > 1){
+              <span class="ml-1 shrink-0 rounded-full filter-badge">
+                +{{ filterConfiguration.selectedRequestType.length - 1 }}
+              </span>
+              }
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)="clearSelection(RequestFilterKey.REQUEST_TYPE);requestMenuTrigger.closeMenu();$event.stopPropagation() ">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu class="assigned-to-menu filter-menu" #requestMenu="matMenu" yPosition="below" xPosition="after"
+          (closed)="onCloseMenu(RequestFilterKey.REQUEST_TYPE)">
+          <div (click)="stopDefaultBehaviour($event)">
+            <div class="menu-wrapper p-2">
+              @for (requestType of filterConfiguration.requestTypeList;track i;let i = $index) {
+              <button mat-menu-item class="px-0" (click)="toggleSelection(RequestFilterKey.REQUEST_TYPE, requestType)">
+                <mat-checkbox [checked]="requestType.selected">
+                  {{ requestType.title }}
+                </mat-checkbox>
+              </button>
+              }
+            </div>
+            <div class="p-2 text-end">
+              <loading-button [smallButton]="true" [appLogClick]="'Request Type Apply'"
+                (onButtonClick)="onApplyOptionFilter(RequestFilterKey.REQUEST_TYPE, requestMenuTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      @if (selectedRequestDataSubject) {
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button"
+          [matMenuTriggerFor]="showDataSubjectTypeFilter ? requestTypeMenu : null" #requestTypeTrigger="matMenuTrigger">
+          @if(showDataSubjectTypeFilter){
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          }
+          <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showDataSubjectTypeFilter }">
+            <div class="d-flex align-items-center">
+              <span class="overflow-hidden text-ellipsis max-w-[160px]">
+                Data Subject:{{ filterConfiguration.selectedDataSubject[0]?.name }}
+              </span>
+              @if(filterConfiguration.selectedDataSubject.length > 1){
+              <span class="ml-1 shrink-0 rounded-full filter-badge">
+                +{{ filterConfiguration.selectedDataSubject.length - 1 }}
+              </span>
+              }
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)=" clearSelection(RequestFilterKey.DATA_SUBJECT_TYPE); requestTypeTrigger.closeMenu();$event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu class="request-type-menu filter-menu scroll-w-0" #requestTypeMenu="matMenu" yPosition="below"
+          xPosition="after" (closed)="onCloseMenu(RequestFilterKey.DATA_SUBJECT_TYPE)">
+          <div (click)="stopDefaultBehaviour($event)">
+            <div class="menu-wrapper p-2">
+              @for (dataSubject of filterConfiguration.dataSubjectList; track i;let i = $index) {
+              <button mat-menu-item class="px-0"
+                (click)="toggleSelection(RequestFilterKey.DATA_SUBJECT_TYPE, dataSubject)">
+                <mat-checkbox [checked]="dataSubject.selected">
+                  {{ dataSubject.name }}
+                </mat-checkbox>
+              </button>
+              }
+            </div>
+            <div class="p-2 text-end">
+              <loading-button [smallButton]="true" [appLogClick]="'Data Subject Apply'"
+                (onButtonClick)="onApplyOptionFilter(RequestFilterKey.DATA_SUBJECT_TYPE, requestTypeTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      @if(selectedAssignedTo){
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="showAssignedTo ? assignedToMenu : null"
+          #assignedToTrigger="matMenuTrigger">
+          @if(showAssignedTo){
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          }
+          <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showAssignedTo }">
+            <div class="d-flex align-items-center">
+              <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                Assigned To:
+                {{ getDisplayName(filterConfiguration.selectedAssignedTo[0])}}
+              </span>
+              @if(filterConfiguration.selectedAssignedTo.length > 1){
+              <span class="ml-1 shrink-0 rounded-full filter-badge">
+                +{{ filterConfiguration.selectedAssignedTo.length - 1 }}
+              </span>
+              }
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)=" clearSelection(RequestFilterKey.ASSIGNED_TO);assignedToTrigger.closeMenu();$event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu class="assigned-to-menu filter-menu" #assignedToMenu="matMenu" yPosition="below" xPosition="after"
+          (closed)="onCloseMenu(RequestFilterKey.ASSIGNED_TO)">
+          <div (click)="stopDefaultBehaviour($event)">
+            <div class="menu-wrapper p-2">
+              @for (assignedTo of filterConfiguration.assignedToList; track i;let i = $index) {
+              <button mat-menu-item class="px-0" (click)="toggleSelection(RequestFilterKey.ASSIGNED_TO, assignedTo)">
+                <mat-checkbox [checked]="assignedTo.selected">
+                  {{ getDisplayName(assignedTo)}}
+                </mat-checkbox>
+              </button>
+              }
+            </div>
+            <div class="p-2 text-end">
+              <loading-button [smallButton]="true" [appLogClick]="'Assigned to  Apply'"
+                (onButtonClick)=" onApplyOptionFilter(RequestFilterKey.ASSIGNED_TO, assignedToTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      @if(selectedThrough){
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="showThroughList ? throughMenu : null"
+          #throughTrigger="matMenuTrigger">
+          @if(showThroughList){
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          }
+          <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showThroughList }">
+            <div class="d-flex align-items-center">
+              <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                Through: {{ filterConfiguration.selectedThrough[0]?.name }}
+              </span>
+              @if(filterConfiguration.selectedThrough.length > 1){
+              <span class="ml-1 shrink-0 rounded-full filter-badge">
+                +{{ filterConfiguration.selectedThrough.length - 1 }}
+              </span>
+              }
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)="clearSelection(RequestFilterKey.THROUGH);throughTrigger.closeMenu();$event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu class="assigned-to-menu filter-menu" #throughMenu="matMenu" yPosition="below" xPosition="after"
+          (closed)="onCloseMenu(RequestFilterKey.THROUGH)">
+          <div (click)="stopDefaultBehaviour($event)">
+            <div class="menu-wrapper p-2">
+              @for (_through of filterConfiguration.through;track i;let i = $index;)
+              {
+              <button mat-menu-item class="px-0" (click)="toggleSelection(RequestFilterKey.THROUGH, _through)">
+                <mat-checkbox [checked]="_through.selected">
+                  {{ _through.name }}
+                </mat-checkbox>
+              </button>
+              }
+            </div>
+            <div class="p-2 text-end">
+              <loading-button [smallButton]="true" [appLogClick]="'Through Apply'"
+                (onButtonClick)="onApplyOptionFilter(RequestFilterKey.THROUGH, throughTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      @if(selectedChannel){
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="showChannelList ? channelMenu : null"
+          #channelTrigger="matMenuTrigger">
+          @if(showChannelList){
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          }
+          <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showChannelList }">
+            <div class="d-flex align-items-center">
+              <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                Channel: {{ filterConfiguration.selectedChannel[0]?.name }}
+              </span>
+              @if(filterConfiguration.selectedChannel.length > 1){
+              <span class="ml-1 shrink-0 rounded-full filter-badge">
+                +{{ filterConfiguration.selectedChannel.length - 1 }}
+              </span>
+              }
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)="clearSelection(RequestFilterKey.CHANNEL);channelTrigger.closeMenu();$event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu class="assigned-to-menu filter-menu" #channelMenu="matMenu" yPosition="below" xPosition="after"
+          (closed)="onCloseMenu(RequestFilterKey.CHANNEL)">
+          <div (click)="stopDefaultBehaviour($event)">
+            <div class="menu-wrapper p-2">
+              @for (channel of filterConfiguration.channelList;track i;let i = $index;)
+              {
+              <button mat-menu-item class="px-0" (click)="toggleSelection(RequestFilterKey.CHANNEL, channel)">
+                <mat-checkbox [checked]="channel.selected">
+                  {{ channel.name }}
+                </mat-checkbox>
+              </button>
+              }
+            </div>
+            <div class="p-2 text-end">
+              <loading-button [smallButton]="true" [appLogClick]="'Channel Apply'"
+                (onButtonClick)="onApplyOptionFilter(RequestFilterKey.CHANNEL, channelTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      @if (filterConfiguration.fromDate) {
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap"
+        [style.width.px]="filterConfiguration.fromDate ? 186 : 200">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="fromMenu" #fromMenuTrigger="matMenuTrigger"
+          (menuOpened)="syncTempDate('from')" (menuClosed)="syncTempDate('from')">
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          <div class="d-flex align-items-center">
+            <div class="date-range">
+              From : {{ filterConfiguration.fromDate | date : "dd/MM/yyyy" }}
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)="clearSelection(RequestFilterKey.FROM_DATE); fromMenuTrigger.closeMenu();$event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu #fromMenu="matMenu" class="assigned-to-menu filter-menu">
+          <div (click)="stopDefaultBehaviour($event)" class="p-2">
+            <mat-form-field appearance="outline" class="w-full mat-md-input">
+              <mat-label>From</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [ngModel]="filterConfiguration.tempFromDate"
+                (ngModelChange)="filterConfiguration.tempFromDate = $event" [max]="maxDateFilter" />
+              <mat-datepicker-toggle matIconSuffix [for]="fromPicker">
+                <mat-icon matDatepickerToggleIcon class="calendar-md-icon material-symbols-outlined">
+                  calendar_month
+                </mat-icon>
+              </mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+            <div class="px-2 py-1 text-end mt-2">
+              <loading-button [smallButton]="true" [appLogClick]="'From Date Apply'"
+                (onButtonClick)="applyDateFilter(fromMenuTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+      <!-- To Date -->
+      @if (filterConfiguration.toDate) {
+      <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+        <button mat-button class="dropdown-button" [matMenuTriggerFor]="toMenu" #toMenuTrigger="matMenuTrigger"
+          (menuOpened)="syncTempDate('to')" (menuClosed)="syncTempDate('to')">
+          <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+          <div class="d-flex align-items-center">
+            <div class="date-range">
+              To : {{ filterConfiguration.toDate | date : "dd/MM/yyyy" }}
+            </div>
+            <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+              (click)="clearSelection(RequestFilterKey.TO_DATE);toMenuTrigger.closeMenu(); $event.stopPropagation()">
+              close
+            </mat-icon>
+          </div>
+        </button>
+        <mat-menu #toMenu="matMenu" class="assigned-to-menu filter-menu">
+          <div (click)="stopDefaultBehaviour($event)" class="p-2">
+            <mat-form-field appearance="outline" class="w-full mat-md-input">
+              <mat-label>To</mat-label>
+              <input matInput [matDatepicker]="toPicker" [ngModel]="filterConfiguration.tempToDate"
+                (ngModelChange)="filterConfiguration.tempToDate = $event" [min]="minToDateFilter" />
+              <mat-datepicker-toggle matIconSuffix [for]="toPicker">
+                <mat-icon matDatepickerToggleIcon class="calendar-md-icon material-symbols-outlined">
+                  calendar_month
+                </mat-icon>
+              </mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+            <div class="px-2 py-1 text-end mt-2">
+              <loading-button [smallButton]="true" [appLogClick]="'To Date Apply'"
+                (onButtonClick)="applyDateFilter(toMenuTrigger)">
+                Apply
+              </loading-button>
+            </div>
+          </div>
+        </mat-menu>
+      </div>
+      }
+    </div>
+    @if (filterApplied && drawerView !== 'EXPORT') {
+    <div class="d-flex my-auto justify-content-center whitespace-nowrap">
+      <button mat-button class="button mb-2" (click)="resetAllFilter()">
+        <mat-icon class="cursor-pointer material-symbols-outlined">close</mat-icon>
+        Clear all
+      </button>
+    </div>
+    }
+  </div>
+  }
+</ng-template>
+
+<mat-drawer-container class="right-sidebar mat-md-drawer" [hasBackdrop]="true" autosize>
+  <mat-drawer #rightDrawer class="" mode="over" position="end">
+    <dsr-drawer-content [viewType]="drawerView" [filterConfiguration]="filterConfiguration" [selectedTab]="selectedTab"
+      (onCloseDrawer)="rightDrawer.close()" (onApplyFilter)="onApplyDrawerFilter($event)"
+      (onDownload)="onDownloadApply($event)">
+    </dsr-drawer-content>
+  </mat-drawer>
+</mat-drawer-container>

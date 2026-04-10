@@ -1,0 +1,13 @@
+@use "../../../../../styles/custom/colors.scss" as us;
+
+.doc-viewer-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.fontColor {
+    color: us.$primary;
+}

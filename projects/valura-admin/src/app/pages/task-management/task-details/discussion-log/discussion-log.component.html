@@ -1,0 +1,321 @@
+<div class="discussion-log-tab d-flex flex-column w-100 h-100">
+
+  <div class="flex-1 overflow-y-auto p-1 bg-white m-3 mt-1 mb-0 custom-scrollbar" (scroll)="onScroll($event)">
+
+    @if(isLoadingConversation && conversationMessages.length === 0) {
+
+    <div class="space-y-4 p-3">
+      <div *ngFor="let item of [1,2,3,4]" class="shimmer-message-card">
+        <div class="shimmer-message-header">
+          <div class="shimmer-circle"></div>
+          <div class="shimmer-text shimmer-text-short"></div>
+          <div class="shimmer-text shimmer-text-badge"></div>
+          <div class="shimmer-text shimmer-text-tiny ml-auto"></div>
+        </div>
+        <div class="shimmer-message-body">
+          <div class="shimmer-text shimmer-text-long"></div>
+          <div class="shimmer-text shimmer-text-medium"></div>
+          <div class="shimmer-text shimmer-text-short"></div>
+        </div>
+      </div>
+    </div>
+    }
+
+    @else if(conversationMessages.length === 0 && !isLoadingConversation) {
+    <div class="flex items-center justify-center h-full">
+      <p class="text-gray-400 text-sm">No threads added at</p>
+    </div>
+    }
+
+    @else {
+    @if(hasMoreConversationMessages && conversationMessages.length > 0) {
+    <div class="py-2 mb-4">
+      @if(isLoadingMoreConversationMessages) {
+      <div class="flex items-center justify-center">
+        <mat-spinner diameter="24"></mat-spinner>
+        <span class="ml-2 text-sm text-gray-500">Loading older messages...</span>
+      </div>
+      }
+    </div>
+    }
+
+    <div class="space-y-4">
+      @for(message of conversationMessages; track message.id) {
+
+      <div class="thread-container">
+        <div class="message-row" [attr.data-message-type]="message.messageType" [ngClass]="{
+          'message-row--self': isCurrentUser(message),
+          'message-row--other': !isCurrentUser(message)
+        }" [attr.data-message-id]="message.id" (mouseenter)="hoveredMessageId = message.id"
+          (mouseleave)="hoveredMessageId = null">
+
+          @if(hoveredMessageId === message.id && !isEditMode && !isReplyMode && !message.isDeleted && !readOnly) {
+          <div
+            class="message-actions bg-white rounded-lg shadow-md border border-gray-200 p-1 z-10 flex items-center gap-1">
+
+
+            <button mat-icon-button (click)="startReply(message)" class="shadow-none bg-transparent mat-md-fab-btn"
+              title="Reply">
+              <mat-icon class="text-primary material-symbols-outlined">reply</mat-icon>
+            </button>
+
+
+            @if(isMessageOwner(message) && message.canUpdateMessage) {
+            <button mat-icon-button (click)="startEditMessage(message)"
+              class="shadow-none bg-transparent mat-md-fab-btn" title="Edit message">
+              <mat-icon class="text-primary material-symbols-outlined">edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="deleteMessage(message.id)"
+              class="shadow-none bg-transparent mat-md-fab-btn" title="Delete message">
+              <mat-icon class="text-primary material-symbols-outlined">delete</mat-icon>
+            </button>
+            }
+          </div>
+          }
+
+
+          <div class="message-card">
+            <div class="message-header">
+              <span class="message-sender body-large">{{ message.sender }}</span>
+              <span class="message-badge" [ngClass]="{
+  'message-badge--response': message.messageType === 'Response',
+  'message-badge--remark': message.messageType === 'Remark'
+}">
+                {{ message.messageType }}
+              </span>
+              <span class="message-time">{{ message.timestamp }}</span>
+            </div>
+            <div *ngIf="message.text" class="message-body message-content" [innerHTML]="message.text"></div>
+            <div *ngIf="message.attachments?.length" class="message-attachments">
+              @for (attachment of message.attachments; track attachment.id) {
+              <div class="message-attachment" (click)="downloadAttachment(attachment)">
+                <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+                <span class="message-attachment-name" [title]="attachment.name">{{ attachment.name }}</span>
+              </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+
+        @if(message.replies && message.replies.length > 0) {
+        <div class="replies-container">
+          @if(shouldShowExpandButton(message)) {
+          <button class="expand-replies-button" (click)="toggleRepliesExpansion(message.id)">
+            <span>+ {{ getHiddenRepliesCount(message) }} more replies</span>
+          </button>
+          }
+          @for(reply of getVisibleReplies(message); track reply.id) {
+          <div class="message-row reply-message" [attr.data-message-type]="reply.messageType"
+            [attr.data-message-id]="reply.id" (mouseenter)="hoveredMessageId = reply.id"
+            (mouseleave)="hoveredMessageId = null">
+
+
+            @if(hoveredMessageId === reply.id && !isEditMode && !isReplyMode && !reply.isDeleted && !readOnly) {
+            <div
+              class="message-actions bg-white rounded-lg shadow-md border border-gray-200 p-1 z-10 flex items-center gap-1">
+
+
+              <button mat-icon-button (click)="startReply(reply)" class="shadow-none bg-transparent mat-md-fab-btn"
+                title="Reply">
+                <mat-icon class="text-primary material-symbols-outlined">reply</mat-icon>
+              </button>
+
+
+              @if(isMessageOwner(reply) && reply.canUpdateMessage) {
+              <button mat-icon-button (click)="startEditMessage(reply)"
+                class="shadow-none bg-transparent mat-md-fab-btn" title="Edit message">
+                <mat-icon class="text-primary material-symbols-outlined">edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="deleteMessage(reply.id)"
+                class="shadow-none bg-transparent mat-md-fab-btn" title="Delete message">
+                <mat-icon class="text-primary material-symbols-outlined">delete</mat-icon>
+              </button>
+              }
+            </div>
+            }
+
+
+            <div class="message-card">
+              <div class="message-header">
+                <span class="message-sender body-large">{{ reply.sender }}</span>
+                <span class="message-badge" [ngClass]="{
+  'message-badge--response': reply.messageType === 'Response',
+  'message-badge--remark': reply.messageType === 'Remark'
+}">
+                  {{ reply.messageType }}
+                </span>
+                <span class="message-time">{{ reply.timestamp }}</span>
+              </div>
+
+              <div *ngIf="reply.text" class="message-body message-content" [innerHTML]="reply.text"></div>
+
+              <div *ngIf="reply.attachments?.length" class="message-attachments">
+                @for (attachment of reply.attachments; track attachment.id) {
+                <div class="message-attachment" (click)="downloadAttachment(attachment)">
+                  <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+                  <span class="message-attachment-name" [title]="attachment.name">{{ attachment.name }}</span>
+                </div>
+                }
+              </div>
+            </div>
+          </div>
+          }
+
+        </div>
+        }
+      </div>
+
+      }
+      @if(conversationCurrentPage > 1 || (isLoadingMoreConversationMessages && !isLoadingOlderMessages)) {
+      <div class="py-2 mt-4">
+        @if(isLoadingMoreConversationMessages && !isLoadingOlderMessages) {
+        <div class="flex items-center justify-center">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span class="ml-2 text-sm text-gray-500">Loading newer messages...</span>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  @if(!readOnly) {
+  <div class="pb-2 pl-1 pr-1 pt-0 bg-white">
+    <div class="bg-white  pb-1 py-1 ">
+
+
+      @if(showWarning) {
+      <div class="warning-banner">
+        <div class="warning-content">
+          <mat-icon class="material-symbols-outlined">info</mat-icon>
+
+          <span class="warning-text">{{ warningMessage }}</span>
+          <button mat-icon-button class="warning-close" (click)="dismissWarning()" title="Dismiss">
+
+            <mat-icon class="material-symbols-outlined">close</mat-icon>
+          </button>
+        </div>
+      </div>
+      }
+      <div class="tiptap-wrapper-with-buttons" [class.toolbar-expanded]="showToolbar" [class.has-reply]="isReplyMode"
+        [class.has-files]="(isEditMode && editingMessageAttachments.length > 0) || selectedFiles.length > 0">
+        @if(isReplyMode && replyingToMessage) {
+        <div class="reply-banner-teams">
+          <div class="reply-banner-content">
+            <div class="reply-info">
+              <div class="reply-header">
+                <span class="reply-sender">{{ replyingToMessage.sender }}</span>
+                <span class="reply-timestamp">{{ replyingToMessage.timestamp }}</span>
+              </div>
+              <p class="reply-preview">{{ replyingToMessageText }}</p>
+            </div>
+            <button mat-icon-button (click)="cancelReply()" class="reply-close-btn" title="Cancel reply">
+              <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+
+
+        <div class="tiptap-toolbar">
+          <div class="toolbar-group">
+            <button type="button" class="toolbar-button" [class.is-active]="isActive('bold')" (click)="toggleBold()"
+              title="Bold">
+              <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_bold</mat-icon>
+            </button>
+
+            <button type="button" class="toolbar-button" [class.is-active]="isActive('italic')" (click)="toggleItalic()"
+              title="Italic">
+              <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_italic</mat-icon>
+            </button>
+
+            <button type="button" class="toolbar-button" [class.is-active]="isActive('underline')"
+              (click)="toggleUnderline()" title="Underline">
+              <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_underlined</mat-icon>
+            </button>
+          </div>
+
+          <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+          <div class="flex items-center gap-0.5">
+            <button type="button" class="toolbar-button" [class.is-active]="isActive('bulletList')"
+              (click)="toggleBulletList()" title="Bullet List">
+              <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_list_bulleted</mat-icon>
+            </button>
+
+            <button type="button" class="toolbar-button" [class.is-active]="isActive('orderedList')"
+              (click)="toggleOrderedList()" title="Numbered List">
+              <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_list_numbered</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div #editorContainer class="tiptap-editor-container"></div>
+
+        <div class="selected-files-preview-internal">
+          @if(isEditMode) {
+          @for(attachment of editingMessageAttachments; track attachment.id; let idx = $index) {
+          <div class="file-preview-card">
+            <mat-icon class="material-symbols-outlined text-gray-600">attach_file</mat-icon>
+            <span class="file-name" [title]="attachment.name">{{attachment.name}}</span>
+            <button mat-icon-button (click)="removeEditingAttachment(idx)" class="remove-file-button"
+              title="Remove file">
+              <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+          </div>
+          }
+          }
+
+          @for(file of selectedFiles; track file.name; let idx = $index) {
+          <div class="file-preview-card">
+            <mat-icon class="material-symbols-outlined text-gray-600">attach_file</mat-icon>
+            <span class="file-name" [title]="file.name">{{file.name}}</span>
+            <button mat-icon-button (click)="removeSelectedFile(idx)" class="remove-file-button" title="Remove file">
+              <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+          </div>
+          }
+        </div>
+
+        <div class="input-actions">
+
+          <button mat-icon-button (click)="toggleToolbar()" class="action-button format-button"
+            [class.active]="showToolbar" title="Toggle formatting" disableRipple>
+            <mat-icon class="mat-md-icon material-symbols-outlined">drive_file_rename_outline</mat-icon>
+          </button>
+
+          <button mat-icon-button (click)="attachFiles()" class="action-button" title="Attach files" disableRipple>
+            <mat-icon class="mat-md-icon material-symbols-outlined ">attach_file</mat-icon>
+          </button>
+
+
+          @if(isEditMode) {
+          <div class="flex gap-2">
+            <button mat-icon-button (click)="cancelEdit()" class="action-button" title="Cancel">
+              <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+            </button>
+            <button mat-icon-button (click)="sendMessage()" [disabled]="isSendingMessage"
+              class="action-button send-button" [class.updating]="isSendingMessage" title="Update message"
+              disableRipple>
+              <mat-icon class="mat-md-icon material-symbols-outlined">
+                {{isSendingMessage ? 'schedule' : 'send'}}
+              </mat-icon>
+            </button>
+          </div>
+          } @else {
+          <button mat-icon-button (click)="sendMessage()" [disabled]="isSendingMessage"
+            class="action-button send-button" [class.sending]="isSendingMessage" title="Send message" disableRipple>
+            <mat-icon class="mat-md-icon material-symbols-outlined">
+              {{isSendingMessage ? 'schedule' : 'send'}}
+            </mat-icon>
+          </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>

@@ -1,0 +1,170 @@
+<div class="d-flex flex-column  overflow-hidden view-wrapper">
+  <div class="p-3">
+    <div class="d-flex justify-between">
+      <div class="headline-medium">Consent Record</div>
+      <div>
+        <loading-button type="primary" class="mx-2" (onButtonClick)="withDrawConsent()">Withdraw consents</loading-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white">
+      <div class="relative flex-1 overflow-hidden">
+        <mat-tab-group [(selectedIndex)]="selectedTabIndex"
+                       class="remove-border-bottom custom-tab-group h-full"
+                       mat-stretch-tabs="false"
+                       mat-align-tabs="start">
+
+          <mat-tab label="Withdrawal request">
+            <div class="h-full flex flex-col">
+
+              <div class="flex-1 overflow-auto mt-4 rounded-lg no-scrollbar">
+                <div class="min-w-[1000px]">
+                  <table mat-table [dataSource]="dataSource" matSort class="w-full  bg-white">
+
+                    <ng-container matColumnDef="id">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >ID</th>
+                      <td mat-cell *matCellDef="let row" class="whitespace-nowrap">{{ row.id }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="templateName">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Template</th>
+                      <td mat-cell *matCellDef="let row" class="whitespace-nowrap">{{ row.templateName }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="upstreamSources">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Upstream Sources</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.upstreamSources }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Status</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.status }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="purpose">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Purpose</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.purpose }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="dataSubject">
+                      <th mat-header-cell *matHeaderCellDef >Data Subject</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.dataSubject }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="method">
+                      <th mat-header-cell *matHeaderCellDef >Method</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.method }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="requestedOn">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Requested On</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.requestedOn }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="performedBy">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Performed By</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.performedBy }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  </table>
+                </div>
+              </div>
+
+
+              <div class="bg-white z-10">
+                <mat-paginator
+                  [pageSize]="10"
+                  [pageSizeOptions]="[ 10,15]"
+                  class="paginator">
+                </mat-paginator>
+              </div>
+            </div>
+          </mat-tab>
+
+
+          <mat-tab label="Consent records">
+
+
+            <div class="h-full flex flex-col">
+
+              <div class="flex-1 overflow-auto mt-4 rounded-lg no-scrollbar">
+                <div class="min-w-[1000px]">
+                  <table mat-table [dataSource]="data" matSort class="w-full  bg-white">
+
+                    <ng-container matColumnDef="id">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >ID</th>
+                      <td mat-cell *matCellDef="let row" class="whitespace-nowrap">{{ row.id }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="templateName">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Template</th>
+                      <td mat-cell *matCellDef="let row" class="whitespace-nowrap">{{ row.templateName }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="upstreamSources">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Upstream Sources</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.upstreamSources }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Status</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.status }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="dataSubject">
+                      <th mat-header-cell *matHeaderCellDef >Data Subject</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.dataSubject }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="action">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-right">Actions</th>
+                      <td mat-cell *matCellDef="let row" class="text-right">
+                        <button  class="text-blue-600 hover:underline border-none" (click)="onActionClick(row)">
+                          {{ row.action }}
+                        </button>
+                      </td>
+                    </ng-container>
+
+
+                    <ng-container matColumnDef="timeStamp">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Timestamp</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.timeStamp }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayColumns;"></tr>
+                  </table>
+                </div>
+              </div>
+
+
+              <div class="bg-white z-10">
+                <mat-paginator
+                  [pageSize]="10"
+                  [pageSizeOptions]="[ 10,15]"
+                  class="paginator">
+                </mat-paginator>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+
+
+        <div class="absolute top-4 right-2 flex gap-2">
+          <button mat-mini-fab class="shadow-none border-none bg-white">
+            <mat-icon class="material-symbols-outlined">search</mat-icon>
+          </button>
+          <button mat-mini-fab class="shadow-none border-none bg-white">
+            <mat-icon class="material-symbols-outlined">tune</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

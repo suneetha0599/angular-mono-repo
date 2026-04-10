@@ -1,0 +1,184 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden mr-[280px]">
+  <div class="flex justify-between gap-2 items-center p-3 pb-0 my-auto">
+    <div class=" flex items-center gap-2 ">
+      <button (click)="goBack()"
+        class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+        <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+      </button>
+      <div class="flex items-center justify-start">
+        <div class="headline-medium my-auto">{{ isEditMode ? 'Edit Email Template' : 'Create Email' }}</div>
+      </div>
+      @if(isEditMode){
+      <button mat-icon-button (click)="goPrev()" [disabled]="!prevId" color="primary"
+        class="medium-icon d-flex my-auto">
+        <mat-icon class=" material-symbols-outlined"
+          [ngClass]="!prevId ? 'text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+      </button>
+      <button mat-icon-button (click)="goNext()" [disabled]="!nextId" color="primary"
+        class="medium-icon d-flex my-auto">
+        <mat-icon class=" material-symbols-outlined"
+          [ngClass]="!nextId ? 'text-gray-400' : 'text-primary'">chevron_right</mat-icon>
+      </button>
+      }
+    </div>
+    @if(!hasApiError && isEditMode){
+    <loading-button type="light" (onButtonClick)="openStepperPopup()" [basicButton]="true">
+      View Activity
+    </loading-button>}
+  </div>
+  @if(hasApiError){
+  <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+  }@else{
+  <div class="m-3 flex-1 overflow-hidden d-flex flex-column bg-white">
+    <div class="d-flex flex-column rounded position-relative flex-1 bg-white">
+
+      <div class="sticky-form-section p-3 pb-0 mb-2 bg-white flex-shrink-0">
+        <ng-container *ngIf="isLoading">
+          <div class="mb-1">
+            <div class="shimmer-line mb-2" style="width: 180px; height: 18px;"></div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="shimmer-box" style="height: 56px;"></div>
+              <div class="shimmer-box" style="height: 56px;"></div>
+            </div>
+          </div>
+          <div class="mb-1">
+            <div class="shimmer-line mb-2" style="width: 120px; height: 18px;"></div>
+            <div class="shimmer-box" style="height: 56px;"></div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="!isLoading">
+          <form [formGroup]="emailForm">
+            <div class="mb-1">
+              <p class="label-large mb-2 fw-semibold">Template Configuration</p>
+              <div class="grid grid-cols-2 gap-4">
+                <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-input">
+                  <mat-label>Name</mat-label>
+                  <input matInput formControlName="name">
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [control]="nameControl" [errors]="nameControl.errors"
+                      controlActualName="Name">
+                    </custom-mat-error>
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-select">
+                  <mat-label>Template Type</mat-label>
+                  <mat-select formControlName="templateType">
+                    <mat-option *ngFor="let event of templateType" [value]="event.value">
+                      {{ event.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [control]="templateTypeControl"
+                      [errors]="templateTypeControl.errors" controlActualName="Template Type">
+                    </custom-mat-error>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+
+            <div class="mb-1">
+              <div class="grid grid-cols-2 gap-4">
+                <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-select">
+                  <mat-label>Module</mat-label>
+                  <mat-select formControlName="module" (selectionChange)="onChangeModule($event)">
+                    <mat-option *ngFor="let event of module" [value]="event.value">
+                      {{ event.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [control]="moduleControl" [errors]="moduleControl.errors"
+                      controlActualName="Module">
+                    </custom-mat-error>
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-select">
+                  <mat-label>Trigger Event</mat-label>
+                  <mat-select formControlName="triggerEvent">
+                    <mat-option *ngFor="let event of triggerEvents" [value]="event.value">
+                      {{ event.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [control]="triggerEventControl"
+                      [errors]="triggerEventControl.errors" controlActualName="Trigger event">
+                    </custom-mat-error>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="mb-1">
+              <p class="label-large mb-2 fw-semibold">Email Details</p>
+              <div class="mb-1">
+                <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-input">
+                  <mat-label>Email Subject</mat-label>
+                  <input matInput formControlName="emailSubject">
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [control]="emailSubjectControl"
+                      [errors]="emailSubjectControl.errors" controlActualName="Email subject">
+                    </custom-mat-error>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </form>
+        </ng-container>
+      </div>
+
+      <div class="flex-1 p-3 pt-0 overflow-hidden d-flex flex-column">
+        <div *ngIf="isLoading" class="shimmer-box" style="height: 500px;"></div>
+        <app-custom-editor *ngIf="!isLoading" class="flex-1 d-flex flex-column"
+          [initialContent]="emailForm.get('emailBody')?.value" [showInsertVariable]="true"
+          [variables]="selectedEmailElementList" [placeholder]="'Type your email content here...'"
+          (contentChange)="onEditorContentChange($event)"></app-custom-editor>
+      </div>
+      <div *ngIf="emailForm.get('emailBody')?.invalid && emailForm.get('emailBody')?.touched"
+        class="email-body-error -mt-3 mb-1 ml-4 flex-shrink-0">
+        Email body is required
+      </div>
+
+      <div class="p-3 bg-white border-top flex-shrink-0 bottom-0 z-10">
+        <div class="flex justify-end gap-3">
+          <loading-button type="secondary" (onButtonClick)="onPreview()">
+            Preview
+          </loading-button>
+          <loading-button *ngIf="!isEditMode" type="secondary" (onButtonClick)="onSaveToDraft()"
+            [disabled]="isDraftMode && !hasFormChanged && isFinalSaved" [loading]="isSavingDraft">
+            Save to Draft
+          </loading-button>
+          <loading-button type="primary" (onButtonClick)="onSaveTemplate()"
+            [disabled]="!emailForm.valid || isSavingTemplate" [loading]="isSavingTemplate">
+            Save Template
+          </loading-button>
+        </div>
+      </div>
+    </div>
+  </div>}
+</div>
+
+
+<ng-template #errorLoading>
+  <div class="m-3 flex-1 overflow-hidden d-flex flex-column bg-white justify-center">
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+  </div>
+</ng-template>
+
+<ng-template #overrideDialog>
+  <h4 mat-dialog-title class="my-0 py-2 px-3">Warning</h4>
+  <div mat-dialog-content class="px-3 py-2 d-flex">
+    <p class="mb-0 fs-14 body-large">
+      Trigger event already exists. Do you want to override it?
+    </p>
+  </div>
+
+  <div mat-dialog-actions align="end" class="p-2">
+    <div class="w-full flex justify-end gap-2 p-0">
+      <loading-button type="secondary" (onButtonClick)="onOverrideNo()">No</loading-button>
+      <loading-button type="primary" (onButtonClick)="onOverrideYes()">Yes</loading-button>
+    </div>
+  </div>
+</ng-template>

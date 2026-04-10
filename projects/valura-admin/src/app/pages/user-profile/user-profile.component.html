@@ -1,0 +1,95 @@
+<div class="px-8 py-2">
+
+    <!-- Header section -->
+    <h5 class="mt-3 headline-large text-gray-800">User profile</h5>
+
+    <div class="bg-white shadow-sm rounded-lg p-3 mt-4 w-full max-w-[950px]">
+
+        <!-- Profile photo and name -->
+        <form [formGroup]="userInfoForm">
+            <div class="flex w-100">
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+
+                    @if (profilePhoto) {
+                    <img [src]="profilePhoto" class="w-20 h-20 rounded-full border border-gray-300 object-cover" />
+                    } @else {
+                    <div
+                        class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300">
+                        <mat-icon class="text-gray-600 text-base material-symbols-outlined">person</mat-icon>
+                    </div>
+                    }
+
+                    <div class="flex flex-col mt-2">
+                        <p class="body-medium">{{displayName }}</p>
+                        <p class="body-medium">{{ email }}</p>
+                    </div>
+                </div>
+                <!-- <div>
+                    <button mat-mini-fab class="shadow-none bg-light mx-1" (click)="logOut()">
+                        <mat-icon color="primary">logout</mat-icon>
+                    </button>
+                </div> -->
+            </div>
+            <!-- Form Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-12 mt-3">
+                <div class="md:col-span-9">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+                        <div class="md:col-span-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label class="text-sm">First Name</mat-label>
+                                <input matInput formControlName="firstName" name="firstName" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="md:col-span-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label class="text-sm">Last Name</mat-label>
+                                <input matInput formControlName="lastName" name="lastName" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="md:col-span-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label class="text-sm">Full Name</mat-label>
+                                <input matInput formControlName="displayName" name="displayName" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="md:col-span-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label class="text-sm">Phone number</mat-label>
+                                <input matInput formControlName="phoneNumber" name="phoneNumber" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="md:col-span-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label class="text-sm">Default Entity</mat-label>
+
+                                <mat-select formControlName="defaultEntity">
+                                    <mat-option *ngFor="let entity of entityList" [value]="entity.id">
+                                        {{ entity.id | titlecase }}
+
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Footer section -->
+            <div class="mt-4 flex gap-4">
+                <loading-button type="primary" [disabled]="loading" [loading]="loading" [loadingText]="'Save'"
+                    (onButtonClick)="onSave()">
+                    Save
+                </loading-button>
+                <loading-button type="secondary" (onButtonClick)="onCancel()">Cancel</loading-button>
+            </div>
+        </form>
+    </div>
+</div>

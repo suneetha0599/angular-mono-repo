@@ -1,1 +1,317 @@
-/* You can add global styles to this file, and also import other style files */
+@use './styles/custom/custom';
+@use './styles/custom/colors' as colors;
+@use './styles/custom/typography' as typo;
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+@import "./tailwind.css";
+
+$border-radius: 8px;
+$topbar-height: 70px;
+$progressbar-height: 2px;
+$border-radius-12: 12px;
+$footer-height: 20px;
+
+.mat-mdc-notch-piece {
+    border: none;
+}
+
+.multiline-tooltip {
+    white-space: pre-line !important;
+    line-height: 1.5;
+    max-width: 300px;
+}
+
+html,
+body {
+    height: 100%;
+    background-color: #F8F8F8 !important;
+    margin: 0;
+    font-family: 'Source Sans 3', sans-serif !important;
+    overflow: hidden;
+}
+
+
+.topbar {
+    height: $topbar-height !important;
+    // box-shadow: 0px 1px 5px 1px #7D847D24;
+}
+
+.body-wrapper {
+    height: calc(100vh - ($topbar-height));
+
+    .body {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
+
+.view-wrapper {
+    height: calc(100vh - ($topbar-height + $progressbar-height + $footer-height));
+}
+
+.primary {
+    color: colors.$primary !important;
+}
+
+.text-primary {
+    color: colors.$primary !important;
+}
+
+.border-primary {
+    border-color: colors.$primary !important;
+}
+
+.bg-primary {
+    background-color: colors.$primary !important;
+}
+
+.bg-secondary {
+    background-color: colors.$secondary !important;
+}
+
+.bg-light {
+    background-color: colors.$light !important;
+}
+
+.text-dark {
+    color: colors.$dark !important;
+}
+
+.text-light {
+    color: colors.$light !important;
+}
+
+
+.border-grey {
+    border-color: colors.$border-color;
+}
+
+.border-xsm {
+    border: 0.86px solid colors.$border-color !important;
+}
+
+.w-fit-content {
+    width: fit-content !important;
+}
+
+.br-8 {
+    border-radius: $border-radius;
+}
+
+.outer-wrapper {
+    box-shadow: 0px 1px 5px 1px #7D847D24;
+    border-radius: $border-radius-12;
+}
+
+.flow-diagram {
+    width: 100%;
+
+    .ngx-graph-outer {
+        height: 100%;
+        width: 100% !important;
+    }
+
+    .ngx-graph {
+        height: 100%;
+        width: 100%;
+    }
+}
+
+.shadow-wrapper {
+    box-shadow: 0px 1px 5px 1px #7D847D24;
+}
+
+.pointer {
+    cursor: pointer !important;
+}
+
+.text-grey {
+    color: colors.$arrow-color !important;
+}
+
+.cursor-drag {
+    cursor: move;
+}
+
+.scroll-w-0 {
+    scrollbar-width: none;
+}
+
+.border-md {
+    border: 1.5px solid colors.$primary !important;
+}
+
+.progress-wrapper {
+    height: 2px;
+
+    .mat-mdc-progress-bar {
+        height: 2px !important;
+    }
+}
+
+@font-face {
+    font-family: text-security-disc;
+    src: url(/assets/font-password/text-security-disc.woff);
+}
+
+input.secret {
+    font-family: text-security-disc !important;
+    -webkit-text-security: disc;
+}
+
+.table-layout-fixed {
+    table-layout: fixed !important;
+}
+
+.child-row {
+    border-left: 1.6px solid #000000 !important;
+    position: relative;
+}
+
+.inner-row::before {
+    content: '';
+    position: absolute;
+    left: 0px;
+    top: 50%;
+    width: 100%;
+    height: 1.6px;
+    background-color: #000000;
+}
+
+.box-shadow-md {
+    box-shadow:
+        0px 1px 5px 1px #7D847D24,
+        0px 1px 2px 0px #C8C8C833;
+}
+
+.warning-warpper {
+    border-color: colors.$info-border-color !important;
+    background-color: colors.$info-bg-color;
+
+    .warning-icon {
+        height: 15px !important;
+        width: 15px !important;
+        font-size: 15px !important;
+        color: colors.$info-text-color;
+    }
+
+    .warning-text {
+        color: colors.$info-text-color;
+    }
+}
+
+.menu-more-detail {
+    list-style-type: disc;
+}
+
+.email-body ul,
+.email-body ol {
+    list-style: revert;
+    margin: revert;
+    padding: revert;
+    list-style-position: outside;
+}
+
+
+ul,
+ol {
+    list-style: revert;
+    margin: revert;
+    padding: revert;
+}
+
+
+.info-icn {
+    width: 18px !important;
+    font-size: 18px !important;
+    height: 18px !important;
+}
+
+.icon-warning {
+    color: colors.$warning !important;
+}
+
+.footer-section {
+    height: $footer-height;
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'liga';
+}
+
+.custom-textarea {
+    resize: none !important;
+    overflow-y: auto;
+    max-height: 2rem;
+}
+
+
+html body {
+
+    mat-sidenav,
+    mat-sidenav.mat-drawer,
+    mat-sidenav.mat-drawer.mat-drawer-side,
+    .mat-sidenav,
+    .mat-drawer.mat-sidenav,
+    mat-sidenav.sidebar,
+    .sidebar.mat-sidenav {
+        z-index: 1 !important;
+    }
+
+    mat-sidenav-container,
+    .mat-sidenav-container {
+        z-index: auto !important;
+    }
+}
+
+.cdk-overlay-container {
+    z-index: 1000001 !important;
+}
+
+
+html body .sidebar-submenu-tooltip,
+body .sidebar-submenu-tooltip,
+.sidebar-submenu-tooltip {
+    z-index: 1000002 !important;
+    position: fixed !important;
+}
+
+html body mat-sidenav {
+    transform: none !important;
+    will-change: auto !important;
+    filter: none !important;
+    perspective: none !important;
+}
+
+
+.email-template-container {
+
+    .template-variable,
+    .edit-variable {
+        background-color: #fef3c7;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+}
+
+.link-button {
+    text-transform: none;
+    font-weight: normal;
+    text-decoration: underline;
+}

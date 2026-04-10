@@ -1,0 +1,72 @@
+  /* Hide checkbox in selected options */
+  ::ng-deep {
+
+  .mat-mdc-option.mdc-list-item--selected .mat-pseudo-checkbox {
+    display: none !important;
+  }
+
+  /* Compact spacing for dropdown options (used in autocomplete) */
+  .compact-select .mat-mdc-option {
+    min-height: 36px !important;
+    padding: 6px 16px !important;
+  }
+
+  .compact-select .mdc-list-item__primary-text {
+    line-height: 1.3 !important;
+  }
+
+  /* Make autocomplete panel scrollable for pagination */
+  .mat-autocomplete-panel,
+  .mat-mdc-autocomplete-panel {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Ensure panel scrolling works */
+  .cdk-overlay-pane .mat-autocomplete-panel,
+  .cdk-overlay-pane .mat-mdc-autocomplete-panel {
+    max-height: 300px !important;
+  }
+  }
+
+  .chip-input-field {
+  min-width: 200px;
+  
+  ::ng-deep .mat-mdc-form-field-wrapper {
+    height: 70px !important;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 70px !important;
+    border-radius: 8px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: 8px 12px !important;
+    min-height: auto !important;
+  }
+
+  ::ng-deep .mat-mdc-floating-label {
+    color: #666 !important;
+    top: 30% !important;
+    transform: translateY(-50%) !important;
+    
+    &.mdc-floating-label--float-above {
+      top: 0 !important;
+      transform: translateY(-50%) scale(0.75) !important;
+    }
+  }
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+  }
+
+  @media (max-width: 600px) {
+    min-width: 160px;
+  }
+}
+
+.custom-textarea {
+  resize: none !important;
+}

@@ -1,0 +1,83 @@
+.size {
+    height: 100%;
+    width: 100%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -468px 0;
+    }
+
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.shimmer-section-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.shimmer-section-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.shimmer-section-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 300px;
+    justify-content: flex-end;
+}
+
+.shimmer-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: linear-gradient(to right, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #f0f0f0 100%);
+    background-size: 800px 100px;
+    animation: shimmer 1.5s infinite linear;
+}
+
+.shimmer-bar {
+    border-radius: 4px;
+    height: 12px;
+    background: linear-gradient(to right, #f0f0f0 0%, #e0e0e0 20%, #f0f0f0 40%, #f0f0f0 100%);
+    background-size: 800px 100px;
+    animation: shimmer 1.5s infinite linear;
+
+    &--short {
+        width: 80px;
+    }
+
+    &--medium {
+        width: 140px;
+    }
+
+    &--long {
+        width: 95%;
+    }
+
+    &--progress {
+        width: 160px;
+        height: 4px;
+    }
+
+    &--percent {
+        width: 36px;
+    }
+
+    &--icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+    }
+}

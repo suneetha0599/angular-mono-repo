@@ -1,0 +1,260 @@
+<div class="h-100 overflow-hidden flex gap-2 flex-col">
+    <div class="flex flex-row gap-2 pt-3 px-3">
+        <div class="flex flex-col p-3 border-1 border-gray-200 w-60 rounded-md gap-2"
+            style="background-color: #F8F8F8;">
+            <div class="font-sm text-black mb-1" style="font-weight: 500;">Triggered assessments</div>
+            <div class="text-primary text-2xl font-normal leading-8 tracking-normal">{{ triggeredCount }}</div>
+        </div>
+        <div class="flex flex-row p-3 border-1 border-gray-200 w-60 gap-20 rounded-md ">
+            <div class="flex flex-col gap-2 ">
+                <div class="font-sm text-black mb-1" style="font-weight: 500;">
+                    Vendors
+                </div>
+                <div class="text-primary text-2xl font-normal leading-8 tracking-normal">
+                    {{ vendorCount }}
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <div class="font-sm text-black mb-1" style="font-weight: 500;">Assets</div>
+                <div class="text-primary text-2xl font-normal leading-8 tracking-normal">
+                    {{ assetCount }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-auto rounded-lg no-scrollbar m-3">
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+            <div class="px-2.5 py-3 bg-[#F3F4F6]">
+                <button class="w-full flex items-center justify-between bg-transparent border-0 cursor-pointer"
+                    (click)="toggleSection('assessment')">
+                    <div class="font-semibold text-sm">
+                        Assessments
+                    </div>
+                    <mat-icon class="material-symbols-outlined">
+                        {{ isExpanded('assessment') ? 'arrow_drop_up' : 'arrow_drop_down' }}
+                    </mat-icon>
+                </button>
+            </div>
+            <div *ngIf="isExpanded('assessment')">
+                @if (!requestLoading && assessmentDataSource.data.length > 0) {
+                <table mat-table [dataSource]="requestLoading ? shimmerDataSource : assessmentDataSource"
+                    class="mat-elevation-z8 w-100 custom-table table">
+                    <ng-container matColumnDef="id">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Assessment ID </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else idContent">
+                                <div class="shimmer-line shimmer-sm"></div>
+                            </ng-container>
+                            <ng-template #idContent>
+                                {{ row.id }}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Assessment Name </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else nameContent">
+                                <div class="shimmer-line shimmer-md"></div>
+                            </ng-container>
+                            <ng-template #nameContent>
+                                {{ row.name }}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else statusContent">
+                                <div class="shimmer-line shimmer-md"></div>
+                            </ng-container>
+                            <ng-template #statusContent>
+                                <span class="font-medium w-30" style="padding:4px 12px; border-radius:16px;"
+                                    [ngStyle]="getStatusStyle(row.status)">
+                                    {{ getStatus(row.status) }}
+                                </span>
+                            </ng-template>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef> Actions </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else actionContent">
+                                <div class="shimmer-line shimmer-sm"></div>
+                            </ng-container>
+                            <ng-template #actionContent>
+                                <loading-button type="light" [basicButton]="true">
+                                    {{ row.status === 'NOT_STARTED' ? 'Start assessment' : 'Continue' }}
+                                </loading-button>
+                            </ng-template>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="assessmentColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: assessmentColumns;"></tr>
+                </table>
+                } @else if (!requestLoading && assessmentDataSource.data.length === 0) {
+                <item-not-found [imgHeight]="'120px'"></item-not-found>
+                }
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+            <div class="px-2.5 py-3 bg-[#F3F4F6]">
+                <button class="w-full flex items-center justify-between bg-transparent border-0 cursor-pointer"
+                    (click)="toggleSection('vendor')">
+                    <div class="font-semibold text-sm">
+                        Vendor
+                    </div>
+                    <mat-icon class="material-symbols-outlined">
+                        {{ isExpanded('vendor') ? 'arrow_drop_up' : 'arrow_drop_down' }}
+                    </mat-icon>
+                </button>
+            </div>
+            <div *ngIf="isExpanded('vendor')">
+                @if (!requestLoading && VendorDataSource.data.length > 0) {
+                <table mat-table [dataSource]="requestLoading ? shimmerDataSource : VendorDataSource" matSort
+                    class="mat-elevation-z8 w-100 custom-table table">
+                    <ng-container matColumnDef="vendorId">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Vendor ID </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else idContent">
+                                <div class="shimmer-line shimmer-sm"></div>
+                            </ng-container>
+                            <ng-template #idContent>
+                                {{row.vendorId}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="vendor">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Vendor </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else nameContent">
+                                <div class="shimmer-line shimmer-md"></div>
+                            </ng-container>
+                            <ng-template #nameContent>
+                                {{row.vendor}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="asset">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Asset </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else assetContent">
+                                <div class="shimmer-line shimmer-md"></div>
+                            </ng-container>
+                            <ng-template #assetContent>
+                                {{row.asset}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="bpa">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> BPA </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else bpaContent">
+                                <div class="shimmer-line shimmer-md"></div>
+                            </ng-container>
+                            <ng-template #bpaContent>
+                                {{row.bpa}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="poc">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> POC </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else pocContent">
+                                <div class="shimmer-line shimmer-md"></div>
+                            </ng-container>
+                            <ng-template #pocContent>
+                                {{row.poc}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="vendorColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: vendorColumns;"></tr>
+                </table>
+                } @else if (!requestLoading && VendorDataSource.data.length === 0) {
+                <item-not-found [imgHeight]="'120px'"></item-not-found>
+                }
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3">
+            <div class="px-2.5 py-3 bg-[#F3F4F6]">
+                <button class="w-full flex items-center justify-between bg-transparent border-0 cursor-pointer"
+                    (click)="toggleSection('asset')">
+                    <div class="font-semibold text-sm">
+                        Asset
+                    </div>
+                    <mat-icon class="material-symbols-outlined">
+                        {{ isExpanded('asset') ? 'arrow_drop_up' : 'arrow_drop_down' }}
+                    </mat-icon>
+                </button>
+            </div>
+            <div *ngIf="isExpanded('asset')">
+                @if (!requestLoading && assetDataSource.data.length > 0) {
+                <table mat-table [dataSource]="requestLoading ? shimmerDataSource : assetDataSource" matSort
+                    class="mat-elevation-z8 w-100 custom-table table">
+                    <ng-container matColumnDef="assetId">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Asset ID </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else idContent">
+                                <div class="shimmer-line shimmer-sm"></div>
+                            </ng-container>
+                            <ng-template #idContent>
+                                {{row.assetId}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else nameContent">
+                                <div class="shimmer-line shimmer-sm"></div>
+                            </ng-container>
+                            <ng-template #nameContent>
+                                {{row.name}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="vendor">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Vendor </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else vendorContent">
+                                <div class="shimmer-line shimmer-sm"></div>
+                            </ng-container>
+                            <ng-template #vendorContent>
+                                {{row.vendor}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="bpa">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header> BPA </th>
+                        <td mat-cell *matCellDef="let row">
+                            <ng-container *ngIf="requestLoading; else bpaContent">
+                                <div class="shimmer-line shimmer-sm"></div>
+                            </ng-container>
+                            <ng-template #bpaContent>
+                                {{row.bpa}}
+                            </ng-template>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="assetColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: assetColumns;"></tr>
+                </table>
+                } @else if (!requestLoading && assetDataSource.data.length === 0) {
+                <item-not-found [imgHeight]="'120px'"></item-not-found>
+                }
+            </div>
+        </div>
+    </div>
+</div>

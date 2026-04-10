@@ -1,0 +1,117 @@
+<div class="d-flex flex-column  overflow-hidden view-wrapper p-3">
+  <!-- Header -->
+  <div class="flex-shrink-0 bg-white p-3 pb-0">
+    <div class="flex items-center gap-2">
+      <button (click)="goBack()"
+        class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+        <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+      </button>
+      <div class="headline-medium my-auto">Data Subject Details</div>
+    </div>
+
+    <div class="flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="text-base text-gray-600 my-1">{{ displayName }}</div>
+      </div>
+      <!-- <div class="flex gap-2">
+        <button mat-mini-fab color="primary" class="shadow-none bg-light mx-1 mat-md-fab-btn">
+          <mat-icon class="material-symbols-outlined">search</mat-icon>
+        </button>
+        <button mat-mini-fab color="primary" class="shadow-none bg-light mx-1 mat-md-fab-btn">
+          <mat-icon class="material-symbols-outlined">filter_list</mat-icon>
+        </button>
+      </div> -->
+    </div>
+
+    <!--  Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-2">
+      @if(requestData){
+      <mat-card class="p-3 rounded-xl border border-gray-200 shadow-none">
+        <div class="flex justify-between text-sm text-gray-500 mb-1">
+          <span>Total Requests</span>
+          <span class="font-semibold text-primary text-base">{{requestData.totalRequestCount}}</span>
+        </div>
+        <div class="flex mt-2 text-xs text-gray-400 gap-2 justify-content-between">
+          <div>Open: <span class="text-black">{{requestData.openRequestCount }}</span></div>
+          <div class="w-px h-4 bg-gray-300 justify-center "></div>
+          <div>Completed: <span class="text-black">{{completedRequestCount}}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="p-3 rounded-xl border border-gray-200 shadow-none">
+        <div class="text-sm text-gray-500">Expiring Soon</div>
+        <div class="text-2xl font-medium text-primary">{{ requestData.expiryRequestCount }}</div>
+      </mat-card>
+
+      <mat-card class="p-3 rounded-xl border border-blue-500 shadow-none ring-2 ring-blue-500">
+        <div class="text-sm text-gray-500">In Progress</div>
+        <div class="text-2xl font-medium text-primary">{{requestData.inProgressRequestCount}}</div>
+      </mat-card>
+      }
+    </div>
+    <!-- Table Section -->
+    <div class="title-large flex-shrink-0 my-3">Request details</div>
+  </div>
+
+
+
+  <div class="flex-1 overflow-auto p-3 pt-0 bg-white">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+      @for (header of tableHeaders; track header) {
+      <ng-container [matColumnDef]="header.columnDef">
+
+        <!-- HEADER -->
+        <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap">
+          <span class="text-grey title-small">{{ header.headerName }}</span>
+        </th>
+
+        <!-- CELL -->
+        @switch (header.key) {
+        @case (HEADER_STATUS) {
+        <td mat-cell *matCellDef="let element">
+          <div class="status p-2 d-flex align-items-center justify-content-center label-large"
+            [ngStyle]="{'background-color': getStatusColors(element.status),'color':getStatusTextColors(element.status)}">
+            {{ getStatusText(element.status) }}
+
+          </div>
+        </td>
+        }
+        @case (HEADER_NAME) {
+        <td mat-cell *matCellDef="let row" class="whitespace-nowrap" (click)="goToRequestDetails(row)">
+          <span class="label-large text-primary pointer">{{ requestRaisedName(row) }}</span>
+        </td>
+        }
+        @case (HEADER_DATE) {
+        <td mat-cell *matCellDef="let row" class=" whitespace-nowrap">
+          <span class="body-large">{{ row[header.columnDef] | date:'dd.MM.yyyy' }}</span>
+        </td>
+        }
+        @case (HEADER_THROUGH) {
+        <td mat-cell *matCellDef="let row" class=" whitespace-nowrap">
+          <div class="whitespace-nowrap">
+            {{ formatText(row.requestedBy) }}
+          </div>
+        </td>
+
+        }
+        @default {
+        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+          <span class="body-large">{{ row[header.columnDef]? row[header.columnDef]:'-' }}</span>
+        </td>
+        }
+        }
+      </ng-container>
+      }
+      <!-- Rows -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small">
+      </tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+  </div>
+
+  <mat-paginator #paginator class="bg-white" [pageSize]="pageSize" [length]="totalItems" (page)="onPageChange($event)"
+    [pageSizeOptions]="[10, 50, 100]" aria-label="Select page"></mat-paginator>
+
+</div>

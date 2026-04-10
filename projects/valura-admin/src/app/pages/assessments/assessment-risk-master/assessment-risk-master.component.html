@@ -1,0 +1,29 @@
+<app-assessment-risk-list [assessmentRiskMaster]="true"></app-assessment-risk-list>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #riskViewDrawer mode="over" position="end" class="risk-view-mat-drawer" [disableClose]="true">
+    <app-risk-view-drawer [riskData]="riskViewData" [assessmentId]="riskViewPayload?.assessmentId ?? 0"
+      [sections]="riskViewPayload?.sections || []" [isApprover]="riskViewPayload?.isApprover ?? false"
+      [isRespondent]="riskViewPayload?.isRespondent ?? false" (onClose)="closeRiskViewDrawer()"
+      (onEdit)="onRiskViewEdit($event)" (onDelete)="onRiskViewDelete($event)"
+      (onCreateTask)="onRiskViewCreateTask($event)" (onRefresh)="onRiskViewRefresh()"
+      (onNavigateToTask)="onNavigateToTask($event)" [viewMode]="true">
+    </app-risk-view-drawer>
+  </mat-drawer>
+</mat-drawer-container>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #createTaskDrawer mode="over" position="end" [disableClose]="true" class="create-task-mat-drawer">
+    @if (createTaskRiskData) {
+    <app-create-task-drawer [isRiskContext]="true" [isEditMode]="createTaskRiskData.isEditMode ?? false"
+      [task]="createTaskRiskData.taskData ?? null" [assessmentId]="createTaskRiskData.assessmentId"
+      [sections]="createTaskRiskData.sections" [risks]="createTaskRiskData.risks || []"
+      [isVendorContext]="isVendorContext"
+      [riskId]="createTaskRiskData.riskData ? 'R-' + (createTaskRiskData.riskData.riskId ?? createTaskRiskData.riskData.id ?? '') : ''"
+      [questionId]="createTaskRiskData.questionId ?? 0" [source]="createTaskRiskData.source"
+      [hideParameterFields]="createTaskRiskData.hideParameterFields ?? false" (onClose)="closeCreateTaskDrawer()"
+      (onSaveTask)="onCreateTaskSaved($event)">
+    </app-create-task-drawer>
+    }
+  </mat-drawer>
+</mat-drawer-container>

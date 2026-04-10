@@ -1,0 +1,548 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <!-- Title -->
+  <div class="p-3 pb-0">
+    <div class="d-flex justify-between">
+      <div class="headline-medium my-auto">Task Management</div>
+      <!-- <loading-button (onButtonClick)="onOpenCreateTaskDrawer()"><mat-icon
+          class="material-symbols-outlined">add</mat-icon>New Task</loading-button> -->
+    </div>
+  </div>
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        <!-- <mat-icon class="cursor-pointer icons ml-3">download</mat-icon> -->
+
+        <div class="h-full flex flex-col overflow-hidden !mb-0">
+          <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+
+            @if (!showSearch) {
+            <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()">
+              <mat-icon class="material-symbols-outlined" color="primary">search</mat-icon>
+            </button>
+            } @if (showSearch) {
+            <div class="flex items-center">
+              <mat-form-field appearance="outline" class="mat-sm-input mat-round-input enabled-mat-input search-bar">
+                <mat-icon class="material-symbols-outlined" matPrefix>search</mat-icon>
+                <input matInput [(ngModel)]="filterConfiguration.searchText" placeholder="Search..."
+                  [debounceTime]="1000" (ngModelDebounceChange)="onSearchChange()" />
+                @if (filterConfiguration.searchText) {
+                <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+                  <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+                </button>
+                }
+              </mat-form-field>
+              <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()">
+                <mat-icon class="material-symbols-outlined" color="primary">search</mat-icon>
+              </button>
+            </div>
+            }
+            <!-- <mat-slide-toggle *ngIf="!isExternalUser && !isInternalUser" color="primary" [checked]="assigned"
+            (change)="toggleAssignedSwitch($event)">
+            Assigned
+          </mat-slide-toggle> -->
+            <div class="position-relative">
+              @if(filterApplied){
+              <div class="position-absolute  right-[3px] top-[3px]">
+                <div class="custom-badge-count rounded-full"></div>
+              </div>
+              }
+              <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="searchFilter()">
+                <mat-icon class="material-symbols-outlined" color="primary">filter_list</mat-icon>
+              </button>
+            </div>
+            <!-- <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="exportReport()">
+            <mat-icon color="primary"> download</mat-icon>
+          </button> -->
+          </div>
+          @if(filterApplied){
+          <div class="d-flex align-items-center overflow-auto scroll-w-0  !pb-0">
+            <div class="my-2 d-flex align-items-center">
+              @if(selectedStatus){
+              <div class="custom-multi-select d-flex align-items-center mr-2 mb-2"
+                [style.width.px]="showStatusFilter ? 203 : 180">
+                <button mat-button class="dropdown-button w-100 px-2"
+                  [matMenuTriggerFor]="showStatusFilter ? statusMenu : null" #statusTrigger="matMenuTrigger">
+                  @if(showStatusFilter){
+                  <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  }
+                  <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showStatusFilter }">
+                    <div class="d-flex align-items-center">
+                      <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                        Status: {{ filterConfiguration.selectedStatus[0]?.name }}
+                      </span>
+                      @if(filterConfiguration.selectedStatus.length > 1){
+                      <span class="ml-1 shrink-0 rounded-full filter-badge">
+                        +{{ filterConfiguration.selectedStatus.length - 1 }}
+                      </span>
+                      }
+                    </div>
+                    <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                      (click)=" clearSelection('status'); statusTrigger.closeMenu(); $event.stopPropagation()">
+                      close
+                    </mat-icon>
+                  </div>
+                </button>
+                <mat-menu class="status-menu filter-menu" #statusMenu="matMenu" yPosition="below" xPosition="after"
+                  (closed)="onCloseMenu(STATUS)" [overlapTrigger]="false">
+                  <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 196px;">
+                    <div class="menu-wrapper">
+                      @for (status of filterConfiguration.statusList; track status;) {
+                      <button mat-menu-item (click)="toggleSelection(STATUS, status)">
+                        <mat-checkbox [checked]="status.selected" [disabled]="status.disabled">
+                          {{ status.name }}
+                        </mat-checkbox>
+                      </button>
+                      }
+                    </div>
+                    <div class="px-2 py-1 text-end">
+                      <loading-button [smallButton]="true" (onButtonClick)="onApplyOptionFilter(STATUS, statusTrigger)">
+                        Apply
+                      </loading-button>
+                    </div>
+                  </div>
+                </mat-menu>
+              </div>
+              }
+
+              @if(selectedLOE){
+              <div class="custom-multi-select d-flex align-items-center mr-2 mb-2"
+                [style.width.px]="showLOEfilter ? 203 : 180">
+                <button mat-button class="dropdown-button w-100 px-2"
+                  [matMenuTriggerFor]="showLOEfilter ? loemenu : null" #loeTrigger="matMenuTrigger">
+                  @if(showLOEfilter){
+                  <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  }
+                  <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showLOEfilter }">
+                    <div class="d-flex align-items-center">
+                      <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                        LOE: {{ filterConfiguration.selectedLOE[0]?.value }}
+                      </span>
+                      @if(filterConfiguration.selectedLOE.length > 1){
+                      <span class="ml-1 shrink-0 rounded-full filter-badge">
+                        +{{ filterConfiguration.selectedLOE.length - 1 }}
+                      </span>
+                      }
+                    </div>
+                    <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                      (click)=" clearSelection('loe'); loeTrigger.closeMenu(); $event.stopPropagation()">
+                      close
+                    </mat-icon>
+                  </div>
+                </button>
+                <mat-menu class="status-menu filter-menu" #loemenu="matMenu" yPosition="below" xPosition="after"
+                  (closed)="onCloseMenu(LOE)" [overlapTrigger]="false">
+                  <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 196px;">
+                    <div class="menu-wrapper">
+                      @for (loe of filterConfiguration.effortlevels; track loe;) {
+                      <button mat-menu-item (click)="toggleSelection(LOE, loe)">
+                        <mat-checkbox [checked]="loe.selected" [disabled]="loe.disabled">
+                          {{ loe.value }}
+                        </mat-checkbox>
+                      </button>
+                      }
+                    </div>
+                    <div class="px-2 py-1 text-end">
+                      <loading-button [smallButton]="true" (onButtonClick)="onApplyOptionFilter(LOE, loeTrigger)">
+                        Apply
+                      </loading-button>
+                    </div>
+                  </div>
+                </mat-menu>
+              </div>
+              }
+
+              @if(selectedPriority){
+              <div class="custom-multi-select d-flex align-items-center mr-2 mb-2"
+                [style.width.px]="showPriorityfilter ? 203 : 180">
+                <button mat-button class="dropdown-button w-100 px-2"
+                  [matMenuTriggerFor]="showPriorityfilter ? prioritymenu : null" #priorityTrigger="matMenuTrigger">
+                  @if(showPriorityfilter){
+                  <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  }
+                  <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showPriorityfilter }">
+                    <div class="d-flex align-items-center">
+                      <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                        Priority: {{ filterConfiguration.selectedPriority[0]?.value }}
+                      </span>
+                      @if(filterConfiguration.selectedPriority.length > 1){
+                      <span class="ml-1 shrink-0 rounded-full filter-badge">
+                        +{{ filterConfiguration.selectedPriority.length - 1 }}
+                      </span>
+                      }
+                    </div>
+                    <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                      (click)=" clearSelection('priority'); priorityTrigger.closeMenu(); $event.stopPropagation()">
+                      close
+                    </mat-icon>
+                  </div>
+                </button>
+                <mat-menu class="status-menu filter-menu" #prioritymenu="matMenu" yPosition="below" xPosition="after"
+                  (closed)="onCloseMenu(PRIORITY)" [overlapTrigger]="false">
+                  <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 196px;">
+                    <div class="menu-wrapper">
+                      @for (priority of filterConfiguration.priorityOptions; track priority.id;) {
+                      <button mat-menu-item (click)="toggleSelection(PRIORITY, priority)">
+                        <mat-checkbox [checked]="priority.selected" [disabled]="priority.disabled">
+                          {{ priority.value }}
+                        </mat-checkbox>
+                      </button>
+                      }
+                    </div>
+                    <div class="px-2 py-1 text-end">
+                      <loading-button [smallButton]="true"
+                        (onButtonClick)="onApplyOptionFilter(PRIORITY, priorityTrigger)">
+                        Apply
+                      </loading-button>
+                    </div>
+                  </div>
+                </mat-menu>
+              </div>
+              }
+
+              @if(selectedAssignee && !showAssignedToFilter){
+              <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap"
+                [style.width.px]="showAssigneefilter ? 242 : 225">
+                <button mat-button class="dropdown-button  w-100 px-2"
+                  [matMenuTriggerFor]="showAssigneefilter ? assigneemenu : null" #assigneeTrigger="matMenuTrigger">
+                  @if(showAssigneefilter){
+                  <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  }
+                  <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showAssigneefilter }">
+                    <div class="d-flex align-items-center">
+                      <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                        Assignor: {{ getDisplayName(filterConfiguration.selectedAsssignee[0])}}
+                      </span>
+                      @if(filterConfiguration.selectedAsssignee.length > 1){
+                      <span class="ml-1 shrink-0 rounded-full filter-badge">
+                        +{{ filterConfiguration.selectedAsssignee.length - 1 }}
+                      </span>
+                      }
+                    </div>
+                    <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                      (click)=" clearSelection('assignee'); assigneeTrigger.closeMenu(); $event.stopPropagation()">
+                      close
+                    </mat-icon>
+                  </div>
+                </button>
+                <mat-menu class="status-menu filter-menu" #assigneemenu="matMenu" yPosition="below" xPosition="after"
+                  (closed)="onCloseMenu(ASSIGNEE)" [overlapTrigger]="false">
+                  <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 225px;">
+                    <div class="menu-wrapper">
+                      @for (assignee of filterConfiguration.assignerList; track assignee;) {
+                      <button mat-menu-item (click)="toggleSelection(ASSIGNEE, assignee)">
+                        <mat-checkbox [checked]="assignee.selected">
+                          {{ getDisplayName(assignee) }}
+                        </mat-checkbox>
+                      </button>
+
+                      }
+                    </div>
+                    <div class="px-2 py-1 text-end">
+                      <loading-button [smallButton]="true"
+                        (onButtonClick)="onApplyOptionFilter(ASSIGNEE, assigneeTrigger)">
+                        Apply
+                      </loading-button>
+                    </div>
+                  </div>
+                </mat-menu>
+              </div>
+              }
+
+              @if(selectedAssignedTo && showAssignedToFilter){
+              <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap"
+                [style.width.px]="showAssignedTo ? 242 : 225">
+                <button mat-button class="dropdown-button  w-100 px-2"
+                  [matMenuTriggerFor]="showAssignedTo ? assignedToMenu : null" #assignedToTrigger="matMenuTrigger">
+                  @if(showAssignedTo){
+                  <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  }
+                  <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showAssignedTo }">
+                    <div class="d-flex align-items-center">
+                      <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                        Assigned To:
+                        {{ getDisplayName(filterConfiguration.selectedAssignedTo[0])}}
+                      </span>
+                      @if(filterConfiguration.selectedAssignedTo.length > 1){
+                      <span class="ml-1 shrink-0 rounded-full filter-badge">
+                        +{{ filterConfiguration.selectedAssignedTo.length - 1 }}
+                      </span>
+                      }
+                    </div>
+                    <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                      (click)="clearSelection('assignedTo');assignedToTrigger.closeMenu(); $event.stopPropagation()">
+                      close
+                    </mat-icon>
+                  </div>
+                </button>
+                <mat-menu class="assigned-to-menu filter-menu" #assignedToMenu="matMenu" yPosition="below"
+                  xPosition="after" (closed)="onCloseMenu(ASSIGNED_TO)" [overlapTrigger]="false">
+                  <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 225px;">
+                    <div class="menu-wrapper">
+                      @for (assignedTo of filterConfiguration.assignedToList; track assignedTo;)
+                      {
+                      <button mat-menu-item (click)="toggleSelection(ASSIGNED_TO, assignedTo)">
+                        <mat-checkbox [checked]="assignedTo.selected">
+                          {{ getDisplayName(assignedTo)}}
+                        </mat-checkbox>
+                      </button>
+                      }
+                    </div>
+                    <div class="px-2 py-1 text-end">
+                      <loading-button [smallButton]="true"
+                        (onButtonClick)=" onApplyOptionFilter(ASSIGNED_TO,assignedToTrigger)">
+                        Apply
+                      </loading-button>
+                    </div>
+                  </div>
+                </mat-menu>
+              </div>
+              }
+
+              @if (filterConfiguration.fromDate) {
+              <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap"
+                [style.width.px]="filterConfiguration.fromDate ? 186 : 200">
+                <button mat-button class="dropdown-button  w-100 px-2" [matMenuTriggerFor]="fromMenu"
+                  #fromMenuTrigger="matMenuTrigger" (menuOpened)="syncTempDate('from')"
+                  (menuClosed)="syncTempDate('from')">
+                  <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  <div class="d-flex align-items-center">
+                    <div class="date-range">
+                      From : {{ filterConfiguration.fromDate | date : "dd/MM/yyyy" }}
+                    </div>
+                    <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                      (click)="clearSelection('fromDate'); fromMenuTrigger.closeMenu();$event.stopPropagation()">
+                      close
+                    </mat-icon>
+                  </div>
+                </button>
+                <mat-menu #fromMenu="matMenu" class="assigned-to-menu filter-menu">
+                  <div (click)="stopDefaultBehaviour($event)" class="p-2">
+                    <mat-form-field appearance="outline" class="w-full mat-md-input">
+                      <mat-label>From</mat-label>
+                      <input matInput [matDatepicker]="fromPicker" [ngModel]="filterConfiguration.tempFromDate"
+                        (ngModelChange)="filterConfiguration.tempFromDate = $event" [max]="maxDateFilter" />
+                      <mat-datepicker-toggle matIconSuffix [for]="fromPicker">
+                        <mat-icon matDatepickerToggleIcon class="calendar-md-icon material-symbols-outlined">
+                          calendar_month
+                        </mat-icon>
+                      </mat-datepicker-toggle>
+                      <mat-datepicker #fromPicker></mat-datepicker>
+                    </mat-form-field>
+                    <div class="px-2 py-1 text-end mt-2">
+                      <loading-button [smallButton]="true" (onButtonClick)="applyDateFilter(fromMenuTrigger)">
+                        Apply
+                      </loading-button>
+                    </div>
+                  </div>
+                </mat-menu>
+              </div>
+              }
+              <!-- To Date -->
+              @if (filterConfiguration.toDate) {
+              <div class="custom-multi-select d-flex align-items-center mr-2 mb-2 whitespace-nowrap">
+                <button mat-button class="dropdown-button  w-100 px-2" [matMenuTriggerFor]="toMenu"
+                  #toMenuTrigger="matMenuTrigger" (menuOpened)="syncTempDate('to')" (menuClosed)="syncTempDate('to')">
+                  <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                  <div class="d-flex align-items-center">
+                    <div class="date-range">
+                      To : {{ filterConfiguration.toDate | date : "dd/MM/yyyy" }}
+                    </div>
+                    <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                      (click)="clearSelection('toDate');toMenuTrigger.closeMenu(); $event.stopPropagation()">
+                      close
+                    </mat-icon>
+                  </div>
+                </button>
+                <mat-menu #toMenu="matMenu" class="assigned-to-menu filter-menu">
+                  <div (click)="stopDefaultBehaviour($event)" class="p-2">
+                    <mat-form-field appearance="outline" class="w-full mat-md-input">
+                      <mat-label>To</mat-label>
+                      <input matInput [matDatepicker]="toPicker" [ngModel]="filterConfiguration.tempToDate"
+                        (ngModelChange)="filterConfiguration.tempToDate = $event" [min]="minToDateFilter" />
+                      <mat-datepicker-toggle matIconSuffix [for]="toPicker">
+                        <mat-icon matDatepickerToggleIcon class="calendar-md-icon material-symbols-outlined">
+                          calendar_month
+                        </mat-icon>
+                      </mat-datepicker-toggle>
+                      <mat-datepicker #toPicker></mat-datepicker>
+                    </mat-form-field>
+                    <div class="px-2 py-1 text-end mt-2">
+                      <loading-button [smallButton]="true" (onButtonClick)="applyDateFilter(toMenuTrigger)">
+                        Apply
+                      </loading-button>
+                    </div>
+                  </div>
+                </mat-menu>
+              </div>
+              }
+            </div>
+            @if (selectedStatus || selectedAssignedTo ||filterConfiguration.toDate||filterConfiguration.fromDate) {
+            <div class="d-flex my-auto justify-content-center">
+              <button mat-button class="button mb-2  whitespace-nowrap" (click)="resetAllFilter()">
+                <mat-icon class="cursor-pointer material-symbols-outlined">close</mat-icon>
+                Clear all
+              </button>
+            </div>
+            }
+          </div>
+          }
+          <div #scrollContainer class="flex-1 rounded-lg no-scrollbar table-scroll-container">
+            @if(!requestLoading && hasApiError){
+            <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+            }
+            @else if(!requestLoading && isEmptyRequest){
+            <item-not-found [imgHeight]="'200px'" [heading]=errorTitle></item-not-found>
+            }
+            @else{
+            <ng-container *ngTemplateOutlet="ngTemplateTable;context: { dataSourceData: dataSource }"></ng-container>
+            }
+          </div>
+          <div class="bg-white z-1">
+            <mat-paginator #paginator class="bg-white" [pageSize]="pageSize" [length]="totalItems"
+              (page)="onPageChange($event)" [pageSizeOptions]="[10, 50, 100]" aria-label="Select page"></mat-paginator>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #ngTemplateTable let-dataSourceData="dataSourceData" let-subTask="subTask" let-allSubTasks="allSubTasks">
+  <!-- Class  table-layout-fixed & + (header.stickyEnd ? ' sticky-header' : '') is removed, if subtask is concept is added then add this class -->
+  <table mat-table [dataSource]="isLoading ? shimmerDataSource : dataSourceData" matSort [class]="
+  'mat-elevation-z8 w-100 custom-table table ' +
+  (subTask ? ' subtask-table' : '')
+  " multiTemplateDataRows (matSortChange)="onSortChange($event)">
+    @for (header of tableHeaders; track header.id;let i = $index; let isFirst=$first) {
+    <ng-container [matColumnDef]="header.columnDef" [stickyEnd]="header.stickyEnd ?? false">
+      <!-- HEADER -->
+      <ng-container
+        *ngIf="header.columnDef === 'assigneeToUserName' || header.columnDef === 'actions'; else sortableHeader">
+        <th mat-header-cell *matHeaderCellDef [class]="'px-4 title-small whitespace-nowrap header-bg z-1'"
+          [style.width]="header.width" disableClear="true" [style.maxWidth]="header.maxWidth">
+          <ng-container>
+            <span class="text-grey title-small">{{ header.headerName }}</span>
+          </ng-container>
+        </th>
+      </ng-container>
+      <ng-template #sortableHeader>
+        <th mat-header-cell *matHeaderCellDef
+          [mat-sort-header]="!isLoading && header.sortable ? header.columnDef : null" [style.maxWidth]="header.maxWidth"
+          [class]="'px-4 title-small whitespace-nowrap header-bg z-1'" [style.width]="header.width" disableClear="true">
+          <ng-container>
+            <span class="text-grey title-small">{{ header.headerName }}</span>
+          </ng-container>
+        </th>
+      </ng-template>
+
+      <!-- CELL -->
+      <td mat-cell *matCellDef="let row" [class]="header.stickyEnd ? 'sticky-cell' : ''"
+        [style.maxWidth]="header.maxWidth" [style.width]="header.width">
+
+        <!-- Show shimmer only for first 7 cols -->
+        <ng-container *ngIf="isLoading && i < tableColumnCount">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+
+        <ng-container *ngIf="!isLoading">
+          @switch (header.key) {
+          @case (HEADER_STATUS) {
+          <div class="status p-2 d-flex align-items-center justify-content-center label-large"
+            [style.width]="header.width"
+            [ngStyle]="{ 'background-color': getStatusColors(row.state), color: getStatusTextColors(row.state)}">
+            <span>{{ getStatusText(row.status) }}</span>
+          </div>
+          }
+          @case (HEADER_NAME) {
+          <div class="d-flex">
+            <span [appEllipsisTooltip]="row[header.columnDef]" [colorType]="'primary'"
+              [matTooltip]="row[header.columnDef]" matTooltipPosition="below" matTooltipClass="material-tooltip"
+              (click)="viewTaskDetail(row)">
+            </span>
+          </div>
+          }
+          @case (HEADER_DESC) {
+          <span class="label-large" [title]="row[header.columnDef]">
+            {{ row[header.columnDef] }}
+          </span>
+          }
+          @case (HEADER_DATE) {
+          <span class="body-large">
+            {{ row[header.columnDef] ? (row[header.columnDef] | date : "dd.MM.yyyy") : "-" }}
+          </span>
+          }
+          @case (HEADER_ACTION) {
+          <button mat-icon-button [matMenuTriggerFor]="menu" [disabled]="!editTaskRequest">
+            <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+          </button>
+          <mat-menu class="action-panel" #menu="matMenu" xPosition="before">
+            <!-- @if(!row.parentTaskId){
+         <button mat-menu-item (click)="openCreateSubTaskDialog(row)">Add Subtask</button>
+         }
+         @if(row.parentTaskId){
+         <button mat-menu-item (click)="openCreateSubTaskDialog(row)">Details</button>
+         <button mat-menu-item (click)="deleteSubTaskDetails(row)">Delete</button>
+         } -->
+            <button mat-menu-item (click)="viewTaskDetail(row)">View</button>
+            <button mat-menu-item (click)="deleteTask(row)">Delete</button>
+          </mat-menu>
+          }
+          @case (HEADER_PRIORITY) {
+          <span class="label-large flex items-center" [ngStyle]="{ color: getPriorityTextColor(row.priority) }">
+
+            <mat-icon class="material-symbols-outlined !text-base">
+              {{ getPriorityIcon(row.priority) }}
+            </mat-icon>
+
+            {{ getPriority(row.priority) }}
+          </span>
+
+          }
+          @case (HEADER_LOE) {
+          <span class="label-large">
+            {{ getEffortLevel(row.levelOfEffort) }}
+          </span>
+          }
+          @case (HEADER_ASSIGNEE) {
+          <span class="body-large">
+            {{ getAssigneeName(row) }}
+          </span>
+          }
+          @default {
+          <div class="body-large">
+            {{ row[header.columnDef] ? row[header.columnDef] : "-" }}
+          </div>
+          }
+          }
+        </ng-container>
+      </td>
+
+    </ng-container>
+    }
+    <ng-container matColumnDef="subTaskDetail">
+      <td mat-cell *matCellDef="let row" [attr.colspan]="displayedHeaders.length" class="px-0 subtask-container">
+        <div class="subtask-wrapper">
+          <ng-container
+            *ngTemplateOutlet="ngTemplateTable; context: {dataSourceData: row.subTasks, subTask: true, allSubTasks: row.subTasks}">
+          </ng-container>
+        </div>
+      </td>
+    </ng-container>
+    <!-- Rows -->
+    @if(!subTask){
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true" class="bg-gray-100 title-small"></tr>
+    }
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders"></tr>
+    <tr mat-row *matRowDef="let row; columns: ['subTaskDetail']; when: hasSubTasks"></tr>
+  </table>
+</ng-template>
+<mat-drawer-container class="right-sidebar mat-md-drawer" [hasBackdrop]="true" autosize>
+  <mat-drawer #rightDrawer class="" mode="over" position="end">
+    @if(filterConfiguration){
+    <dsr-drawer-content [isFromTask]="true" [viewType]="'FILTER'" [filterConfiguration]="filterConfiguration"
+      [selectedTab]="selectedTab" (onCloseDrawer)="rightDrawer.toggle()"
+      (onApplyFilter)="onApplyDrawerFilter($event)"></dsr-drawer-content>
+    }
+  </mat-drawer>
+</mat-drawer-container>

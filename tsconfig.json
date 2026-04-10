@@ -18,6 +18,15 @@
     "target": "ES2022",
     "module": "ES2022",
     "paths": {
+      "@admin-core/*": [
+        "./projects/valura-admin/src/app/core/*"
+      ],
+      "@admin-page/*": [
+        "./projects/valura-admin/src/app/pages/*"
+      ],
+      "@valura-lib/*": [
+        "./projects/valura-lib/src/lib/*"
+      ],
       "valura-lib": [
         "./dist/valura-lib"
       ]

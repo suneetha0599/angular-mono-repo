@@ -1,0 +1,607 @@
+<div class="p-3 pb-0">
+  <div class="d-flex justify-between">
+    <div class="headline-medium leading-7 text-black m-0">
+      {{title }}
+    </div>
+    @if(data.viewType == TaskDialogTypes.CLARIFICATION && positiveButtonLabel){
+    <loading-button type="primary" class="me-2" [disabled]="submitLoading()" (onButtonClick)="completeStage()">
+      {{positiveButtonLabel}}
+    </loading-button>
+    }
+  </div>
+  <div class="text-sm font-normal text-[#161D1D] tracking-[0.5px] m-0 w-4/5">
+    {{description}}
+  </div>
+  <div class="h-0 border-t mt-2"
+    style="border-top-width: 0.1px; border-style: dashed; border-color: #AFAFAF; border-image: repeating-linear-gradient(to right, #AFAFAF 0, #AFAFAF 6px, transparent 6px, transparent 10px) 100;">
+  </div>
+</div>
+
+<div mat-dialog-content class="m-0 p-3" style="height: 75vh;">
+  <!-- Horizontal Divider -->
+
+  <!-- Main Content Section -->
+  <div class="flex flex-row items-center h-100">
+    <ng-container *ngTemplateOutlet="ngTemplateTabMainContent; context:{}">
+    </ng-container>
+  </div>
+</div>
+
+<div mat-dialog-actions class="mx-3 mb-3 flex justify-center  border-t"
+  style="border-top-width: 0.1px; border-style: dashed; border-color: #AFAFAF; border-image: repeating-linear-gradient(to right, #AFAFAF 0, #AFAFAF 6px, transparent 6px, transparent 10px) 100;">
+</div>
+
+
+<!-- Main Content -->
+<ng-template #ngTemplateTabMainContent>
+  <!-- Main content area -->
+  <div class="d-flex flex-column h-100  w-100 overflow-hidden">
+    <div class="d-flex main-wrapper overflow-hidden position-relative h-100  w-100">
+      <div
+        class="w-[350px] min-w-[330px] bg-white border-[0.2px] border-solid border-[#CFCFCF] rounded-xl h-100  overflow-auto ">
+        <mat-tab-group disableRipple animationDuration="300ms" mat-align-tabs="start"
+          class="mat-tab-100 mat-tab-disable-ripple tab-highlight mat-tab-scroll-0 mat-tab-flex-0  mat-tab-padding-sm"
+          (selectedTabChange)="setActiveTab($event)" [selectedIndex]="selectedRequestLeftIndex">
+          @for (tab of tabs; track tab.id) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="title-small text-primary">{{tab.label}}</span>
+            </ng-template>
+            <ng-container *ngTemplateOutlet="ngTemplateTabLeftContent; context:{}">
+            </ng-container>
+          </mat-tab>
+          }
+        </mat-tab-group>
+      </div>
+      <div class="h-full w-0 border-l mx-3"
+        style="border-left-width: 0.1px; border-style: dashed; border-color: #AFAFAF; border-image: repeating-linear-gradient(to bottom, #AFAFAF 0, #AFAFAF 6px, transparent 6px, transparent 10px) 100;">
+      </div>
+      <!-- Right table panel -->
+      <div class="col w-100 h-100 overflow-auto">
+        <ng-container *ngTemplateOutlet="ngTemplateTabRightContent; context:{}">
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Left Content -->
+<ng-template #ngTemplateTabLeftContent>
+  <div #scrollContainer class="d-flex overflow-hidden position-relative h-100 p-3">
+    <div class="w-100 h-100 overflow-auto scroll-w-0">
+      @if (isTabLoading()) {
+      <div class="shimmer-wrapper inset-0 z-10 bg-white" style="transition: opacity 0.3s ease-in-out;">
+        <!-- Comments Shimmer -->
+        @if (activeTab() === 'comments') {
+        <div class="flex flex-col gap-4">
+          <div class="shimmer-card h-[80px] rounded-lg"></div>
+          <div class="shimmer-card h-[60px] rounded-lg ml-12"></div>
+          <div class="shimmer-card h-[75px] rounded-lg"></div>
+          <div class="shimmer-card h-[65px] rounded-lg ml-12"></div>
+          <div class="shimmer-card h-[70px] rounded-lg"></div>
+        </div>
+        }
+        <!-- Details Shimmer -->
+        @if (activeTab() === 'details') {
+        <div class="flex flex-col gap-4">
+          <div class="shimmer-card h-[40px] rounded-lg"></div>
+          <div class="shimmer-card h-[30px] rounded-lg w-3/4"></div>
+          <div class="shimmer-card h-[30px] rounded-lg w-1/2"></div>
+          <div class="shimmer-card h-[30px] rounded-lg w-2/3"></div>
+          <div class="shimmer-card h-[20px] rounded-lg w-full"></div>
+          <div class="shimmer-card h-[15px] rounded-lg w-1/3"></div>
+        </div>
+        }
+        <!-- Documents Shimmer -->
+        @if (activeTab() === 'documents') {
+        <div class="flex flex-col gap-3">
+          <div class="shimmer-card h-[35px] rounded-lg"></div>
+          <div class="shimmer-card h-[25px] rounded-lg w-4/5"></div>
+          <div class="shimmer-card h-[20px] rounded-lg w-3/4"></div>
+          <div class="shimmer-card h-[20px] rounded-lg w-2/3"></div>
+          <div class="shimmer-card h-[20px] rounded-lg w-3/5"></div>
+          <div class="shimmer-card h-[20px] rounded-lg w-4/5"></div>
+          <div class="shimmer-card h-[20px] rounded-lg w-1/2"></div>
+        </div>
+        }
+      </div>
+      }
+      <!-- Actual Tab Content -->
+      <div [class.tab-content-hidden]="isTabLoading()" class="tab-content"
+        style="transition: opacity 0.3s ease-in-out;">
+        <!-- Comments Content -->
+        @if (activeTab() === 'comments') {
+        <ng-container *ngTemplateOutlet="commentsTab"></ng-container>
+        }
+        <!-- Documents Content -->
+        @else if (activeTab() === 'documents') {
+        <div class="w-full h-full overflow-hidden">
+          <div class="w-full h-full overflow-auto scroll-w-0" [ngClass]="{
+                  'flex items-center justify-center': !(data.documents.length),
+                  'col': data.documents.length
+                  }">
+
+            @if(data.documents.length) {
+            @for(docPath of data.documents; track docPath) {
+            <div class="flex w-full mt-2 items-center justify-between border-b border-gray-200 last:border-b-0">
+              <div class="flex items-center">
+                <mat-icon class="material-symbols-outlined fontColor me-2">description</mat-icon>
+                <span>{{ getFileName(docPath) }}</span>
+              </div>
+              <button mat-icon-button color="primary" (click)="downloadDocument(docPath)">
+                <span class="material-symbols-outlined">download</span>
+              </button>
+            </div>
+            }
+            }
+            @else {
+            <div class="empty-wrapper">
+              <div class="text-gray-500 body-large">No documents available</div>
+            </div>
+            }
+          </div>
+        </div>
+        }
+        <!-- Details Content -->
+        @else{
+        <div class="scroll-w-0 h-100">
+          @if(data.dsrDetails) {
+          <div class="border rounded-md bg-gray-50 p-2 mb-3">
+            <p class="title-medium fontColor mb-1">
+              {{ data.dsrDetails.fullName }}
+              @if(data.dsrDetails.dataSubjectTypeId) {
+              <span class="ml-2 px-2 py-1 border-md rounded-full body-small bg-white fontColor">
+                {{ data.dsrDetails.dataSubjectTypeId }}
+              </span>
+              }
+            </p>
+            <p class="text-gray-500 body-large mb-1">{{ data.dsrDetails.email }}</p>
+            <p class="text-gray-500 mb-0 body-large">{{ data.dsrDetails.phoneNumber }}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-gray-700">
+            <div>
+              <div class="text-gray-500 label-small">Assigned to</div>
+              <div class="body-large">{{ data.dsrDetails.assignedTo || '---' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 label-small">Status</div>
+              <div class="body-large">{{ data.dsrDetails.status }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 label-small">Email</div>
+              <div class="body-large">{{ data.dsrDetails.email }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 label-small">Request Type</div>
+              <div class="body-large">{{ data.dsrDetails.dsrRightId }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 label-small">Request Channel</div>
+              <div class="body-large">{{ data.dsrDetails.channel }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 label-small">Through</div>
+              <div class="body-large">{{ data.dsrDetails.requestedThrough }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 label-small">Raised On</div>
+              <div class="body-large">{{ data.dsrDetails.raisedOn | date:'dd.MM.yyyy' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 label-small">Expires on</div>
+              <div class="body-large">{{ data.dsrDetails.expiresOn | date:'dd.MM.yyyy' }}</div>
+            </div>
+            <div class="col-span-2">
+              <div class="text-gray-500 label-small">Description</div>
+              <p class="body-large">{{ data.dsrDetails.description }}</p>
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Right Tab Content -->
+<ng-template #ngTemplateTabRightContent>
+  <!-- Right Panel -->
+  @if (data.viewType == TaskDialogTypes.TASK) {
+  @if(showAddRecordForm){
+  <!-- Add Record Form Panel (Initially Hidden) -->
+  <div
+    class="h-100 p-3 bg-white border-[0.2px] border-solid border-[#CFCFCF] rounded-xl flex flex-col transition-transform duration-300 ease-in-out">
+    <div class="flex flex-row justify-between items-center w-full mb-3">
+      <div class="headline-medium leading-7 text-black m-0">
+        Add record
+      </div>
+      <loading-button type="secondary" class="me-2" (onButtonClick)="cancelAddRecord()">
+        Cancel
+      </loading-button>
+    </div>
+    <form [formGroup]="addRecordForm" (ngSubmit)="saveAndContinue()" class="flex-1 overflow-x-auto no-scrollbar">
+      <div class="grid grid-cols-12  gap-2 mb-4">
+        <!-- Attribute Name Field -->
+        <div class="col-span-6">
+          <div>
+            <mat-form-field appearance="outline" class="w-full mat-md-input mat-mdc-mb-0">
+              <mat-label> Attribute name</mat-label>
+              <input matInput formControlName="attributeName">
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="col-span-6"></div>
+      </div>
+      <div class="grid grid-cols-12 gap-2  mb-4">
+        <!-- Category and Purpose Fields -->
+        <div class="col-span-6">
+          <mat-form-field appearance="outline" class="w-full mat-md-input ">
+            <mat-label>Category</mat-label>
+            <input matInput formControlName="category">
+          </mat-form-field>
+        </div>
+        <div class="col-span-6">
+          <mat-form-field appearance="outline" class="w-full mat-md-input">
+            <mat-label>Purpose</mat-label>
+            <input matInput formControlName="purpose">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="grid grid-cols-12  gap-2 mb-4">
+        <!-- Found In and Exemption Fields -->
+        <div class="col-span-6">
+          <mat-form-field appearance="outline" class="w-full mat-md-input">
+            <mat-label>Found in</mat-label>
+            <input matInput formControlName="foundIn">
+          </mat-form-field>
+        </div>
+        <div class="col-span-6">
+          <mat-form-field appearance="outline" class="w-full mat-md-input">
+            <mat-label>Exemption</mat-label>
+            <input matInput formControlName="exemption">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="grid grid-cols-12 gap-2 mb-4">
+        <div class="col-span-6">
+          <!-- Justification Field -->
+          <app-custom-mat-textarea [label]="Justification" [minRows]="1" [maxRows]="5">
+          </app-custom-mat-textarea>
+
+        </div>
+        <div class="col-span-6"></div>
+      </div>
+    </form>
+    <div class="flex justify-end items-center my-auto">
+      <loading-button [isSubmitButton]="true" [loading]="isSaveLoading" [disabled]="addRecordForm.invalid"
+        class="disabled:cursor-not-allowed">
+        Save and continue
+      </loading-button>
+    </div>
+  </div>
+  }
+  @else{
+  <!-- Data Table Panel -->
+  <div
+    class="h-100 p-3 bg-white border-[0.2px] border-solid border-[#CFCFCF] rounded-xl flex flex-col transition-transform duration-300 ease-in-out">
+    <div class="flex justify-between items-center mb-3">
+      <div class="headline-medium leading-7 text-black m-0">
+        {{title }}
+      </div>
+      <loading-button type="secondary" class="me-2" (onButtonClick)="addRecords()">
+        Add record
+      </loading-button>
+    </div>
+    <div class="flex-1 overflow-x-auto no-scrollbar">
+      <ng-container
+        *ngTemplateOutlet="ngTemplateTable; context:{dataSource:dataFullFillmentRecordsData, tableHeaders:headers, displayedHeaders:displayedColumns}">
+      </ng-container>
+    </div>
+  </div>
+  }
+  }
+  @if (data.viewType == TaskDialogTypes.CLARIFICATION) {
+  <div
+    class="h-100 p-3 bg-white border-[0.2px] border-solid border-[#CFCFCF] rounded-xl flex flex-col transition-transform duration-300 ease-in-out">
+    @for (tab of rightPanelTabs; track tab.id) {
+    @if (activeCommentTab() === tab.id) {
+    <ng-container *ngTemplateOutlet="tab.id === 'comments' ? commentsTab
+         : tab.id === 'attachments' ? attachmentsTab
+         : null">
+    </ng-container>
+    }
+    }
+  </div>
+  }
+
+</ng-template>
+
+<!-- Comments -->
+<ng-template #commentsTab>
+  <div class="flex-1 overflow-x-auto no-scrollbar">
+    <canvas #threadingCanvas class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
+    <div class="flex flex-col w-full p-2 gap-[15px]  relative z-10">
+      @for (comment of commentsData; track trackByCommentId($index, comment)) {
+      <div class="flex flex-col" [ngClass]="{'ml-12': comment.isReply}" [id]="'comment-' + comment.id">
+        <!-- Comment Header with Avatar -->
+        <div class="flex items-center gap-[25px] mb-2">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-[#902EE5] rounded-full flex items-center justify-center border border-white avatar">
+            <span class="text-white text-lg font-semibold" style="font-family: 'Roboto', sans-serif;">
+              {{ comment.avatar }}
+            </span>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm font-normal text-black leading-[17px]" style="font-family: 'Inter', sans-serif;">
+              {{ comment.author }}
+            </div>
+            <div class="text-[10px] font-normal text-black leading-3" style="font-family: 'Inter', sans-serif;">
+              {{ comment.timestamp }}
+            </div>
+          </div>
+        </div>
+        <!-- Comment Content -->
+        <div class="ml-[73px] flex flex-col gap-[5px]">
+          <!-- Mention Tag -->
+          @if (comment.mention) {
+          <div class="inline-flex items-center px-[14px] py-[5px] bg-[#D9DBF5] rounded-[35px] w-fit">
+            <span class="text-sm font-normal text-[#161D1D] tracking-[0.5px] leading-[22px]"
+              style="font-family: 'Source Sans 3', sans-serif;">
+              {{ comment.mention }}
+            </span>
+          </div>
+          }
+          <!-- Comment Text -->
+          <div class="text-sm font-normal text-[#161D1D] tracking-[0.5px] leading-[22px]"
+            style="font-family: 'Source Sans 3', sans-serif;" [innerHTML]="comment.content">
+          </div>
+          @if (comment.attachments.length) {
+          <div class="flex flex-wrap gap-2 mt-1">
+            @for (file of comment.attachments; track file) {
+            <a [href]="getAttachmentUrl(file.fileKey)" target="_blank"
+              class="flex items-center bg-gray-100 px-2 py-1 rounded-full text-xs max-w-[200px] hover:bg-gray-200">
+              <span class="truncate">{{ getFileName(file.fileKey) }}</span>
+            </a>
+            }
+          </div>
+          }
+          <!-- Action Buttons -->
+          <div class="flex items-center gap-2 text-[10px] leading-3" style="font-family: 'Inter', sans-serif;">
+            <button type="button"
+              class="flex items-center gap-[5px] text-[#1868DB] hover:underline bg-transparent border-none cursor-pointer p-0"
+              (click)="onReplyComment(comment)" [attr.aria-label]="'Reply to ' + comment.author + ' comment'">
+              <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <rect x="20" y="20.75" width="20" height="20" transform="rotate(180 20 20.75)"
+                  fill="url(#pattern0_3760_18802)" />
+                <defs>
+                  <pattern id="pattern0_3760_18802" patternContentUnits="objectBoundingBox" width="1" height="1">
+                    <use xlink:href="#image0_3760_18802" transform="scale(0.01)" />
+                  </pattern>
+                  <image id="image0_3760_18802" width="100" height="100" preserveAspectRatio="none"
+                    xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAAvu95BAAAEUUlEQVR4Ae2cOWgVURiFnxIVLVxBELUSwUJxw1Is1EIbEVsxihaWLigKaqXGxkbc0CJoIWhrJUoqS8VEECwUhQgqrhgXcImeAxkYkrlz34t3Zv65c344eS9zb2b++533z53tpdVSiIAIiIAIiIAIiIAIiIAIiIAIiIAIiIAIiIAIiIAIiIAIiIAIVEFgIja6tooNa5tjCUzAoovQMLR3bLOWlEkgMeMvNkrJlDLpj9rWaDNkyihAZf7qMkOmlOnCyLZ8ZtCUP1B3Bbk1bpMyw5DlMkNmGCJgKBVVhswwRMBQKqoMmWGIgKFUVBkywxABQ6moMmSGIQKGUlFlyAxDBAylosqQGYYIGEpFlSEzDBEwlIoqowAzCHU8weemrkC7PX/ch/abnj4Wmn8jiSHoCzQIPYN+QrUImngVSh5AiPGVBj2CzkLrIH4AzcY5ZBajCXljeokxH4GmQ6aCSeUlHnvbR4z/INRlxZXFSOQ1FDt43/geg8EyK6YsRSLvZUrrOxh0hzZlvEdZK5DIPWiOJ6E3aGfidQjOD9TkDpJlJR2HTnXwN4V1pSm+SnmAPrMKyyD8ijk3cLe8A7oBfYN8uy+2n4BMRIympMHOwC8noa+QzxjfOVl6vYW+j90UwpsHsWLyTPmB9pWQiWiCKQR9COJJo8uYp2ibApmIppiyBbTzTDEzn/BT0RRT9mGsrirhgcBcwrASTTGlF8BdppyxYkaSx3K8eZeTMAfCi3e+8xh0MRs8nP8AZZnCSyxm5pKEYBNMOewwhCZtS0BYeo199zUVsF17guuWjEjnErsp5zHYrN3WqzQEa+9jNmWTwxCatNCaEel8YjWFFySHoawq2ZAGYPF9rKZw95RlyJ5OTSj7XnE/ElwP8SqxK1ajoQ+q0yHxW8dgWD0dRdmGMLkBaCPEY3hXsJLuQHW5dO+65zPNNUDX8ioMYS6xVYoLvMsolx+VL49lTgk2h1TuCBKouyl5R1mcL2sZ7ZjSa3Rkm5FX1hEWly0wmnNbaeWZ8hBrmN3WWsrvdAGbzDKEu7HaR5Ypls2o5bWsTj8l6avE1i/RH8XgsqqDy7Z2OnDL/VkpdyGruymy44nrJyjLEJ5jmbsfgpyijmsYXZYZXNYT9cgNDu5Ajhnm7qkb5Bc0Jc4NeU+dHAu6Na3MSYDPQfPrGPyHnK5dlannspwjiaBhPsZwK8cIGsQnF3kwoiiQwEys+zTEecFVFVzOG1S7IEVgApOwviUQ4bIieLU2z4ikTfMGQIUMPrLDm2b85m0CuZ1XVgZPDhWBCezE+toxIN2HX1HYHjgPO19eDD2wgtfXP2LGk9DbqeqOYehxlLU+PiK6H1oDBTeDg+jiD4WXwAv0uAxdgoa8vf+jgwzJhscz8QGIT7/chu5DnD8KD559KlqtRYCwCvoMDULPoV+QQgREQAREQAREQAREQAREQAREQAREQAREQAREQAREQAREoP4E/gHncL0J5jnvhAAAAABJRU5ErkJggg==" />
+                </defs>
+              </svg>
+              <span>Reply</span>
+            </button>
+            <div class="w-[18px] h-0 border-t border-black opacity-60 rotate-90"></div>
+            <button type="button"
+              class="flex items-center gap-[5px] text-[#1868DB] hover:underline bg-transparent border-none cursor-pointer p-0"
+              (click)="onEditComment(comment)" [attr.aria-label]="'Edit ' + comment.author + ' comment'">
+              <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <rect y="0.75" width="20" height="20" fill="url(#pattern0_3760_18806)" />
+                <defs>
+                  <pattern id="pattern0_3760_18806" patternContentUnits="objectBoundingBox" width="1" height="1">
+                    <use xlink:href="#image0_3760_18806" transform="scale(0.01)" />
+                  </pattern>
+                  <image id="image0_3760_18806" width="100" height="100" preserveAspectRatio="none"
+                    xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAZKADAAQAAAABAAAAZAAAAAAvu95BAAADJ0lEQVR4Ae2cS2oVQRhGI0h0BWYQ3IgiiCMDvjai2xDBgVtQ435CVERnOlR8gqAj/T6xSFP0s249BnUKfrqr+vF3zrldXbeam709CgQgAAEIQAACEIAABCAAAQhAAAIQgAAEIAABCEAAAhCAAAQgAIHeCVwWgCeK14rPilPFI8WBglKZwE3l+674MxKf1HZNQalE4Eh5finGZIS2n9p+o9L1dJ1mjQykVPqIbJGBlMJSUmQgpZCUXWQgJbOUHDKQkknKbZ3ntyIAzbH06Ou6gpJA4KqO+aHIIWJ4Dkvhe0qCEB9SSoq/PF5KvKbuDysl5WH3ZBcAnJ/ZXkLKyUy+7jfdEYFXisMZErmlfJzJ1fUmywijqXdaryXlZdfUJ/74oYwwEqol5fHENXXbPCajlpRvoj53J3YnZU5GaSnuHv0+hfKfwJbpkKXu64rOueXLo2XcxcQZgS0y1t4pa6Ug48zDv7UUGbmkICOjjF2lIKOAjFQpyCgoY6sUZEQySrzPWCvF0yy3ouvpurrLAzxAX1ouDYm7FjD842vICLKQMiQ/sl5TBlJGBAybSj4zAvyppafu596nDK+zi/UWd0aQw2gq+oghIwLSsoqMlvSj3MiIgLSsIqMl/Sg3MiIgLavIaEk/yo2MCEjLKjJa0o9yIyMC0rKKjJb0o9zIiIC0rCKjJf0o977qXxRh8q7mkonCSIarfvVZU0LIhYwRGW562kAIMiZktOiukDEhw81+6xe6kBpLZMzI8KZnFYUgY0HGBW337ya4MxZA1drs32wgoxbtFXmeVxBCN7VChHep0V0hY6UM7+ZfFZXsrpCxQYZ3PS4oBBkbZZTsrpCxUYZ3v6co0V0hI0GGD3lRQAgyEmVc1HFT//829a75qnN6CoaSQCBXd2UJnnaxCE9QUhIJ7DK68jSLp+r9/gQJiQLiwz6oYUvXZAnhTvDojJKZwFudb0mInzGeVnF3hARBKFke6ORjQizB3ZknHP3gp1QicE557iveKN4rLMHTKEgQBAoEIAABCEAAAhCAAAQgAAEIQAACEIAABCAAAQhAAAIQgAAEIACBZQJ/AX231q5tc6dhAAAAAElFTkSuQmCC" />
+                </defs>
+              </svg>
+              <span>Edit</span>
+            </button>
+            <div class="w-[18px] h-0 border-t border-black opacity-60 rotate-90"></div>
+            <button type="button"
+              class="flex items-center gap-[5px] text-red-500 hover:underline bg-transparent border-none cursor-pointer p-0"
+              (click)="onDeleteComment(comment)" [attr.aria-label]="'Delete ' + comment.author + ' comment'">
+              <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <rect y="0.75" width="20" height="20" fill="url(#pattern0_3760_18810)" />
+                <defs>
+                  <pattern id="pattern0_3760_18810" patternContentUnits="objectBoundingBox" width="1" height="1">
+                    <use xlink:href="#image0_3760_18810" transform="scale(0.01)" />
+                  </pattern>
+                  <image id="image0_3760_18810" width="100" height="100" preserveAspectRatio="none"
+                    xlink:href="data:image/png;base64,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" />
+                </defs>
+              </svg>
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  <div class="p-1 border-t border-gray-300 bg-white">
+    @if (uploadedFiles.length) {
+    <div class="flex flex-wrap gap-2 mb-2">
+      @for (file of uploadedFiles; track file; let i = $index) {
+      <div class="flex items-center bg-gray-100 px-2 py-1 rounded-full text-xs max-w-[200px]">
+        <span class="truncate flex-1">{{ file.fileName }}</span>
+        <button type="button" (click)="removeFile(i)"
+          class="m-1 p-0 w-4 h-4 flex items-center justify-center !rounded-full hover:bg-gray-300">
+          <mat-icon class="mt-2 material-symbols-outlined" style="font-size:14px; line-height:16px;">close</mat-icon>
+        </button>
+      </div>
+      }
+    </div>
+    }
+    <!-- Comment Input with Upload Button -->
+    <!--                <mat-form-field class="w-full" appearance="outline">-->
+    <!--                    <div class="relative">-->
+    <!--                      <textarea-->
+    <!--                              id="commentBox"-->
+    <!--                              matInput-->
+    <!--                              placeholder="Write a comment..."-->
+    <!--                              [(ngModel)]="newCommentText"-->
+    <!--                              (input)="onCommentInput($event)"-->
+    <!--                              #commentBox-->
+    <!--                              cdkTextareaAutosize-->
+    <!--                              cdkAutosizeMinRows="1"-->
+    <!--                              cdkAutosizeMaxRows="5">-->
+    <!--                    </textarea>-->
+    <!--                        &lt;!&ndash; Mention Dropdown &ndash;&gt;-->
+    <!--                        @if(showMentionList){-->
+    <!--                            <div-->
+    <!--                                    class="fixed-top z-50 bg-white border rounded max-h-40 overflow-y-auto right-0 top-0">-->
+    <!--                                @for( user of mentionResults;track user){-->
+    <!--                                    <div-->
+    <!--                                            class="px-3 py-2 cursor-pointer hover:bg-gray-100"-->
+    <!--                                            (click)="selectMention(user)">-->
+    <!--                                        <span class="font-medium">{{ user.firstName }}</span>-->
+    <!--                                    </div>-->
+    <!--                                }-->
+    <!--                            </div>-->
+    <!--                        }-->
+    <!--                    </div>-->
+    <!--                    &lt;!&ndash; Attach file &ndash;&gt;-->
+    <!--                    <button-->
+    <!--                            mat-icon-button-->
+    <!--                            matSuffix-->
+    <!--                            (click)="fileInput.click()"-->
+    <!--                            aria-label="Attach file">-->
+    <!--                        <mat-icon>attach_file</mat-icon>-->
+    <!--                    </button>-->
+    <!--                    &lt;!&ndash; Post / Update &ndash;&gt;-->
+    <!--                    <button-->
+    <!--                            mat-icon-button-->
+    <!--                            matSuffix-->
+    <!--                            (click)="onAddComment()"-->
+    <!--                            [disabled]="!newCommentText.trim() && uploadedFiles.length === 0"-->
+    <!--                            [attr.aria-label]="editingCommentId ? 'Update Comment' : 'Post Comment'">-->
+    <!--                        <mat-icon>send</mat-icon>-->
+    <!--                    </button>-->
+    <!--                </mat-form-field>-->
+    <div class="relative">
+      @if (showMentionList && mentionResults.length>0) {
+      <div class="absolute z-50 bg-white border rounded shadow-lg max-h-40 overflow-y-auto w-64"
+        [ngStyle]="{ top: mentionPosition.top + 'px', left: mentionPosition.left + 'px' }">
+        @for (user of mentionResults; track user) {
+        <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" (click)="selectMention(user)">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3"
+            [style.background-color]="getUserColor(user)">
+            {{ getInitials(user.firstName, user.lastName) }}
+          </div>
+          <div class="text-sm font-medium text-gray-800">
+            {{ user.firstName }} {{ user.lastName }}
+          </div>
+        </div>
+        }
+      </div>
+      }
+      <quill-editor #quillEditorRef [(ngModel)]="newCommentText" [ngModelOptions]="{ standalone: true }"
+        (onContentChanged)="onQuillContentChanged($event)" [styles]="{ 'min-height': '80px' }" class="content-editor">
+      </quill-editor>
+    </div>
+    <!-- Attach file -->
+    <button mat-icon-button matSuffix (click)="fileInput.click()" aria-label="Attach file">
+      <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+    </button>
+    <!-- Post / Update -->
+    <button mat-icon-button matSuffix (click)="onAddComment()" [disabled]="sendBtnIsDisabled"
+      [attr.aria-label]="editingCommentId ? 'Update Comment' : 'Post Comment'">
+      <mat-icon class="material-symbols-outlined">send</mat-icon>
+    </button>
+    <!-- Hidden file input -->
+    <input #fileInput type="file" multiple hidden (change)="onFileBrowse($event)" (click)="onclick($event)" />
+  </div>
+</ng-template>
+
+<!-- Attachments -->
+<ng-template #attachmentsTab>
+  <div class="p-4 space-y-4">
+    <div
+      class="w-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1C2B70] transition mt-4">
+      <label>
+        <div class="flex flex-col items-center justify-center p-5" fileDrop (fileDropped)="onFileDropped($event)">
+          <div class="w-10 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 mb-2">
+            <mat-icon class="text-4xl text-gray-500 material-symbols-outlined">
+              folder
+            </mat-icon>
+          </div>
+          <p class="label-large"><span class="text-primary">Click here</span> or drag
+            files to upload
+          </p>
+          <p class="body-medium">Supported format Jpeg, Png, Jpg (less than 5mb
+            each)
+          </p>
+        </div>
+        <input type="file" class="hidden" multiple (change)="onFileBrowse($event)" (click)="onclick($event)" />
+      </label>
+      @if (uploadedFiles.length > 0) {
+      <div class="text-gray-600 w-full px-5">
+        @for (file of uploadedFiles; track file; let i = $index) {
+        <div class="flex justify-between items-center mb-1">
+          <span>{{ file.fileName }}</span>
+          <button mat-icon-button color="warn" class="cursor-pointer" (click)="removeFile(i); $event.stopPropagation()">
+            <mat-icon class="material-symbols-outlined">delete</mat-icon>
+          </button>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Table -->
+<ng-template #ngTemplateTable let-dataSource="dataSource" let-tableHeaders="tableHeaders"
+  let-displayedHeaders="displayedHeaders">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table table-md-row">
+    @for (header of tableHeaders; track header.id;let isFirst=$first) {
+    <ng-container [matColumnDef]="header.columnDef" [stickyEnd]="header.stickyEnd ?? false">
+      <!-- HEADER -->
+      <th mat-header-cell *matHeaderCellDef [mat-sort-header]="header.sortable ? header.columnDef : null"
+        class="px-4 title-small whitespace-nowrap">
+        <span class="text-grey title-small">{{ header.headerName }}</span>
+      </th>
+      <!-- CELL -->
+      @switch (header.key) {
+      @case(HEADER_EXCEMPTED){
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        <span [class]="getExemptedStatusClass(row.exempted)">
+          {{ row.exempted }}
+        </span>
+      </td>
+      }
+      @case(HEADER_ACTION){
+      <td mat-cell *matCellDef="let row">
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+        </button>
+        <mat-menu class="action-panel" #menu="matMenu">
+          <button mat-menu-item (click)="onEditRecord(row)">Edit</button>
+          <button mat-menu-item (click)="onDeleteRecord(row)">Delete</button>
+        </mat-menu>
+      </td>
+      }
+      @default {
+      <td mat-cell *matCellDef="let row" class="whitespace-nowrap position-relative px-4">
+        <div class="body-large">{{ row[header.columnDef]? row[header.columnDef]:'-' }}</div>
+      </td>
+      }
+      }
+    </ng-container>
+    }
+    <!-- Rows -->
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true" class="bg-gray-100 title-small">
+    </tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+  </table>
+</ng-template>

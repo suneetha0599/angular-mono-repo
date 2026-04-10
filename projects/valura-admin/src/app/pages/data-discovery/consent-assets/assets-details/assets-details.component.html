@@ -1,0 +1,375 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <!-- Header -->
+  <div class="p-3 pb-1">
+    <div class="d-flex justify-between">
+      <div class="flex gap-2 flex-row justify-center items-center">
+        @if(showBackButton){
+        <button (click)="goBack()"
+          class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+          <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+        </button>}
+        @if(asset?.needsAction){
+        <mat-icon [matTooltip]="warningMessage"
+          class="mat-md-icon text-base icon-warning my-auto material-symbols-outlined">
+          info
+        </mat-icon>
+        }
+
+        <span class="headline-medium truncate whitespace-nowrap overflow-hidden"
+          [appEllipsisTooltip]=" currentAssetName|| asset?.name ||'' " [colorType]="'primary'" [maxWidth]="0"
+          [matTooltip]=" currentAssetName|| asset?.name|| ''" matTooltipPosition="below"
+          matTooltipClass="material-tooltip"></span>
+        @if(isVendorNavigation){
+        <button [disabled]="disablePrevBtnV" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goPrevAsset()">
+          <mat-icon class="material-symbols-outlined"
+            [ngClass]="disablePrevBtnV ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+        </button>
+
+        <button [disabled]="disableNextBtnV" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goNextAsset()" [ngClass]="disableNextBtnV ? '!text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+        </button>
+        }@else{
+        <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToPrevRequest()">
+          <mat-icon class="material-symbols-outlined"
+            [ngClass]="disablePrevBtn ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+        </button>
+        <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToNextRequest()" [ngClass]="disableNextBtn ? '!text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+        </button>
+        }
+      </div>
+
+      @if(!hasApiError){
+      <div class="d-flex gap-2 align-items-center">
+        <loading-button type="light" [basicButton]="true" (click)="openStepperPopup()">View Activity</loading-button>
+      </div>}
+    </div>
+  </div>
+  @if(!loading && hasApiError){
+  <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+  }@else{
+  <div class="p-3 pt-0 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        <mat-tab-group class="custom-tab-group mat-tab-100 h-full no-scrollbar" disableRipple animationDuration="300ms"
+          [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
+
+
+          <mat-tab label="Details">
+            <div class="h-full flex flex-col">
+              <div class="flex-1 overflow-y-auto no-scrollbar m-4 !mt-2">
+
+                <div>
+                  <div class="label-large mb-2">Asset Name</div>
+                  <div class="body-medium">{{ asset?.name || 'N/A' }}</div>
+                </div>
+
+                <div>
+                  <div class="label-large mb-2 mt-4">Asset Description</div>
+                  <div class="body-medium">{{ asset?.description || 'N/A' }}</div>
+                </div>
+
+                <div>
+                  <div class="label-large mb-2 mt-4">Asset Type</div>
+                  <div class="body-medium">{{ asset?.type || 'N/A' }}</div>
+                </div>
+
+                <div>
+                  <div class="label-large mb-2 mt-4">Asset Owner</div>
+                  <div class="body-medium">{{ asset?.systemOwner || 'N/A' }}</div>
+                </div>
+                @if(!(asset?.type==='INTERNAL')){
+                <div>
+                  <div class="label-large mb-2 mt-4">Vendor Name</div>
+                  <div class="body-medium  hover:cursor-pointer" (click)="onViewDetails(asset?.vendorDetails,'vendor')">
+                    {{ asset?.vendorDetails?.vendorName || 'N/A' }}</div>
+                </div>
+                }
+
+                <div>
+                  <div class="label-large mb-2 mt-4"> Asset URL</div>
+                  <a *ngIf="asset?.url; else noUrl" class="body-medium hover:cursor-pointer"
+                    (click)="onClickUrl(asset?.url)">
+                    {{ asset?.url }}
+                  </a>
+                  <ng-template #noUrl>
+                    <span class="body-medium">N/A</span>
+                  </ng-template>
+                </div>
+
+                <div class="mt-4">
+                  <div class="label-large mb-2">Hosting Details</div>
+                  <table class="w-3/4 border border-gray-300 rounded-lg">
+                    <thead class="bg-gray-100">
+                      <tr>
+                        <th class="text-left p-2 border-b label-large">Hosting Location</th>
+                        <th class="text-left p-2 border-b label-large">Hosting Provider</th>
+                        <th class="text-left p-2 border-b label-large">Hosting Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for(hosting of asset?.hostingDetails; track hosting){
+                      <tr>
+                        <td class="p-2 border-b body-medium">{{ hosting.locationName || 'N/A' }}</td>
+                        <td class="p-2 border-b body-medium">{{ hosting?.name || 'N/A' }}</td>
+                        <td class="p-2 border-b body-medium">{{ hosting?.hostingSite || 'N/A' }}</td>
+                      </tr>
+                      }
+                      @if(!asset?.hostingDetails || asset?.hostingDetails.length === 0 ){
+                      <tr>
+                        <td colspan="3" class="p-2 body-medium">No hosting details available.</td>
+                      </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-4">
+                  <div class="label-large mb-2">Security Control</div>
+
+                  @if(asset?.securityMeasures?.length > 0){
+                  <ng-container>
+                    @for(measure of asset?.securityMeasures; track measure){
+                    <ul class="list-disc list-inside mb-2">
+                      <li class="body-large">{{ measure?.name || measure }}</li>
+                    </ul>
+                    }
+                  </ng-container>
+                  }
+                  @else {
+                  <span class="text-gray-600 body-medium">N/A</span>
+                  }
+                </div>
+
+
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>Personal Data Elements</span>
+            </ng-template>
+
+            <div class="flex flex-col overflow-hidden mt-2 no-scrollbar">
+              <div class="flex-1 overflow-y-auto rounded-lg no-scrollbar max-h-[400px]">
+                @if(dataSubjects.length){
+                <!-- Accordion -->
+                <cdk-accordion class="configure-accordion overflow-y-auto">
+                  @for (ds of dataSubjects; track ds; let i = $index) {
+                  <cdk-accordion-item #accordionItem="cdkAccordionItem" class="configure-accordion-item">
+
+                    <!-- Header -->
+                    <button class="configure-accordion-item-header" (click)="ds.expanded = !ds.expanded">
+                      <span class="title-small text-gray-700" [ngClass]="{'text-primary': ds.expanded}">
+                        {{ ds.dsName || ('Data Subject ' + (i+1)) }}
+                        <span class="grayOut-expand">({{ ds.pdElements?.length || 0 }})</span>
+                      </span>
+                      <mat-icon class="mat-md-icon text-primary material-symbols-outlined">
+                        {{ ds.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+                      </mat-icon>
+                    </button>
+
+                    @if (ds.expanded) {
+                    <div class="configure-accordion-item-body" role="region">
+                      <div class="overflow-auto no-scrollbar">
+
+                        <table mat-table [dataSource]="ds.dataSource"
+                          class="mat-elevation-z8 w-full custom-table table">
+                          <ng-container matColumnDef="pdName">
+                            <th mat-header-cell *matHeaderCellDef>Personal Data Element</th>
+                            <td mat-cell *matCellDef="let row">{{ row.pdName }}</td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="category">
+                            <th mat-header-cell *matHeaderCellDef>Category</th>
+                            <td mat-cell *matCellDef="let row">{{ row.categoryNames}}</td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="sources">
+                            <th mat-header-cell *matHeaderCellDef>Classification</th>
+                            <td mat-cell *matCellDef="let row">{{ row.classificationNames}}</td>
+                          </ng-container>
+
+                          <tr mat-header-row *matHeaderRowDef="['pdName', 'category', 'sources']; sticky: true"></tr>
+                          <tr mat-row *matRowDef="let row; columns: ['pdName', 'category', 'sources'];"></tr>
+                        </table>
+
+
+                      </div>
+                    </div>
+                    }
+                  </cdk-accordion-item>
+                  }
+                </cdk-accordion>
+                } @else{
+                @if(!loading){
+                <item-not-found [imgHeight]="'200px'" heading="No personal data elements have been linked to this Asset"></item-not-found>
+                }
+                }
+              </div>
+            </div>
+          </mat-tab>
+
+
+
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>Linked Processing Activity</span>
+            </ng-template>
+
+            <div class="flex flex-col overflow-hidden mt-2 no-scrollbar">
+              <div class="flex-1 overflow-y-auto rounded-lg no-scrollbar max-h-[400px]">
+                @if(linkedBpaDataSource.data.length){
+                <table mat-table [dataSource]="linkedBpaDataSource" matSort
+                  class="mat-elevation-z8 w-full custom-table table">
+
+                  <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                      Process ID
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                      {{ row.id }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="processName">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                      Process Name
+                    </th>
+                    <td mat-cell *matCellDef="let row" (click)="onViewDetails(row,'bpa')"
+                      class="hover: pointer text-primary">
+                      {{ row.processName }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="bpaOwner">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                      Process Owner
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                      {{ row.bpaOwner }}
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="department">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                      Department
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                      {{ row.department }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="dsInvolved">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                      Volume of Data Subjects
+
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                      {{ row.dsInvolved }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="title-small !text-center">
+                      <span class="text-grey title-small !text-center whitespace-nowrap">Status</span>
+                    </th>
+                    <td mat-cell *matCellDef="let row" class="whitespace-nowrap text-center">
+                      <ng-container>
+                        <div
+                          class="flex align-items-center justify-content-center  w-[100px] body-large px-2 py-1 rounded"
+                          [ngStyle]="{'background-color': getStatusColors(row.status),
+                                                  'color': getStatusTextColors(row.status) }"> {{ row.status }}
+                        </div>
+                      </ng-container>
+
+                    </td>
+                  </ng-container>
+
+
+
+                  <tr mat-header-row *matHeaderRowDef="linkedBpaColumns; sticky: true"></tr>
+                  <tr mat-row *matRowDef="let row; columns: linkedBpaColumns;"></tr>
+                </table>}
+                @else{
+                @if(!loading){
+                <item-not-found [imgHeight]="'200px'" heading="No processing activities have been linked to this Asset"></item-not-found>
+                }
+                }
+              </div>
+            </div>
+          </mat-tab>
+
+
+
+          <!-- <mat-tab label="Security measures">
+            @if(asset?.securityMeasures?.length > 0){
+            <ng-container>
+              @for(measure of asset?.securityMeasures; track measure){
+              <ul class="list-disc list-inside mb-2">
+                <li class="body-large">{{ measure.name }}</li>
+              </ul>
+              }
+            </ng-container>
+            }
+            @else {
+            <ng-template>
+              <span class="text-gray-600 body-medium">No security measures configured.</span>
+            </ng-template>
+            }
+
+
+
+
+          </mat-tab> -->
+        </mat-tab-group>
+
+
+        <div class="edit-wrapper">
+          <ng-container [ngSwitch]="selectedTabIndex">
+            <ng-container *ngSwitchCase="0">
+              <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="onEdit(assetId)">
+                <mat-icon color="primary" class="text-primary material-symbols-outlined">edit</mat-icon>
+              </button>
+
+              <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn">
+                <mat-icon color="primary" class="material-symbols-outlined">delete</mat-icon>
+              </button>
+              <!--            </ng-container>-->
+              <!--            <ng-container *ngSwitchDefault>-->
+              <!--              @if(selectedTabIndex === 3){-->
+              <!--               <ng-container >-->
+              <!--                <loading-button type="secondary">Configure</loading-button>-->
+              <!--                </ng-container>-->
+              <!--              }-->
+              <!--              <ng-template #addNewBtn>-->
+              <!--                <loading-button type="secondary">Add new</loading-button>-->
+              <!--              </ng-template>-->
+              <!--              <button mat-mini-fab class="shadow-none bg-transparent mt-2 mat-md-fab-btn">-->
+              <!--                <mat-icon color="primary">search</mat-icon>-->
+              <!--              </button>-->
+              <!--              <button mat-mini-fab class="shadow-none bg-transparent mt-2 mat-md-fab-btn">-->
+              <!--                <mat-icon color="primary">sort</mat-icon>-->
+              <!--              </button>-->
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
+
+
+
+<ng-template #errorLoading>
+  <div class="p-3 pt-0 flex-1 overflow-hidden ">
+    <div
+      class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2 justify-content-center">
+      <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    </div>
+  </div>
+</ng-template>

@@ -1,0 +1,110 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{ dialogTitle }}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="onClose()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+
+  @if(!isTaskStep){
+  <div class="label-large mb-4">What do you want to do next?</div>
+
+  <mat-radio-group [(ngModel)]="selectedOption" class="grid grid-cols-2 gap-4 mb-2">
+
+    <mat-card class="p-4">
+      <mat-radio-button value="continue">
+        <div class="font-bold">Continue myself</div>
+        <div>Fill remaining sections with AI assistance.</div>
+      </mat-radio-button>
+    </mat-card>
+
+    <mat-card class="p-4">
+      <mat-radio-button value="assignTask">
+        <div class="font-bold">Assign task to process owner</div>
+        <div>A task will be created for {{data.processOwner}}</div>
+      </mat-radio-button>
+    </mat-card>
+
+  </mat-radio-group>
+  }
+
+  @if(isTaskStep){
+
+  <form [formGroup]="taskForm" class="grid gap-3">
+
+    <div class="grid grid-cols-2 gap-4">
+
+      <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0">
+        <mat-label>Task Name</mat-label>
+        <input title="taskName" matInput formControlName="taskName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option value="review">Review</mat-option>
+          <mat-option value="approval">Approval</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0">
+        <mat-label>Due Date</mat-label>
+        <input title="dueDate" matInput [matDatepicker]="picker" formControlName="dueDate" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority">
+          <mat-option value="low">Low</mat-option>
+          <mat-option value="medium">Medium</mat-option>
+          <mat-option value="high">High</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <app-custom-mat-textarea [control]="description" label="Description" [minRows]="1" [maxRows]="5">
+      </app-custom-mat-textarea>
+
+    </div>
+
+    <div>
+      <label class="font-medium mb-1 block">Assignee Type</label>
+      <mat-radio-group formControlName="assigneeType" class="flex gap-4">
+        <mat-radio-button value="internal">Internal</mat-radio-button>
+        <mat-radio-button value="external">External</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0">
+      <mat-label>Assignee</mat-label>
+      <mat-select formControlName="assignee">
+        @for(user of assignees; track user){
+        <mat-option [value]="user">{{user}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+  </form>
+
+  }
+
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+
+    @if(isTaskStep){
+    <loading-button type="secondary" (onButtonClick)="onClose()">
+      Cancel
+    </loading-button>
+    }
+
+    <loading-button type="primary" (onButtonClick)="onContinue()" [disabled]="taskForm.invalid">
+      {{ isTaskStep ? 'Create Task' : 'Continue' }}
+    </loading-button>
+
+  </div>
+</div>

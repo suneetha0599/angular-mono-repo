@@ -1,0 +1,106 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+    @if(dataSource.filteredData.length > 0){
+    <ng-container *ngTemplateOutlet="ngTemplateTable"></ng-container>
+    } @else {
+    <item-not-found [imgHeight]="'200px'" [heading]=errorTitle>
+    </item-not-found>
+    }
+  </div>
+</div>
+
+<ng-template #ngTemplateTable>
+  <table mat-table matSort [dataSource]="dataSource"
+    class="mat-elevation-z8 w-100 custom-table table bg-white table-layout-fixed" matSort
+    (matSortChange)="onSortChange($event)">
+    <ng-container matColumnDef="provision">
+      <th mat-header-cell *matHeaderCellDef sticky mat-sort-header [style.width]="'10%'">
+        Provision
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.provision" [colorType]="'primary'" [matTooltip]="element.provision"
+            matTooltipPosition="below" matTooltipClass="material-tooltip" (click)="onView(element)">
+            {{ element.provision }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="rightTitle">
+      <th mat-header-cell *matHeaderCellDef sticky mat-sort-header [style.width]="'15%'">Title</th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.rightTitle" [colorType]="'default'" [matTooltip]="element.rightTitle"
+            matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.rightTitle }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="rightDescription">
+      <th mat-header-cell *matHeaderCellDef sticky mat-sort-header [style.width]="'35%'">
+        Description
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.rightDescription" [enableNumberSplit]="true"
+            [matTooltip]="element.rightDescription" matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.rightDescription }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="rightTitleSimplified">
+      <th mat-header-cell *matHeaderCellDef sticky mat-sort-header [style.width]="'15%'">
+        Simplified Title
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.rightTitleSimplified" [colorType]="'default'"
+            [matTooltip]="element.rightTitleSimplified" matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.rightTitleSimplified }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="rightDescriptionSimplified">
+      <th mat-header-cell *matHeaderCellDef sticky mat-sort-header [style.width]="'15%'">
+        Simplified Description
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="d-flex">
+          <span [appEllipsisTooltip]="element.rightDescriptionSimplified" [colorType]="'default'"
+            [matTooltip]="element.rightDescriptionSimplified" matTooltipPosition="below"
+            matTooltipClass="material-tooltip">
+            {{ element.rightDescriptionSimplified }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="action" stickyEnd>
+      <th mat-header-cell *matHeaderCellDef [style.width]="'10%'">
+        <span class="text-grey title-small">Actions</span>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <div class="d-flex gap-2">
+          <mat-icon class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+            (click)="onEdit(row)" title="Edit">edit
+          </mat-icon>
+
+          <mat-icon class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+            (click)="onDelete(row)" title="Delete">delete
+          </mat-icon>
+        </div>
+      </td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders"></tr>
+  </table>
+</ng-template>

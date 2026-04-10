@@ -1,0 +1,88 @@
+<!-- Updated general-configuration.component.html -->
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="flex justify-between items-center p-3 pb-0">
+    <div>
+      <div class="d-flex justify-between">
+        <div class="headline-medium my-auto">{{pageTitle}}</div>
+      </div>
+    </div>
+    <loading-button type="light" [basicButton]="true" (onButtonClick)="ShowActivityLog()">
+      Activity Log
+    </loading-button>
+  </div>
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        @if (selectedTab !== 'PD_ELEMENTS') {
+        <div class="position-absolute tab-container"
+          style="right: 0; top: 8px; z-index: 10; display: flex; align-items: center; gap: 8px;">
+          <!-- Search  -->
+          @if(isSearchExpanded) {
+          <mat-form-field appearance="outline"
+            class="mat-sm-input mat-mdc-mb-0 mat-round-input enabled-mat-input search">
+            <mat-icon class="mat-md-icon pe-2 material-symbols-outlined" matPrefix>search</mat-icon>
+            <input matInput placeholder="Search..." [(ngModel)]="searchText" (ngModelChange)="performSearch()" />
+            @if(searchText && searchText.trim()) {
+            <button matSuffix mat-icon-button class="close-btn mat-md-icon me-2" (click)="onSearch()">
+              <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+            </button>
+            }
+          </mat-form-field>
+          }
+          <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="onSearch()">
+            <mat-icon color="primary material-symbols-outlined">search</mat-icon>
+          </button>
+          <!-- Add Button -->
+          @if(addButtonLabel && generalFullAcess){
+          <loading-button (onButtonClick)="onAddButtonClick()">
+            <span> <mat-icon class="mat-md-icon me-2 pt-1 material-symbols-outlined">add</mat-icon> </span>
+            <span> {{addButtonLabel}}</span>
+          </loading-button>
+          }
+        </div>
+        }
+        <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+          [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
+          @for (tab of tabHeaderDetails; track tab.key; let i=$index) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>{{tab.name}}</span>
+            </ng-template>
+            <ng-template matTabContent>
+              <div class="h-full overflow-hidden">
+                <ng-container *ngTemplateOutlet="tabContent; context: { configTab: tab, index: i }">
+                </ng-container>
+              </div>
+            </ng-template>
+          </mat-tab>
+          }
+        </mat-tab-group>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #tabContent let-i="index" let-tab="configTab">
+  @if (selectedTabIndex === i) {
+  @switch (tab.key) {
+  @case (GeneralTabKey.PD_ELEMENTS) {
+  <app-pd-elements></app-pd-elements>
+  }
+  @case (GeneralTabKey.DATA_SUBJECTS) {
+  @if(loadDataSubject){
+  <app-general-data-subjects [refreshElements]="refreshElements" [searchText]="searchText"></app-general-data-subjects>
+  }
+  }
+  @case (GeneralTabKey.DEPARTMENTS) {
+  <!-- render DEPARTMENTS -->
+  <app-departments-table [data]="departments" [searchTerm]="searchText"
+    [editDialogComponent]="AddDepartmentDialogComponent" (view)="handleDepartmentView($event)"
+    (edit)="handleDepartmentEdit($event)" (delete)="handleDepartmentDelete($event)" (dataChanged)="loadDepartments()"
+    (hasApiError)="hasApiError" (requestLoading)="requestLoading" (initialListIsEmpty)="initialListIsEmpty">
+  </app-departments-table>
+  }
+  @default {
+  <div></div>
+  }
+  }
+  }
+</ng-template>

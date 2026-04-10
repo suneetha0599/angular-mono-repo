@@ -1,0 +1,267 @@
+<div class="d-flex flex-column h-100">
+  <div class="p-3 d-flex overflow-hidden">
+    <div class="w-[130px] bg-white border-white h-full rounded overflow-hidden">
+      <div class="flex flex-col gap-2">
+        <button class="text-start px-2 py-2 rounded hover:bg-gray-100 transition title-small" [ngClass]="
+            activeSection === 'requesterInfo'
+            ? 'text-primary'
+            : 'text-[#767676]'
+            " (click)="scrollToSection('requesterInfo')">
+          Requester Info
+        </button>
+        <button class="text-start px-2 py-2 rounded hover:bg-gray-100 transition title-small" [ngClass]="
+            activeSection === 'thirdpartyrole'
+            ? 'text-primary'
+            : 'text-[#767676]'
+            " (click)="scrollToSection('thirdpartyrole')">
+          Third Party Role
+        </button>
+        <button class="text-start px-2 py-2 rounded hover:bg-gray-100 transition title-small" [ngClass]="
+            activeSection === 'channel'
+            ? 'text-primary'
+            : 'text-[#767676]'
+            " (click)="scrollToSection('channel')">
+          Channel
+        </button>
+        <button class="text-start px-2 py-2 rounded hover:bg-gray-100 transition title-small" [ngClass]="
+            activeSection === 'regulations' ? 'text-primary' : 'text-[#767676]'
+            " (click)="scrollToSection('regulations')">
+          Regulations
+        </button>
+        <button class="text-start px-2 py-2 rounded hover:bg-gray-100 transition title-small" [ngClass]="
+            activeSection === 'rightsexercise'
+            ? 'text-primary'
+            : 'text-[#767676]'
+            " (click)="scrollToSection('rightsexercise')">
+          Rights
+        </button>
+        <button class="text-start px-2 py-2 rounded hover:bg-gray-100 transition title-small" [ngClass]="
+            activeSection === 'datasubject' ? 'text-primary' : 'text-[#767676]'
+            " (click)="scrollToSection('datasubject')">
+          Data Subject
+        </button>
+        <button class="text-start px-2 py-2 rounded hover:bg-gray-100 transition title-small" [ngClass]="
+            activeSection === 'declaration' ? 'text-primary' : 'text-[#767676]'
+            " (click)="scrollToSection('declaration')">
+          Declaration
+        </button>
+      </div>
+    </div>
+    <div #scrollContainer class="col h-100 ms-2 gap-3 overflow-y-auto custom-scrollbar-hide" (scroll)="onScroll()">
+      <div id="requesterInfo" class="scroll-section">
+        <ng-container *ngTemplateOutlet="
+            tableMappingTemplate;
+            context: {
+            columns: RequesterInfoTableColumn,
+            data: requesterInfoDataSource,
+            heading: 'Requester Info',
+            noData: 'No requester info found',
+            isAdd: false,
+            addHeading: null,
+            key: FormElementsConfig.REQUESTER_INFO,
+            formElementFullAcess : formElementFullAcess
+            }
+            ">
+        </ng-container>
+      </div>
+      <div id="thirdpartyrole" class="scroll-section">
+        <ng-container *ngTemplateOutlet="
+            tableMappingTemplate;
+            context: {
+            columns: ThirdPartyRoleTableColumn,
+            data: thirdPartyRoleDataSource,
+            heading: 'Third Party Role',
+            noData: 'No third party info found',
+            isAdd: formElementFullAcess && true,
+            addHeading: formElementFullAcess && 'Add Third Party Role',
+            key: FormElementsConfig.THIRD_PARTY_ROLE,
+            formElementFullAcess: formElementFullAcess
+            }
+            ">
+        </ng-container>
+      </div>
+      <div id="channel" class="scroll-section">
+        <ng-container *ngTemplateOutlet="
+            tableMappingTemplate;
+            context: {
+            columns: ChannelTableColumn,
+            data: channelInfoDataSource,
+            heading: 'Channel',
+            noData: 'No Channel info found',
+            isAdd: formElementFullAcess && true,
+            addHeading: formElementFullAcess && 'Add Channel',
+            key: FormElementsConfig.CHANNEL,
+            formElementFullAcess: formElementFullAcess
+            }
+            ">
+        </ng-container>
+      </div>
+      <div id="regulations" class="scroll-section">
+        <ng-container *ngTemplateOutlet="
+            tableMappingTemplate;
+            context: {
+            columns: RegulationTableHeaders,
+            data: regulationDataSource,
+            heading: 'Regulations',
+            noData: 'No regulation info found',
+            isAdd: false,
+            addHeading: null,
+            key: FormElementsConfig.REGULATIONS,
+            formElementFullAcess:formElementFullAcess
+            }
+            ">
+        </ng-container>
+      </div>
+      <div id="rightsexercise" class="scroll-section">
+        <ng-container *ngTemplateOutlet="
+            tableMappingTemplate;
+            context: {
+            columns: RightsTableHeaders,
+            data: rightsDataSource,
+            heading: 'Rights',
+            noData: 'No rights info found',
+            isAdd: false,
+            addHeading: null,
+            key: FormElementsConfig.RIGHTS,
+            formElementFullAcess:formElementFullAcess
+            }
+            ">
+        </ng-container>
+      </div>
+      <div id="datasubject" class="scroll-section">
+        <ng-container *ngTemplateOutlet="
+            tableMappingTemplate;
+            context: {
+            columns: RoleDisplayedColumns,
+            data: roleDataSource,
+            heading: 'Data Subject',
+            noData: 'No Data Subject info found',
+            isAdd: false,
+            addHeading: null,
+            key: FormElementsConfig.DATA_SUBJECT_ROLE,
+            formElementFullAcess:formElementFullAcess
+            }
+            ">
+        </ng-container>
+      </div>
+      <div id="declaration" class="scroll-section">
+        <ng-container *ngTemplateOutlet="
+            tableMappingTemplate;
+            context: {
+            columns:
+            declarationType === 'General'
+            ? GeneralDeclarationInfoTableHeaders
+            : DeclarationInfoTableHeaders,
+            data: declarationDataSource,
+            heading: 'Declaration',
+            noData: 'No declarationinfo found',
+            isAdd: formElementFullAcess && true,
+            addHeading: formElementFullAcess && 'Add Declaration',
+            key: FormElementsConfig.DECLARATION,
+            formElementFullAcess:formElementFullAcess
+            }
+            ">
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #tableMappingTemplate let-columns="columns" let-data="data" let-heading="heading" let-noData="noData"
+  let-isAdd="isAdd" let-addHeading="addHeading" let-key="key">
+  <div class="border border-grey-200 w-full rounded mb-3 mt-3 p-3">
+    <div class="d-flex align-center justify-between items-center border-bottom">
+      <p class="title-medium my-auto d-flex align-center gap-1" [ngClass]="{
+            'mb-4 mt-2': isAdd,
+            'mb-3 mt-1': !isAdd
+            }">
+        {{ heading }}
+        @if (heading === 'Channel') {
+        <mat-icon class="material-symbols-outlined mat-md-icon text-primary"
+          matTooltip="This will be available for Admin form not for DSR form" matTooltipPosition="right">
+          info
+        </mat-icon>
+        }
+      </p>
+      @if(isAdd){
+      <loading-button type="light" [basicButton]="true" [isFullWidth]="true" class="me-2 mb-3"
+        (onButtonClick)="onAddClick(key)">
+        <mat-icon color="primary" class="material-symbols-outlined mat-md-icon me-1">add</mat-icon>
+        <p class="m-0" style="font-size: 14px">{{ addHeading }}</p>
+      </loading-button>
+      }
+    </div>
+    @if(key === FormElementsConfig.DECLARATION){
+    <p class="title-extra-small text-grey pt-2 pl-3">Right</p>
+    } @else{
+    <!-- <p class="title-extra-small text-grey pt-2 pl-3">Form Field</p> -->
+    } @if (key === FormElementsConfig.RIGHTS) {
+    <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100 mat-tab-disable-ripple"
+      (selectedIndexChange)="onRightRegulationTabChange($event)">
+      @for (regulation of formConfiguration.dataSubjectRegulationMasterList;
+      track regulation.id; let i = $index) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>{{ regulation.name }}</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <app-form-element-table [columns]="columns" [dataSource]="data" [noDataMessage]="noData"
+            [tableHeading]="heading" [isAdd]="isAdd" [shimmerRows]="shimmerDataSource" [AddHeading]="addHeading"
+            [key]="key" [dataUpdated]="dataUpdated" (sortChange)="handleSort($event, key)" (edit)="handleEdit($event)"
+            (delete)="handleDelete($event)" (onViewToggle)="onViewToggle($event)" [loading]="isLoading"
+            [formElementFullAcess]="formElementFullAcess">
+          </app-form-element-table>
+        </ng-template>
+      </mat-tab>
+      }
+    </mat-tab-group>
+    } @else if (key === FormElementsConfig.DECLARATION) {
+    <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100 mat-tab-disable-ripple"
+      (selectedIndexChange)="onDeclarationRegulationTabChange($event)">
+      @for (regulation of formConfiguration.dataSubjectRegulationMasterList;
+      track regulation.id; let i = $index) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>
+            {{ regulation.name }}
+          </span>
+        </ng-template>
+        <ng-template matTabContent>
+          <div class="mt-2 ms-2">
+            <mat-button-toggle-group class="toggle-btn-grp toggle-group" [(ngModel)]="selectedEntity"
+              (change)="onSectionChange($event)">
+              @for (declaration of regulation.declarationMasterList; track
+              declaration.type; let i = $index) {
+              <mat-button-toggle [value]="declaration">{{
+                declaration.label
+                }}
+              </mat-button-toggle>
+              }
+            </mat-button-toggle-group>
+          </div>
+          @if(rightSpecific){
+          <app-form-element-table [columns]="columns" [dataSource]="data" [noDataMessage]="noData"
+            [tableHeading]="heading" [isAdd]="isAdd" [shimmerRows]="shimmerDataSource" [AddHeading]="addHeading"
+            [key]="key" [dataUpdated]="dataUpdated" (sortChange)="handleSort($event, key)" (edit)="handleEdit($event)"
+            [loading]="isLoading" (onViewToggle)="onViewToggle($event)" [formElementFullAcess]="formElementFullAcess">
+          </app-form-element-table>
+          } @else{
+          <app-form-element-table [columns]="columns" [dataSource]="data" [noDataMessage]="noData"
+            [tableHeading]="heading" [isAdd]="isAdd" [shimmerRows]="shimmerDataSource" [AddHeading]="addHeading"
+            [key]="key" (sortChange)="handleSort($event, key)" (edit)="handleEdit($event)" [loading]="isLoading"
+            (onViewToggle)="onViewToggle($event)" [formElementFullAcess]="formElementFullAcess">
+          </app-form-element-table>
+          }
+        </ng-template>
+      </mat-tab>
+      }
+    </mat-tab-group>
+    } @else {
+    <app-form-element-table [columns]="columns" [dataSource]="data" [noDataMessage]="noData" [tableHeading]="heading"
+      [isAdd]="isAdd" [shimmerRows]="shimmerDataSource" [AddHeading]="addHeading" [key]="key" [loading]="isLoading"
+      (sortChange)="handleSort($event, key)" (edit)="handleEdit($event)" (delete)="handleDelete($event)"
+      (onViewToggle)="onViewToggle($event)" [formElementFullAcess]="formElementFullAcess">
+    </app-form-element-table>
+    }
+  </div>
+</ng-template>

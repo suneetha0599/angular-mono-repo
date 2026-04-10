@@ -1,0 +1,111 @@
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: #e5e7eb;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.6),
+      transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.action-btns {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+
+  loading-button {
+    ::ng-deep button {
+      padding: 6px 12px !important;
+      height: 32px !important;
+
+      mat-icon {
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+      }
+
+      span {
+        font-size: 13px !important;
+      }
+    }
+  }
+}
+
+.action-btns button {
+  padding: 0;
+}
+
+.drawer-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none;
+  z-index: 999999 !important;
+
+  ::ng-deep .mat-drawer-backdrop {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    z-index: 999999 !important;
+    pointer-events: auto;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  ::ng-deep .mat-drawer-inner-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  ::ng-deep .mat-drawer.mat-drawer-end {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    width: 60vw !important;
+    min-width: 60vw !important;
+    max-width: 60vw !important;
+    height: 100vh !important;
+    z-index: 1000000 !important;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+
+    .mat-drawer-inner-container {
+      display: flex;
+      flex-direction: column;
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+
+    app-trigger-drawer {
+      display: flex !important;
+      flex-direction: column !important;
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+  }
+}

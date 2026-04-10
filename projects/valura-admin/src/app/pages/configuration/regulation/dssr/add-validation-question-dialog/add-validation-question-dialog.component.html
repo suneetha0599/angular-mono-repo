@@ -1,0 +1,147 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{ isView ? "View Question" : isEdit ? "Edit Question" : "Add Question" }}
+</h3>
+<button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+@if(isView) {
+<div mat-dialog-content class="m-0 p-3" [formGroup]="form">
+  <div class="mt-1">
+    @if(form.get('type')?.value === RIGHT_SPECIFIC) {
+    <div class="mt-2 mb-3">
+      <mat-label class="fs-sm-med text-grey">Right</mat-label>
+      <div>{{ getRightName() }}</div>
+    </div>
+    }
+    <div>
+      <mat-label class="fs-sm-med text-grey">Type</mat-label>
+      <div>{{ getTypeName() }}</div>
+    </div>
+
+    <div class="mt-3">
+      <mat-label class="fs-sm-med text-grey">Provision</mat-label>
+      <div>{{ provision.value || "-" }}</div>
+    </div>
+    <div class="mt-3">
+      <mat-label class="fs-sm-med text-grey">Question</mat-label>
+      <div>{{ question.value || "-" }}</div>
+    </div>
+    <div class="mt-3">
+      <mat-label class="fs-sm-med text-grey">Helper / Support Text</mat-label>
+      <div>{{ helper.value || "-" }}</div>
+    </div>
+    <div class="mt-3">
+      <mat-label class="fs-sm-med text-grey">Field Type</mat-label>
+      <div>{{ getFieldTypeName() }}</div>
+    </div>
+    @if (showOptions) {
+    <div class="mt-3">
+      <mat-label class="fs-sm-med text-grey">Options</mat-label>
+      @for(option of options.value; track option;) {
+      <div>{{ option || "-" }}</div>
+      }
+    </div>
+    }
+  </div>
+</div>
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" (onButtonClick)="switchToEdit()">
+      <mat-icon class="text-light me-2 mat-md-icon material-symbols-outlined">edit</mat-icon>
+      <div>Edit</div>
+    </loading-button>
+  </div>
+</div>
+} @else {
+<div mat-dialog-content class="m-0 p-3" [formGroup]="form">
+  <div>
+    <mat-label class="fs-md-med">Select Type</mat-label>
+    <div>
+      <mat-radio-group formControlName="type">
+        @for(type of types; track type;) {
+        <mat-radio-button [value]="type.key">{{ type.name }}</mat-radio-button>
+        }
+      </mat-radio-group>
+    </div>
+  </div>
+  @if(form.get('type')?.value === RIGHT_SPECIFIC) {
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-3 pt-2">
+    <mat-label>Right</mat-label>
+    <mat-select formControlName="right">
+      @for (r of rights; track r.id) {
+      <mat-option [value]="r.id">{{ r.rightTitleSimplified }}</mat-option>
+      }
+    </mat-select>
+    <mat-error>
+      <custom-mat-error class="inline-block" [errors]="right.errors" [control]="right"
+        controlActualName="Right"></custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  }
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-4 pt-2">
+    <mat-label>Provision</mat-label>
+    <input matInput formControlName="provision" />
+    <mat-error>
+      <custom-mat-error class="inline-block" [control]="provision" [errors]="provision.errors"
+        controlActualName="p"></custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  <div class="mt-4">
+    <app-custom-mat-textarea [control]="question" label="Question" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+  <div class="mt-4 ">
+    <app-custom-mat-textarea [control]="helper" label="Helper / support text" [readonly]="isView" [minRows]="1"
+      [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-4 pt-2">
+    <mat-label>Field Type</mat-label>
+    <mat-select formControlName="fieldType">
+      @for (type of fieldTypes; track type) {
+      <mat-option [value]="type.value">{{ type.label }}</mat-option>
+      }
+    </mat-select>
+    <mat-error>
+      <custom-mat-error class="inline-block" [errors]="fieldType.errors" [control]="fieldType"
+        controlActualName="Field Type"></custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  @if (fieldType.value === SINGLE_SELECT || fieldType.value === CHECK_BOX ||
+  fieldType.value === RADIO) {
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-4 pt-2">
+    <mat-label>Add Options</mat-label>
+    <input matInput [matChipInputFor]="chipGrid" [matChipInputAddOnBlur]="true"
+      [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addOptionFromInput($event)" />
+    <mat-error>
+      <custom-mat-error class="inline-block" [control]="options" [errors]="options.errors" controlActualName="Options">
+      </custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  <mat-chip-grid #chipGrid formControlName="options" class="mt-2">
+    @for (option of optionsList; track $index) {
+    <mat-chip-row (removed)="removeOption(option)">
+      {{ option }}
+      <button matChipRemove>
+        <mat-icon class="mat-md-icon text-primary material-symbols-outlined">cancel</mat-icon>
+      </button>
+    </mat-chip-row>
+    }
+  </mat-chip-grid>
+  }
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" [disabled]="form.invalid" (onButtonClick)="onSave()" [loading]="isSubmitloading">
+      {{ buttonName }}
+    </loading-button>
+  </div>
+</div>
+}

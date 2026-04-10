@@ -1,0 +1,10 @@
+<mat-form-field [appearance]="appearance" class="w-full mat-sm-input mat-mdc-mb-0">
+    <mat-label>{{label}}</mat-label>
+    <input matInput [formControl]="formInputControl" [placeholder]="placeholder" (onChange)="onChangeInput()">
+    <mat-error>
+        @if(formInputControl){
+        <custom-mat-error class="inline-block" [errors]="formInputControl.errors"
+            [control]="formInputControl"></custom-mat-error>
+        }
+    </mat-error>
+</mat-form-field>

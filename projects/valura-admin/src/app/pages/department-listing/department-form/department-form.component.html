@@ -1,0 +1,71 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+    <div class="p-4 pb-0">
+        <div class="flex justify-between">
+            <div class="flex">
+                <button (click)="goBack()" class="mr-2 back-button">
+                    <mat-icon class="material-symbols-outlined">arrow_back</mat-icon>
+                </button>
+                <div class="headline-medium -mt-1 ml-1">{{ pageTitle }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isDataLoading" class="p-4 flex-1 min-h-0">
+        <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden">
+            <div class="p-6">
+                <div class="mb-3">
+                    <div class="shimmer shimmer-section-title mb-2"></div>
+                    <div class="w-[30%]">
+                        <div class="shimmer shimmer-input"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="shimmer shimmer-section-title mb-2"></div>
+                    <div class="w-[45%]">
+                        <div class="shimmer shimmer-textarea"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="!isDataLoading && (!isEditMode || departmentData)" class="p-4 flex-1 min-h-0">
+        <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden">
+            <form [formGroup]="form" class="flex flex-col h-full overflow-auto">
+                <div class="p-6">
+                    <div class="mb-3">
+                        <p class="label-large mb-2">Name</p>
+                        <div class="w-[30%]">
+                            <mat-form-field appearance="outline" class="w-full chip-input-field mat-sm-xl-input">
+                                <input matInput formControlName="name">
+                                <mat-error *ngIf="hasFieldError('name')">
+                                    {{ getFieldError('name') }}
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="label-large mb-2">Description</p>
+                        <div class="w-[45%]">
+                            <app-custom-mat-textarea [label]="Description" [control]="descriptionControl"
+                                [minRows]="1" [maxRows]="5">
+                            </app-custom-mat-textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-start gap-3 p-3 bg-white sticky bottom-0">
+                    <loading-button type="primary" [loading]="submitLoading" [disabled]="!canSave"
+                        (onButtonClick)="onSubmit()">
+                        <span class="label-large">{{ submitButtonText }}</span>
+                    </loading-button>
+
+                    <loading-button type="light" [basicButton]="true" (onButtonClick)="goBack()">
+                        <span class="label-large">Cancel</span>
+                    </loading-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

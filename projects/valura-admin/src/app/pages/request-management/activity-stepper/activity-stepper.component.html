@@ -1,0 +1,73 @@
+<div [ngClass]="{ 'm-4': showHeader }">
+  @if(showHeader) {
+  <div class="mb-3">
+    <div class="label-large pt-0">Activity log</div>
+  </div>
+  }
+
+
+
+  <div class="flex-1 overflow-auto space-y-8 relative no-scrollbar" (scroll)="onScroll($event)" #scrollContainer
+    style="max-height: 400px">
+    @if(initialLoading) {
+    @for (i of [1,2,3,4];track $index) {
+    <div class="relative pl-10" [ngClass]="{ 'bg-gray-50 rounded': i === selectedIndex }">
+      @if(i !== 4) {
+      <div class="absolute left-3 top-7 h-full border-l border-gray-300"></div>
+      }
+      <div
+        class="absolute left-0 top-0 w-6 h-6 flex items-center justify-center rounded-full text-white text-sm font-semibold z-10 shimmer">
+      </div>
+      <div class="flex justify-between items-center font-medium text-gray-800 ps-2 !rounded-lg">
+        <div class="flex items-center gap-2 w-24 h-5 shimmer !rounded-lg"></div>
+        <div class="w-16 h-3 shimmer !rounded-lg"></div>
+      </div>
+      <div class="ml-2 mt-2 w-40 h-3 shimmer !rounded-lg"></div>
+      <div class="ml-2 mt-2 w-32 h-3 shimmer !rounded-lg"></div>
+    </div>
+    }
+    }
+    @else{
+    @if(auditlogs && auditlogs.length>0){
+    @for (log of auditlogs; track log; let i = $index) {
+    <div class="relative pl-10" [ngClass]="{ 'bg-gray-50 rounded': i === selectedIndex }">
+      @if(i !== auditlogs.length - 1) {
+      <div class="absolute left-3 top-7 h-full border-l-1 border-gray-300"></div>
+      }
+
+      <div class="absolute left-0 top-0 w-6 h-6 flex items-center justify-center rounded-full  text-sm z-10"
+        [ngClass]="log.actorId === 0 ? 'bg-primary-40 text-white' : 'bg-custom-light text-black'">
+        {{ i + 1 }}
+      </div>
+
+
+      <div class="flex justify-between items-center font-medium text-gray-800">
+        <div class="flex items-center gap-2">
+          {{ log.actorName }}
+        </div>
+        <div class="text-xs text-gray-500 whitespace-nowrap">
+          {{ log.timestamp ? formatDate(log.timestamp, 'short', 'en-IN') : '-' }}
+        </div>
+      </div>
+
+      <div class="ml-2 text-sm text-gray-600 mt-1">
+        {{ formatText(log.action)}}
+      </div>
+      <div class="ml-2 text-sm text-gray-600 mt-1">
+        {{ formatText(log.state)}}
+      </div>
+    </div>
+    }}
+    @else {
+    <item-not-found [imgHeight]="'100px'" heading="There are no activity records available"></item-not-found>
+    }
+    }
+    @if(paginationLoading) {
+    <div class="flex justify-center py-4">
+      <mat-spinner diameter="24"></mat-spinner>
+    </div>
+    }
+  </div>
+
+
+</div>

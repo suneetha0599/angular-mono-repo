@@ -1,0 +1,160 @@
+<div class="d-flex flex-column h-100">
+  <div class="p-3 pb-0 d-flex flex-column overflow-hidden">
+    <div class="relative d-flex flex-column overflow-hidden">
+      <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+        @if(displayForm){
+        <form [formGroup]="displayForm">
+          <div class="w-2/5 space-y-6">
+            <section>
+              <h3 class="mb-2 title-medium !text-lg text-gray-900 font-medium">Upload form logo</h3>
+              <ng-container *ngTemplateOutlet="fileUploadWrapper; context:{}">
+              </ng-container>
+            </section>
+            <section class="mb-1"
+              [class.mb-2]="displayForm.get('copyright')?.hasError('required') && displayForm.get('copyright')?.touched">
+              <h3 class="mb-4 title-medium !text-lg text-gray-900 font-medium">Footer Information</h3>
+              <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-input">
+                <mat-label>Copyright</mat-label>
+                <input matInput formControlName="copyright" />
+                @if (displayForm.get('copyright')?.hasError('required') && displayForm.get('copyright')?.touched) {
+                <mat-error>
+                  <custom-mat-error class="inline-block" [control]="copyrightControl" [errors]="copyrightControl.errors"
+                    controlActualName="Copyright">
+                  </custom-mat-error>
+                </mat-error>
+                }
+              </mat-form-field>
+            </section>
+            <section class="mb-1">
+              <h3 class="mb-4 title-medium !text-lg text-gray-900 font-medium">Form Information</h3>
+              <div class="-space-y-px">
+                <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-input">
+                  <mat-label>Form Title</mat-label>
+                  <input matInput formControlName="formTitle" />
+                  @if (displayForm.get('formTitle')?.hasError('required') && displayForm.get('formTitle')?.touched) {
+                  <mat-error>
+                    <custom-mat-error class="inline-block" [control]="formTitleControl"
+                      [errors]="formTitleControl.errors" controlActualName="Form Title">
+                    </custom-mat-error>
+                  </mat-error> }
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-input"
+                  [class.mt-0]="!(displayForm.get('formTitle')?.hasError('required') && displayForm.get('formTitle')?.touched)"
+                  [class.mt-2]="displayForm.get('formTitle')?.hasError('required') && displayForm.get('formTitle')?.touched">
+                  <mat-label>Subtitle</mat-label>
+                  <input matInput formControlName="subTitle" />
+                </mat-form-field>
+              </div>
+            </section>
+            <section>
+              <h3 class="mb-0 title-medium !text-lg text-gray-900 font-medium">Color Options</h3>
+              <div class="grid grid-cols-2 gap-32">
+                <div class="flex items-center gap-2">
+                  <ngx-colors ngx-colors-trigger formControlName="primaryColor"
+                    (change)="displayForm.get('primaryColor')?.setValue($event)" class="color-trigger">
+                    <div class="w-16 h-16 cursor-pointer transition-all rounded-none"
+                      [style.background-color]="displayForm.get('primaryColor')?.value || '#1e40af'">
+                    </div>
+                  </ngx-colors>
+                  <div class="flex-1">
+                    <mat-form-field appearance="outline" class="w-full mt-6 mat-sm-input enabled-mat-input">
+                      <mat-label>Primary Color</mat-label>
+                      <input matInput formControlName="primaryColor" class="text-left font-mono text-sm" />
+                      <mat-error>
+                        <custom-mat-error class="inline-block" [control]="primaryColorControl"
+                          [errors]="primaryColorControl.errors" controlActualName="Primary Color">
+                        </custom-mat-error>
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <ngx-colors ngx-colors-trigger formControlName="secondaryColor"
+                    (change)="displayForm.get('secondaryColor')?.setValue($event)" class="color-trigger">
+                    <div class="w-16 h-16 cursor-pointer transition-all rounded-none
+          hover:shadow-lg hover:ring-4 hover:ring-primary/30
+          focus:outline-none focus:ring-4 focus:ring-primary/40"
+                      [style.background-color]="displayForm.get('secondaryColor')?.value || '#f0fdfa'">
+                    </div>
+                  </ngx-colors>
+                  <div class="flex-1">
+                    <mat-form-field appearance="outline" class="w-full mt-6 mat-sm-input enabled-mat-input">
+                      <mat-label>Secondary Color</mat-label>
+                      <input matInput formControlName="secondaryColor" class="text-left font-mono text-sm" />
+                      <mat-error>
+                        <custom-mat-error class="inline-block" [control]="secondaryColorControl"
+                          [errors]="secondaryColorControl.errors" controlActualName="Secondary Color">
+                        </custom-mat-error>
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                  <button type="button" (click)="resetColors()" class="reset-button">
+                    <mat-icon class="material-symbols-outlined">refresh</mat-icon>
+                    <span class="reset-text">Reset</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </form>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #fileUploadWrapper>
+  <div class="grid grid-cols-12 gap-4 mb-2">
+    <div class="col-span-12">
+      <div
+        class="h-auto border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1C2B70] transition mt-2"
+        [class.border-gray-300]="!isDragging" [class.bg-gray-50]="!isDragging" [class.border-primary]="isDragging"
+        [class.bg-blue-50]="isDragging">
+        <label>
+          @if (!previewUrl) {
+          <ng-container *ngTemplateOutlet="fileUploadArea; context:{}">
+          </ng-container>
+          }
+          @else {
+          <ng-container *ngTemplateOutlet="imageViewArea; context:{}">
+          </ng-container>
+          }
+        </label>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #fileUploadArea>
+  <div class="flex flex-col items-center p-5 justify-center cursor-pointer" fileDrop
+    (fileDropped)="onFileDropped($event)">
+    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 mb-2">
+      <mat-icon class="text-4xl text-gray-500 cursor-pointer material-symbols-outlined">
+        folder
+      </mat-icon>
+    </div>
+    <p class="label-large">
+      <span class="text-primary">Click here</span> or drag file
+      to upload
+    </p>
+    <p class="body-medium">
+      {{ fileUploadSupportedText }}
+    </p>
+  </div>
+  <input #fileInput type="file" class="hidden" [accept]="fileUploadAccept" (change)="onFileSelected($event)"
+    aria-label="Upload logo file" (click)="onclick($event)" />
+</ng-template>
+<ng-template #imageViewArea>
+  @if(previewUrl){
+  <div class="flex items-center justify-between p-5">
+    <div class="flex items-center gap-4">
+      <img [src]="previewUrl" secureImg [awsImage]="true" [isLocal]="true"
+        class="h-14 w-14 rounded-lg object-cover border" alt="Logo" />
+      <div>
+        <p class="label-large text-gray-900 truncate-text" [matTooltip]="selectedFileName">{{ selectedFileName }}</p>
+      </div>
+    </div>
+    <button type="button" (click)="removeLogo()" class="w-8 h-8 rounded-full transition">
+      <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+    </button>
+  </div>
+  }
+</ng-template>

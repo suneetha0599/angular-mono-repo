@@ -1,0 +1,121 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+    <!-- Title -->
+    <div class="p-3 pb-0">
+        <div class="d-flex justify-between">
+            <div class="headline-medium my-auto">{{pageTitle}}</div>
+            <div>
+                <loading-button type="primary" class="mx-2" (onButtonClick)="create()">
+                    {{createBtnTitle}}
+                </loading-button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="p-3 flex-1 overflow-hidden">
+        <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white">
+            <div class="relative flex-1 overflow-hidden">
+                <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="remove-border-bottom custom-tab-group h-full"
+                    mat-stretch-tabs="false" mat-align-tabs="start">
+                    @for (category of categories; track category) {
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            {{category.label}}
+                        </ng-template>
+                        <div class="h-full flex flex-col overflow-hidden">
+
+                            <div class="flex-1 overflow-auto mt-4 rounded-lg no-scrollbar">
+                                <div>
+                                    <ng-container *ngTemplateOutlet="ngTemplateTable; context:{}">
+                                    </ng-container>
+                                </div>
+                            </div>
+                            <div class="sticky bottom-0 bg-white z-10">
+                                <mat-paginator [pageSize]="10" [pageSizeOptions]="[ 10,15]" class="paginator"
+                                    aria-label="BPA pagination">
+                                </mat-paginator>
+                            </div>
+                        </div>
+                    </mat-tab>
+                    }
+                </mat-tab-group>
+
+
+                <div class="absolute top-4 right-2 flex gap-2">
+                    <button mat-mini-fab class="shadow-none border-none bg-white">
+                        <mat-icon class="material-symbols-outlined">search</mat-icon>
+                    </button>
+                    <button mat-mini-fab class="shadow-none border-none bg-white">
+                        <mat-icon class="material-symbols-outlined">sort</mat-icon>
+                    </button>
+                    <!-- <button mat-mini-fab class="shadow-none border-none bg-white">
+                        <mat-icon class="material-symbols-outlined">download</mat-icon>
+                    </button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #ngTemplateTable>
+    <table mat-table [dataSource]="dataSource" matSort class="w-full bg-white">
+
+        @for (header of tableHeaders; track header) {
+        <ng-container [matColumnDef]="header.columnDef">
+
+            <!-- HEADER -->
+            <th mat-header-cell *matHeaderCellDef [mat-sort-header]="header.sortable ? header.columnDef : null"
+                class="px-4 title-small whitespace-nowrap">
+                <span class="text-grey title-small">{{ header.headerName }}</span>
+            </th>
+
+            <!-- CELL -->
+            @switch (header.key) {
+            @case (HEADER_STATUS) {
+            <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+                <span class="px-2 py-1 rounded text-xs label-medium" [ngClass]="getStatusClass(row.status)">
+                    {{ getStatus(row.status)}}
+                </span>
+            </td>
+            }
+            @case (HEADER_ACTIONS) {
+            <td mat-cell *matCellDef="let row"
+                class="z-10 text-right border-l border-gray-300 bg-white sticky-actions body-large">
+                <div class="flex justify-center">
+                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                        <mat-icon class="text-primary material-symbols-outlined">more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item>
+                            <span class="body-large">Edit</span>
+                        </button>
+                        <button mat-menu-item>
+                            <span class="body-large">View</span>
+                        </button>
+                        <button mat-menu-item>
+                            <span class="body-large">Duplicate</span>
+                        </button>
+                    </mat-menu>
+                </div>
+            </td>
+            }
+            @default {
+            <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+                @if(header.key == HEADER_NAME){
+                <span class="label-large text-primary">{{ row[header.columnDef]
+                    }}</span>
+                }
+                @else{
+                <span class="body-large">{{ row[header.columnDef] }}</span>
+                }
+            </td>
+            }
+            }
+        </ng-container>
+        }
+        <!-- Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true" class="bg-gray-100 title-small"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+    </table>
+</ng-template>

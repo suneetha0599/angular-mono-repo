@@ -1,0 +1,105 @@
+<div class="px-8 py-6">
+  <div class="flex items-center space-x-2 mb-6">
+    <button (click)="goBack()"
+      class="p-1 me-3 flex items-center justify-center mb-3 border border-gray-500 rounded-xl hover:bg-gray-200 fontColor overflow-hidden inline-flex !rounded-xl">
+      <mat-icon class="fontColor material-symbols-outlined">arrow_back</mat-icon>
+    </button>
+    <p class="headline-medium text-gray-800">Create purpose</p>
+  </div>
+
+  <form class="bg-white shadow-sm rounded-lg p-8 w-full max-w-4xl" [formGroup]="purposeForm" (ngSubmit)="onSubmit()">
+
+    <div class="inline-flex border border-gray-500 rounded-full overflow-hidden mb-3">
+      @for (tab of tabOptions; track tab) {
+      <button (click)="selectTab(tab)" [ngClass]="{
+          'bg-gray-100 fontColor': selectedTab === tab,
+          'text-gray-700 bg-white': selectedTab !== tab,
+          'border-r border-gray-300': !$last
+        }" class="flex items-center gap-1 px-3 py-2 transition-colors ">
+        @if (selectedTab === tab) {
+        <mat-icon class="fontColor material-symbols-outlined">check</mat-icon>
+        }
+        <span class="label-large">{{ tab }}</span>
+      </button>
+      }
+    </div>
+
+    @if (selectedTab === 'Add content') {
+    <div class="mb-3">
+      <label class="block label-large text-gray-700 mb-2">Add title for term page</label>
+      <div>
+        <mat-form-field appearance="outline" class="w-[310px]">
+          <input matInput formControlName="title" class="w-full" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="block label-large text-gray-700 mb-2">Add your content here</label>
+      <quill-editor formControlName="termContent" class="content-editor" [styles]="{'min-height': '120px'}">
+      </quill-editor>
+    </div>
+    }
+
+    @if (selectedTab === 'Add document') {
+    <div class="mb-4">
+      <div class="mb-3">
+        <label class="block label-large text-gray-700 mb-2">Add title for term page</label>
+        <div>
+          <mat-form-field appearance="outline" class="w-[310px]">
+            <input matInput formControlName="title" class="w-full" />
+          </mat-form-field>
+        </div>
+      </div>
+      <label class="block label-large text-gray-700 mb-2">Upload documents</label>
+      <div>
+        <label class="w-[500px] h-[200px] border-2 border-dashed border-gray-300 rounded-lg
+            flex items-center justify-center text-center cursor-pointer
+            hover:border-blue-500 transition mt-2">
+          <div class="flex flex-col items-center justify-center p-5">
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 mb-2">
+              <mat-icon class="text-4xl text-gray-500 material-symbols-outlined">
+                folder
+              </mat-icon>
+            </div>
+            <p class="text-gray-600 !body-large"><span class="fontColor !label-large !font-semibold">Click here</span>
+              or
+              drag file to
+              upload</p>
+            <p class="text-gray-500 body-medium">Supported format Jpeg,png,Jpg(30mb each)</p>
+          </div>
+          <input type="file" class="hidden" (change)="handleFileUpload($event)" />
+        </label>
+      </div>
+    </div>
+    }
+
+    @if (selectedTab === 'Add links') {
+    <div class="mb-4">
+      <div class="mb-3">
+        <label class="block label-large text-gray-700 mb-2">Add title for term page</label>
+        <div>
+          <mat-form-field appearance="outline" class="w-[310px]">
+            <input matInput formControlName="title" class="w-full" />
+          </mat-form-field>
+        </div>
+      </div>
+      <label class="block label-large text-gray-700 mb-2">Add links</label>
+      <div class="relative">
+        <div
+          class="absolute top-0 left-0 h-full flex items-center px-2 ms-1 border-r border-gray-300 text-sm text-gray-600">
+          Add links
+        </div>
+        <input matInput placeholder=""
+          class="pl-[90px] ms-2 pr-3 py-2 border border-gray-400 rounded-md w-[310px] text-sm outline-none focus:ring-1 focus:ring-blue-900"
+          type="text" />
+      </div>
+    </div>
+    }
+
+    <div class="flex gap-4">
+      <loading-button type="primary" class="mx-2">Add term page</loading-button>
+      <loading-button type="secondary" class="mx-2">Save Draft</loading-button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,67 @@
+<div class="p-4">
+  <!-- Title -->
+  <div class="text-sm font-bold mb-2">
+    {{ isEffected ? 'Unable to revoke consent' : 'Revoke consent?' }}
+  </div>
+
+  @if (isEffected) {
+    <div class="body-medium text-gray-700 mb-4">
+      The following data is being used for purposes that might affect the functionality of the application and cannot be revoked.
+
+      <div class="body-large mt-4 mb-2">
+        Critical data elements
+      </div>
+      <table mat-table [dataSource]="data" class="min-w-full text-sm" matSort>
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef class="text-gray-600 px-2 py-3">Type</th>
+          <td mat-cell *matCellDef="let row" class="px-2 py-3 fontColor">
+            {{ row.type }}
+          </td>
+        </ng-container>
+
+        <!-- Sensitivity Column -->
+        <ng-container matColumnDef="sensitivity">
+          <th mat-header-cell *matHeaderCellDef class="text-gray-600 px-2 py-3">Sensitivity</th>
+          <td mat-cell *matCellDef="let row" class="px-2 py-3">
+              {{ row.sensitivity }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50 border-b"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <div class="flex justify-between mt-4">
+      <loading-button type="secondary" (onButtonClick)="onCancel()">
+        <span class="label-medium">Cancel</span>
+      </loading-button>
+
+      <div class="flex gap-3">
+        <loading-button type="secondary" (onButtonClick)="onForceRevoke()">
+          <span class="label-medium">Force Revoke</span>
+        </loading-button>
+
+        <loading-button type="primary" (onButtonClick)="onUpdateDS()">
+          <span class="label-medium">Update DS</span>
+        </loading-button>
+      </div>
+    </div>
+  } @else {
+
+    <div class="body-medium text-gray-700 mb-4">
+      By proceeding, the consent will get automatically revoked. Do you wish to proceed?
+    </div>
+
+
+    <div class="flex justify-end gap-3">
+      <loading-button type="secondary" (onButtonClick)="onCancel()">
+        <span class="label-medium">Cancel</span>
+      </loading-button>
+
+      <loading-button type="primary" (onButtonClick)="Continue()">
+        <span class="label-medium">Continue</span>
+      </loading-button>
+    </div>
+  }
+</div>

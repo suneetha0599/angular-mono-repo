@@ -1,0 +1,10 @@
+@use "../../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../../styles/custom/typography.scss" as typography;
+
+.no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

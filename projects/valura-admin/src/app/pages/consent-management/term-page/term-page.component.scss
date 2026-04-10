@@ -1,0 +1,10 @@
+@use "../../../../styles/custom/colors.scss" as us;
+
+.btnColor {
+    background-color: us.$primary;
+}
+
+.fontColor {
+    color: us.$primary;
+    ;
+}

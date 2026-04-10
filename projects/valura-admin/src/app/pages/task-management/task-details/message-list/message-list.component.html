@@ -1,0 +1,103 @@
+<div class="message-list-wrapper h-full">
+
+  <input #fileInput type="file" class="hidden-file-input" multiple [accept]="acceptedTypes"
+    (change)="onFilesSelected($event)" />
+
+  <div #scrollContainer class="h-full max-h-full overflow-y-auto" (scroll)="onScroll($event)">
+    <div class="space-y-3 p-3">
+
+      <ng-container *ngIf="mode === 'ATTACHMENT' && uploadingFiles.length > 0">
+        <div *ngFor="let file of uploadingFiles" class="uploading-file-card">
+          <div class="upload-card-wrapper">
+            <div class="upload-content">
+              <div class="upload-name-row">
+                <span class="upload-filename">{{ file.name }}</span>
+              </div>
+              <div class="upload-info-row">
+                <span class="upload-filesize">{{ file.size }}</span>
+                <span class="upload-progress-text">{{ file.progress }}%</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="file.progress" class="upload-progress-bar">
+              </mat-progress-bar>
+            </div>
+            <button class="upload-remove-btn" (click)="removeUploadingFile(file.id)" aria-label="Remove file">
+              <mat-icon class="material-symbols-outlined">do_not_disturb_on</mat-icon>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+
+      <ng-container *ngIf="messages.length === 0 && isLoading">
+        <div *ngFor="let item of [1,2,3,4,5]" class="shimmer-card">
+          <div class="shimmer-header">
+            <div class="shimmer-circle"></div>
+            <div class="shimmer-text shimmer-text-short"></div>
+            <div class="shimmer-text shimmer-text-tiny ml-auto"></div>
+          </div>
+          <div class="shimmer-body">
+            <div class="shimmer-text shimmer-text-long"></div>
+            <div class="shimmer-text shimmer-text-medium"></div>
+          </div>
+        </div>
+      </ng-container>
+
+
+      <div *ngFor="let msg of messages" class="w-full max-w-full rounded-lg cursor-pointer relative" [ngClass]="{
+       'bg-gray-50 border-gray-200': mode === 'RESPONSE',
+       'bg-[#f2fcd2] border-lime-100': mode === 'REMARK',
+       'bg-[#FBFBFB] border-gray-100': mode === 'ATTACHMENT'
+     }" (mouseenter)="hoveredAttachmentId = msg.id" (mouseleave)="hoveredAttachmentId = null"
+        (click)="onMessageClick(msg)">
+
+
+        <div *ngIf="mode === 'ATTACHMENT' && hoveredAttachmentId === msg.id && msg.source === 'TASK_ATTACHMENT'"
+          class="absolute -top-2 right-2 bg-white rounded-lg shadow-md border border-gray-200 p-1 z-10">
+          <button mat-icon-button (click)="deleteAttachment(msg.id, $event)"
+            class="shadow-none bg-transparent mat-md-fab-btn" title="Delete attachment">
+            <mat-icon class="text-primary material-symbols-outlined">delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="px-4 py-3">
+          <div class="flex items-center gap-2 mb-1 text-xs">
+            <span class="body-large text-[#767676]">
+              {{ msg.senderName }}
+            </span>
+            <span *ngIf="mode !== 'ATTACHMENT'" class="text-[11px] px-2 py-[2px] rounded-full border leading-tight"
+              [ngClass]="{
+          'bg-blue-50 border-blue-200 text-[#1c2b70]': mode === 'RESPONSE',
+          'bg-white border-indigo-100 text-[#1c2b70]': mode === 'REMARK'
+        }">
+              {{ mode === 'RESPONSE' ? 'Response' : (msg.role || 'Remark') }}
+            </span>
+            <span class="ml-auto text-[11px] text-gray-400">
+              {{ msg.time }}
+            </span>
+          </div>
+          <div *ngIf="mode !== 'ATTACHMENT'">
+            <div class="text-sm">
+              {{ msg.message }}
+            </div>
+            <div *ngIf="msg.attachmentCount && msg.attachmentCount > 0"
+              class="flex items-center gap-1 mt-2 text-xs text-gray-500">
+              <mat-icon class="material-symbols-outlined text-base">attach_file</mat-icon>
+              <span>{{ msg.attachmentCount }} {{ msg.attachmentCount === 1 ? 'attachment' : 'attachments' }}</span>
+            </div>
+          </div>
+          <div *ngIf="mode === 'ATTACHMENT'" class="flex items-center gap-2 text-sm">
+            <mat-icon class="material-symbols-outlined text-primary text-xl">
+              description
+            </mat-icon>
+            <span class="text-primary font-medium truncate">{{ msg.fileName }}</span>
+          </div>
+        </div>
+      </div>
+
+
+      <div *ngIf="isLoadingMore && messages.length > 0" class="flex justify-center py-4">
+        <mat-spinner diameter="24"></mat-spinner>
+      </div>
+    </div>
+  </div>
+</div>

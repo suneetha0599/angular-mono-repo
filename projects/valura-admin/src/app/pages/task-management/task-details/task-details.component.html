@@ -1,0 +1,862 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3">
+  <div>
+    <!-- @if(loading){
+    <div class="p-4 text-center">
+      <div class="text-gray-500">Loading task details...</div>
+    </div>
+    }
+    @if(!loading && !taskDetails){
+    <div class="p-4 text-center">
+      <div class="text-red-500">Failed to load task details</div>
+    </div>
+    } -->
+    <div class="grid grid-cols-12 mb-3">
+
+      <div class="col-span-6">
+        <div class="my-auto flex items-center gap-2">
+          @if(showBackButton){
+          <button (click)="goBack()"
+            class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+            <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+          </button>
+          }
+
+          <span class="headline-medium truncate whitespace-nowrap overflow-hidden"
+            [appEllipsisTooltip]="currentTaskName ||taskDetails?.title ||'' " [colorType]="'primary'" [maxWidth]="0"
+            [matTooltip]="currentTaskName ||taskDetails?.title || ''" matTooltipPosition="below"
+            matTooltipClass="material-tooltip">Task
+            {{currentTaskName ||taskDetails?.title || ''}}</span>
+          <!-- @if(showActionItem){
+          <span class="pointer" (click)="openEditTaskDrawer()">
+            <mat-icon class="material-symbols-outlined text-primary mat-md-icon d-flex my-auto ms-1">edit</mat-icon>
+          </span>
+          } -->
+          @if(!fromRequestDetails){
+          <div class="flex items-center">
+            <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+              (click)="goToPrevRequest()">
+              <mat-icon class="my-auto  material-symbols-outlined"
+                [ngClass]="disablePrevBtn ? 'text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+            </button>
+          </div>
+          <div class="flex items-center">
+            <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+              (click)="goToNextRequest()">
+              <mat-icon class="my-auto material-symbols-outlined "
+                [ngClass]="disableNextBtn ? 'text-gray-400' : 'text-primary'">chevron_right</mat-icon>
+            </button>
+          </div>
+          }@else{
+          <div class="flex items-center">
+            <button [disabled]="disablePrevBtnCP" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+              (click)="goPrevAsset()">
+              <mat-icon class="material-symbols-outlined"
+                [ngClass]="disablePrevBtnCP ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+            </button>
+          </div>
+          <div class="flex items-center">
+            <button [disabled]="disableNextBtnCP" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+              (click)="goNextAsset()" [ngClass]="disableNextBtnCP ? '!text-gray-400' : 'text-primary'">
+              <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+
+      @if(loading) {
+      <div class="col-span-6">
+        <div class="d-flex gap-2 justify-end">
+          <div class="animate-pulse">
+            <div class="h-9 w-24 shimmer rounded"></div>
+          </div>
+          <div class="animate-pulse">
+            <div class="h-9 w-28 shimmer rounded"></div>
+          </div>
+          <div class="animate-pulse">
+            <div class="h-9 w-32 shimmer rounded"></div>
+          </div>
+          <div class="animate-pulse">
+            <div class="h-9 w-30 shimmer rounded"></div>
+          </div>
+
+        </div>
+      </div>
+      }
+
+      @if(!loading && taskDetails && !hasApiError){
+      <div class="col-span-6">
+        <div class="d-flex gap-2 justify-end">
+          <button class="!bg-[#E5F6FD] label-medium !rounded p-2">
+            LOE: {{getEffortLevel(taskDetails.levelOfEffort)}}
+          </button>
+          <button class="label-medium !bg-[#F2FCD2] !rounded p-2">
+            Priority:{{getPriority(taskDetails.priority) }}
+          </button>
+          <button class="label-medium  !rounded p-2 !bg-[#E5F6FD]">
+            Task Status: {{taskDetails.status}}
+          </button>
+          @if(actionOptionLength){
+          <mat-form-field appearance="outline" class="!w-30 chip-input-field">
+            <mat-select placeholder="Actions" [(value)]="selectedAction" class="text-teal-600 font-small"
+              (selectionChange)="onActionChange($event)" [disabled]="submitting">
+              <mat-option *ngFor="let option of actionOptions" [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          }
+        </div>
+      </div>
+      }
+    </div>
+
+  </div>
+  @if(!loading && hasApiError){
+  <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+  }@else{
+  <div class="flex main-wrapper overflow-hidden position-relative border border-[#EEEEEE] rounded h-100 ">
+    <div class="col w-100 h-100 overflow-hidden bg-white border border-white   ">
+      <div class="relative  h-full ">
+        <!-- MAT TABS -->
+        <mat-tab-group disableRipple animationDuration="300ms"
+          class="custom-tab-group mat-tab-100 mat-tab-disable-ripple" [(selectedIndex)]="selectedTabIndex"
+          (selectedTabChange)="onTabChange($event.index)">
+          @for(tab of tabHeaderDetails; track tab.key; let i = $index) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>{{ tab.name }}</span>
+            </ng-template>
+            <ng-template matTabContent>
+              <div class="h-full flex flex-col overflow-hidden">
+                <div class="flex-1 overflow-hidden rounded-lg no-scrollbar main-wrapper bg-white">
+                  <ng-container *ngTemplateOutlet="
+                     ngTabContent;
+                     context: { bpaTab: tab, index: i }
+                     "></ng-container>
+                </div>
+              </div>
+            </ng-template>
+          </mat-tab>
+          }
+        </mat-tab-group>
+        <div class="action-btns">
+          @if(selectedTab === TaskDetailsKey.ATTACHMENT) {
+          <loading-button type="secondary" (onButtonClick)="openAttachmentUpload()">
+            <mat-icon class="material-symbols-outlined">add</mat-icon>
+            <span>Add Attachment</span>
+          </loading-button>
+          } @else {
+          @if(showActionItem){
+          <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="openEditTaskDrawer()">
+            <mat-icon color="primary" class="text-primary material-symbols-outlined">edit</mat-icon>
+          </button>
+          <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="deleteTaskConfirm()">
+            <mat-icon color="primary" class="text-primary material-symbols-outlined">delete</mat-icon>
+          </button>
+          }
+          }
+        </div>
+      </div>
+    </div>
+    <div class="w-[380px] h-100 overflow-auto scroll-w-0">
+      @if (loading) {
+
+      <div class="flex flex-col h-full overflow-hidden bg-white">
+        <div class="flex-[55] flex flex-col p-3 animate-pulse">
+
+          <div class="h-5 w-40 shimmer rounded mb-4"></div>
+
+          <div class="border rounded-md bg-gray-50 p-3 mb-3">
+            <div class="h-5 w-32 shimmer rounded mb-2"></div>
+            <div class="h-4 w-40 shimmer rounded mb-1"></div>
+            <div class="h-4 w-28 shimmer rounded"></div>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <div class="h-3 w-20 shimmer rounded mb-1"></div>
+              <div class="h-4 w-24 shimmer rounded"></div>
+            </div>
+
+            <div>
+              <div class="h-3 w-24 shimmer rounded mb-1"></div>
+              <div class="h-4 w-28 shimmer rounded"></div>
+            </div>
+
+            <div>
+              <div class="h-3 w-24 shimmer rounded mb-1"></div>
+              <div class="h-4 w-full shimmer rounded mb-1"></div>
+              <div class="h-4 w-5/6 shimmer rounded"></div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <div class="h-3 w-24 shimmer rounded mb-2"></div>
+
+            @for (i of [1,2,3]; track i) {
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+              <div class="flex items-center gap-2">
+                <div class="h-5 w-5 shimmer rounded"></div>
+                <div class="h-4 w-32 shimmer rounded"></div>
+              </div>
+              <div class="h-3 w-16 shimmer rounded"></div>
+            </div>
+            }
+          </div>
+        </div>
+
+
+        <div class="flex-[45] flex flex-col p-3">
+
+          <div class="h-5 w-36 shimmer rounded mb-4"></div>
+
+          @for (i of [1,2,3]; track i) {
+          <div class="flex justify-between items-center py-2 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <div class="h-5 w-5 shimmer rounded"></div>
+              <div class="h-4 w-40 shimmer rounded"></div>
+            </div>
+            <div class="h-3 w-16 shimmer rounded"></div>
+          </div>
+          }
+        </div>
+
+      </div>
+
+      }
+
+      @else {
+      <div class="label-large m-3">Related Information</div>
+      <div class="flex flex-column bg-white border border-white rounded overflow-hidden p-3 m-3 my-0 scroll-w-0">
+        @if(shouldShowField('NAME') || shouldShowField('EMAIL') || shouldShowField('PHONE_NUMBER') ||
+        shouldShowField('ROLE')) {
+        <div class="border rounded-md bg-gray-50 p-3 mb-3">
+          @if(shouldShowField('NAME')) {
+          <div class="title-medium text-primary mb-1">
+            {{taskDetails?.dsrDetail?.name}}
+            @if(shouldShowField('ROLE')) {
+            <span class="ml-2 px-2 py-1 border-md rounded-full body-small bg-white fontColor">
+              {{taskDetails?.dsrDetail?.role}}
+            </span>
+            }
+          </div>
+          } @else if(shouldShowField('ROLE')) {
+          <div class="title-medium text-primary mb-1">
+            <span class="px-2 py-1 border-md rounded-full body-small bg-white fontColor">
+              {{taskDetails?.dsrDetail?.role}}
+            </span>
+          </div>
+          }
+          @if(shouldShowField('EMAIL')) {
+          <div class="body-large text-gray-500">{{taskDetails?.dsrDetail?.email}}</div>
+          }
+          @if(shouldShowField('PHONE_NUMBER')) {
+          <div class="body-large text-gray-500">{{taskDetails?.dsrDetail?.phoneNumber}}</div>
+          }
+        </div>
+        }
+
+        <div class="bg-white border border-white rounded mt-0">
+          <div class="">
+            <div class="mb-4">
+              <div class="text-gray-500 label-small">Request ID</div>
+              <div class="body-large" [class.pointer]="canNavigate" (click)="goToRequestDetailPage()">
+                {{ dsrRequestId || 'N/A' }}
+              </div>
+            </div>
+
+            <!-- Dynamic fields grid - only show selected fields with valid values -->
+            @if(visibleDsrFields.length > 0) {
+            <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+              @for(field of visibleDsrFields; track field.key) {
+              @if(field.key !== 'NAME' && field.key !== 'EMAIL' && field.key !== 'PHONE_NUMBER' && field.key !==
+              'ROLE'
+              && field.key !== 'DESCRIPTION' && !field.key.startsWith('THIRD_PARTY')) {
+              <div>
+                <div class="text-gray-500 label-small">{{ field.label }}</div>
+                <div class="body-large">{{ getFieldDisplayValue(field.key, field.value) }}</div>
+              </div>
+              }
+              }
+            </div>
+            }
+
+            @if(shouldShowField('DESCRIPTION')) {
+            <div class="mt-4">
+              <div class="text-gray-500 label-small">Description</div>
+              <div class="body-large" [innerHTML]="taskDetails?.dsrDetail?.description"></div>
+            </div>
+            }
+
+            <!-- Third Party Details - only show if third party fields are selected and have values -->
+            @if(taskDetails?.dsrDetail?.isRequestedByThirdParty && (shouldShowField('THIRD_PARTY_NAME') ||
+            shouldShowField('THIRD_PARTY_EMAIL') || shouldShowField('THIRD_PARTY_PHONE_NO') ||
+            shouldShowField('THIRD_PARTY_ROLE'))) {
+            <div class="mt-4">
+              <div class="label-medium mb-3">Requester details</div>
+              <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+                @if(shouldShowField('THIRD_PARTY_NAME')) {
+                <div>
+                  <div class="text-gray-500 label-small">Third Party Name</div>
+                  <div class="body-large">
+                    {{ taskDetails?.dsrDetail?.thirdPartyName }}
+                  </div>
+                </div>
+                }
+
+                @if(shouldShowField('THIRD_PARTY_EMAIL')) {
+                <div>
+                  <div class="text-gray-500 label-small">Third Party Email</div>
+                  <div class="body-large text-ellipsis overflow-hidden"
+                    [title]="taskDetails?.dsrDetail?.thirdPartyEmail">
+                    {{ taskDetails?.dsrDetail?.thirdPartyEmail }}
+                  </div>
+                </div>
+                }
+
+                @if(shouldShowField('THIRD_PARTY_PHONE_NO')) {
+                <div>
+                  <div class="text-gray-500 label-small">Third Party Phone Number</div>
+                  <div class="body-large text-ellipsis overflow-hidden"
+                    [title]="taskDetails?.dsrDetail?.thirdPartyPhoneNo">
+                    {{ taskDetails?.dsrDetail?.thirdPartyPhoneNo }}
+                  </div>
+                </div>
+                }
+
+                @if(shouldShowField('THIRD_PARTY_ROLE')) {
+                <div>
+                  <div class="text-gray-500 label-small">Third Party Role</div>
+                  <div class="body-large text-ellipsis overflow-hidden"
+                    [title]="taskDetails?.dsrDetail?.thirdPartyRole">
+                    {{ taskDetails?.dsrDetail?.thirdPartyRole }}
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          <div class="my-3 mb-0 pr-2">
+            <div class="text-gray-500 label-small">Documents</div>
+
+            @if(taskDetails?.dsrDetail?.documentsList){
+            @for (links of taskDetails?.dsrDetail?.documentsList; track i; let i = $index) {
+            <div class="flex w-100 mt-2 items-start justify-between border-b border-gray-200 last:border-b-0">
+              <div class="w-100">
+                <div class="flex justify-between items-center">
+                  <div class="title-medium text-primary-40 mb-1 whitespace-nowrap flex items-center">
+                    <mat-icon
+                      class="material-symbols-outlined fontColor my-auto doc-icon me-2 mat-md-icon">description</mat-icon>
+                    <span class="pointer body-large" (click)="viewRequestDocument(links)">
+                      {{ getDocumentName(links)}}
+                    </span>
+                  </div>
+
+                  <div class="body-small text-gray-500">
+                    {{ formatDate(links.uploadedOn) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            }
+            }
+          </div>
+        </div>
+      </div>
+      @if(taskHasAttachments){
+      <div class="label-large m-3">Task Attachments</div>
+      <div class="bg-white border border-white rounded n p-3 m-3 mt-0">
+        <div class="w-100">
+          @for(links of (taskDetails?.documentAttached ?? []); track i; let i = $index) {
+          <div class="flex w-100 mt-2 items-start justify-between border-b border-gray-200 last:border-b-0">
+            <div class="w-100">
+              <div class="w-100 flex justify-between">
+                <div class="title-medium text-primary-40 mb-1  whitespace-nowrap d-flex !my-auto  ">
+                  <mat-icon
+                    class="material-symbols-outlined fontColor my-auto doc-icon me-2 mat-md-icon">description</mat-icon>
+                  <span class="pointer body-large"
+                    (click)="onDocLinkClick(links)">{{getFileName(links.documentName)}}</span>
+                </div>
+                <div class="body-small  text-gray-500">{{formatDate(links.uploadedOn)}}</div>
+                <!-- <div class="">
+                  @if(links.link){
+                  <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn"
+                    (click)="onDocLinkClick(links)">
+                    <span class="material-symbols-outlined">download</span>
+                  </button>
+                  }
+                </div> -->
+              </div>
+              <!-- <div class="flex justify-between"> -->
+              <!-- <div class="body-large  mb-1">{{ doc.documentType }}</div> -->
+              <!-- <div class="body-small  text-gray-500">{{ doc.updatedAt | date:'dd.MM.yyyy' }}</div>
+              </div>
+              <div class="body-large  text-gray-500 mb-1">{{ doc.description }}</div> -->
+              <!-- </div> -->
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+      }
+    </div>
+
+    <!-- <div class="flex main-wrapper overflow-hidden position-relative h-100 mt-2 mb-2">
+      <div class="flex flex-column w-100 h-100 overflow-hidden bg-white border border-white rounded p-3">
+        <div class="flex justify-between items-center mb-1">
+          <p class="title-small text-primary mb-4">Upload document / Comments</p>
+          @if(loading){
+          <div class="shimmer-line shimmer-btn"></div>
+          }
+          @else{
+          @if(!showUploadArea){
+          @if(addButtonLabel){
+          <button mat-raised-button (click)="toggleUploadView()"
+            class="bg-primary text-light fw-500 add-user-btn body-small">
+            {{addButtonLabel}}
+          </button>
+          }
+          }
+          @if(showUploadArea && showBackButton){
+          <button mat-button (click)="hideUploadView()"
+            class="flex items-center gap-2 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-md">
+            <mat-icon class="text-lg material-symbols-outlined">arrow_back</mat-icon>
+            Back
+          </button>
+          }
+          }
+        </div>
+        <div class="col w-100 h-100 overflow-auto scroll-w-0">
+
+          @if(showUploadArea || hasDocumentData){
+          <div class="mb-3">
+            <label class="label-large text-gray-500 block mb-2">Documents</label>
+          </div>
+          }
+
+          @if(showUploadArea){
+          <ng-container *ngTemplateOutlet="uploadAreaTemplate"></ng-container>
+          }
+
+          @if(hasDocumentData){
+          <ng-container
+            *ngTemplateOutlet="documentsTableTemplate; context:{dataSource: (documentUpload??[]) }"></ng-container>
+          }
+
+           <div class="mt-3">
+            <ng-container *ngTemplateOutlet="remarksTemplate"></ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-[350px] bg-white border border-white h-100 rounded overflow-auto p-3 ms-3 scroll-w-0">
+        <p class="title-small text-primary mb-4">Related links</p>
+        @if(loading){<div class="shimmer-line shimmer-medium">
+        </div>}
+        @else{
+        @if(taskDetails?.documentAttached){
+        @for(links of (taskDetails?.documentAttached ?? []); track links;) {
+        <div class="flex justify-between items-center mb-2 gap-2" (click)="onDocLinkClick(links)">
+          <span class="text-sky-500 text-sm cursor-pointer hover:underline truncate flex-1 min-w-0"
+            matTooltip="{{getFileName(links.link)}}">{{getFileName(links.link)}}</span>
+        </div>
+        }
+        }
+        }
+      </div>
+      </div> -->
+    <!-- <div class="mt-3 flex justify-end">
+      @if(loading){<div class="shimmer-line shimmer-btn">
+      </div>}
+      @else{
+      @if(verifyButtonLabel){
+      <loading-button type="secondary" class="me-2" [loading]="verifyLoading" (onButtonClick)="verifyTask()"
+        [loadingText]="verifyButtonLabel">
+        <span class="label-large">{{verifyButtonLabel}}</span>
+      </loading-button>
+      }
+      @if(reOpenButtonLabel){
+      <loading-button type="secondary" class="me-2" [loading]="reopenLoading" (onButtonClick)="reOpenTask()"
+        [loadingText]="reOpenButtonLabel">
+        <span class="label-large">{{reOpenButtonLabel}}</span>
+      </loading-button>
+      }
+      @if(completeButtonLabel){
+      <loading-button type="primary" [loading]="submitLoading" (onButtonClick)="onSubmitClick()"
+        [loadingText]="completeButtonLabel">
+        <span class="label-large">{{completeButtonLabel}}</span>
+      </loading-button>
+      }
+      }
+      </div> -->
+  </div>
+  }
+</div>
+<ng-template #documentsTableTemplate let-dataSource="dataSource">
+  @if(loading) {
+  <!-- Shimmer -->
+  <div class="space-y-6">
+    @for (i of [1,2,3]; track i) {
+    <div class="flex space-x-6">
+      <div class=" shimmer-line rounded w-2/4"></div>
+      <div class="shimmer-line rounded w-1/4"></div>
+      <div class="shimmer-line rounded w-1/4"></div>
+      <div class=" shimmer-line rounded w-1/4"></div>
+    </div>
+    }
+  </div>
+  }
+  @else {
+  <table mat-table [dataSource]="dataSource" matSort
+    class="mat-elevation-z8 w-100 custom-table table equal-width-table">
+    @for (header of tableHeaders; track header) {
+    <ng-container [matColumnDef]="header.columnDef">
+      <!-- HEADER -->
+      <th mat-header-cell *matHeaderCellDef [mat-sort-header]="header.sortable ? header.columnDef : null"
+        class="px-4 title-small whitespace-nowrap equal-width-cell">
+        <span class="text-grey title-small">{{ header.headerName }}</span>
+      </th>
+      <!-- CELL -->
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap equal-width-cell">
+        @switch(header.key){
+        @case(HEADER_SELECT) {
+        <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+          [checked]="selection.isSelected(row)">
+        </mat-checkbox>
+        }
+        @case(HEADER_DATE) {
+        <span class="body-large">
+          {{ row.formattedUploadedAt || '-' }}
+        </span>
+        }
+        @case(HEADER_ID) {
+        <span class="body-large text-primary cursor-pointer block truncate"
+          matTooltip="{{ row[header.columnDef] || '-' }}" (click)="onDocNameClick(row)">
+          {{ row[header.columnDef] ? getFileName(row[header.columnDef]) : '-' }}
+        </span>
+        }
+        @default {
+        <span class="body-large">
+          @if (header.columnDef === 'uploadedAt') {
+          {{ row.formattedUploadedAt || formatDateTime(row[header.columnDef]) || '-' }}
+          } @else {
+          {{ row[header.columnDef] ? row[header.columnDef] : '-' }}
+          }
+        </span>
+        }
+        }
+      </td>
+    </ng-container>
+    }
+    <ng-container matColumnDef="remarkedBy">
+      <th mat-header-cell *matHeaderCellDef>Remarked By</th>
+      <td mat-cell *matCellDef="let res">
+        <ng-container *ngFor="let doc of res.documentUploaded">
+          <span>{{ doc.remarkedBy }}</span><br />
+        </ng-container>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="remarkedAt">
+      <th mat-header-cell *matHeaderCellDef>Remarked At</th>
+      <td mat-cell *matCellDef="let res">
+        <ng-container *ngFor="let doc of res.documentUploaded">
+          <span>{{ doc.remarkedAt | date:'dd.MM.yyyy' }}</span><br />
+        </ng-container>
+      </td>
+    </ng-container>
+    <!-- Rows -->
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+  </table>
+  }
+</ng-template>
+
+<ng-template #remarkCard let-title="title" let-remark="remark" let-by="by" let-at="at"
+  let-reopenedRemark="reopenedRemark">
+  <div class="border p-3 rounded bg-white space-y-2">
+    <p class="font-semibold text-gray-800">
+      Remark: {{ remark }}
+    </p>
+    <div class="flex justify-between text-gray-600 text-sm">
+      <span>Remarked By: {{ by }}</span>
+      <span>Remarked At: {{ at | date:'dd MMM yyyy, hh:mm a' }}</span>
+    </div>
+    @if(reopenedRemark.length){
+    <div class="font-semibold text-gray-800">
+      Reopened Remark : {{reopenedRemark }}
+    </div>
+    }
+  </div>
+</ng-template>
+
+<ng-template #showRemarkSection>
+  @if(showTaskDetails) {
+  <label class="label-large text-gray-500 block mb-3">Comments</label>
+  <div class="space-y-4">
+    @for (resolution of taskResolution; track resolution) {
+    @if (resolution?.remarks) {
+    <ng-container *ngTemplateOutlet="remarkCard;
+         context: {
+         title: 'Remark',
+         remark: resolution.remarks,
+         by: resolution.remarkedBy,
+         at: resolution.remarkedAt,
+         reopenedRemark: resolution.reopenRemarks
+         }">
+    </ng-container>
+    }
+    <!-- @for (doc of resolution.documentUploaded || []; track doc) {
+         @if (doc?.remark) {
+         <ng-container *ngTemplateOutlet="remarkCard;
+                     context: {
+                       title: 'Document Remark',
+                       remark: doc.remark,
+                       by: doc.uploadedByUsername,
+                       at: doc.uploadedAt
+                     }">
+         </ng-container>
+         }
+         } -->
+    }
+  </div>
+  }
+</ng-template>
+
+<ng-template #uploadAreaTemplate>
+  <div>
+    @if(showAddDocument){
+    <div
+      class="w-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1C2B70] transition mt-2">
+      <label>
+        <div class="flex flex-col items-center justify-center p-5 cursor-pointer" fileDrop
+          (fileDropped)="onFileDropped($event)">
+          <div
+            class="w-10 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 mb-2 cursor-pointer">
+            <mat-icon class="text-4xl text-gray-500 material-symbols-outlined">
+              folder
+            </mat-icon>
+          </div>
+          <p class="label-large"><span class="text-primary">Click here</span> or drag files to upload</p>
+          <p class="body-medium">{{ fileUploadSupportedText }}</p>
+        </div>
+        <input type="file" class="hidden" multiple [accept]="fileUploadAccept" (change)="onFileBrowse($event)"
+          (click)="onclick($event)" />
+      </label>
+    </div>
+    @if (selectedFiles.length > 0) {
+    <div class="w-full px-0 my-3">
+      @for (selectedFile of selectedFiles; track selectedFile; let i = $index) {
+      <div class="grid grid-cols-[auto_1fr_auto] items-center gap-2 py-1">
+        <mat-icon class="material-symbols-outlined file-icon text-primary">description</mat-icon>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="my-auto text-sm truncate" [title]="selectedFile.file.name">
+            {{ selectedFile.file.name }}
+          </div>
+          <!-- @if(!isInternalOrExternalUser){ -->
+          <!-- <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-input">
+                  <mat-label>Comment/Remark</mat-label>
+                  <textarea matInput [(ngModel)]="selectedFile.remark"
+                      placeholder="Enter your comment or remark for all files" cdkAutosizeMinRows="1"
+                      cdkTextareaAutosize cdkAutosizeMaxRows="2" #autosize="cdkTextareaAutosize"></textarea>
+                  </mat-form-field> -->
+          <!-- } -->
+        </div>
+        <div class="grid grid-cols-1">
+          <mat-icon class="text-primary delete-icn pointer material-symbols-outlined" (click)="removeFile(i)">
+            delete
+          </mat-icon>
+        </div>
+      </div>
+      }
+    </div>
+    }
+    }
+  </div>
+</ng-template>
+
+<ng-template #ngTabContent let-i="index" let-tab="bpaTab">
+  @if (selectedTabIndex === i) {
+  @switch (tab.key) {
+  @case (TaskDetailsKey.DETAILS) {
+  @if(loading){
+  <div class="p-3 animate-pulse">
+    <div class="border rounded-md bg-gray-50 p-3 mb-3">
+      <div class="grid grid-cols-12">
+        <div class="col-span-6">
+          <div class="grid grid-cols-3 gap-y-2">
+            <div class="h-4 w-20 shimmer rounded"></div>
+            <div class="h-4 w-24 shimmer rounded"></div>
+            <div class="h-4 w-24 shimmer rounded"></div>
+
+            <div class="h-5 w-24 shimmer rounded"></div>
+            <div class="h-5 w-28 shimmer rounded"></div>
+            <div class="h-5 w-32 shimmer rounded"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <div class="h-4 w-24 shimmer rounded mb-2"></div>
+      <div class="h-4 w-full shimmer rounded mb-1"></div>
+      <div class="h-4 w-5/6 shimmer rounded"></div>
+    </div>
+
+    <div class="grid grid-cols-4 mt-4">
+      <div class="col-span-6">
+        <div class="grid grid-cols-2 gap-x-10.5 gap-y-2">
+          <div class="h-4 w-20 shimmer rounded"></div>
+          <div class="h-4 w-20 shimmer rounded"></div>
+          <div class="h-5 w-32 shimmer rounded"></div>
+          <div class="h-5 w-28 shimmer rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <div class="h-4 w-16 shimmer rounded mb-2"></div>
+      <div class="flex gap-2">
+        <div class="h-7 w-20 shimmer rounded-full"></div>
+        <div class="h-7 w-24 shimmer rounded-full"></div>
+        <div class="h-7 w-16 shimmer rounded-full"></div>
+      </div>
+    </div>
+  </div>
+
+  }
+  @else {
+  <div class="p-3 col w-100 h-100 overflow-auto scroll-w-0">
+    <div class="border rounded-md bg-gray-50 p-3 mb-3">
+      <div class="grid grid-cols-12 label-medium text-gray">
+        <div class="col-span-2">Task ID</div>
+        <div class="col-span-2">Created On</div>
+        <div class="col-span-3">Assignor</div>
+        <div class="col-span-3">Assignee</div>
+        <div class="col-span-2">Due Date</div>
+      </div>
+      <div class="grid grid-cols-12">
+        <div class="col-span-2">
+          {{ taskDetails?.taskId }}
+        </div>
+        <div class="col-span-2">
+          {{ taskDetails?.createdDate }}
+        </div>
+        <div class="col-span-3">
+          <div class="d-flex pe-2">
+            <p class="body-large !mb-0" [appEllipsisTooltip]="taskDetails?.createdByUserName ?? '' "
+              [matTooltip]="taskDetails?.createdByUserName" matTooltipPosition="below"
+              matTooltipClass="material-tooltip">
+            </p>
+          </div>
+        </div>
+        <div class="col-span-3">
+          <div class="d-flex pe-2">
+            <p class="body-large !mb-0" [appEllipsisTooltip]="taskDetails?.assignToUserName ?? '' "
+              [matTooltip]="taskDetails?.assignToUserName" matTooltipPosition="below"
+              matTooltipClass="material-tooltip">
+            </p>
+          </div>
+        </div>
+        <div class="col-span-2">
+          {{ taskDetails?.dueDate }}
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 label-medium text-gray body-large">
+      Description
+    </div>
+    <div class="body-large" [innerHTML]="taskDetails?.description || 'N/A'">
+    </div>
+
+    @if(taskDetails?.taskLabelMappings?.length) {
+    <div class="mt-4">
+      <p class="label-medium text-gray mb-2">Label</p>
+      <div class="flex flex-wrap gap-2">
+        @for(label of taskDetails!.taskLabelMappings!; track label) {
+        <span class="px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 body-small">
+          {{ label.labelName || label.name || 'Unnamed Label' }}
+        </span>
+        }
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  }
+  @case (TaskDetailsKey.DISCUSSION_LOG) {
+  <app-discussion-log [requestRid]="taskId" [highlightMessageData]="highlightMessageData"></app-discussion-log>
+  }
+  @case (TaskDetailsKey.ATTACHMENT) {
+  <app-message-list #messageListComponent class="h-full" mode="ATTACHMENT" [requestRid]="taskId"
+    (onItemClick)="onMessageItemClick($event)"></app-message-list>
+  }
+  @case (TaskDetailsKey.ACTIVITY) {
+  <app-task-activity-log [taskId]="taskId"></app-task-activity-log>
+  }
+  @case (TaskDetailsKey.ALL_REMARKS) {
+  <app-message-list class="h-full" mode="REMARK" (onItemClick)="onMessageItemClick($event)"></app-message-list>
+  }
+  @case (TaskDetailsKey.ALL_RESPONSES) {
+  <app-message-list mode="RESPONSE" (onItemClick)="onMessageItemClick($event)"></app-message-list>
+  }
+  @default {
+  <div></div>
+  }
+  }
+  }
+</ng-template>
+
+<!-- <ng-template #remarksTemplate>
+  <div class="grid grid-cols-1 gap-6 mt-3">
+    <div>
+      @if(taskCompleted){
+      <div class="md:col-span-1 xl:col-span-1 mb-4">
+        <ng-container *ngTemplateOutlet="showRemarkSection"></ng-container>
+      </div>
+      @if(!isAssigned && !requestTaskClosed){
+      <div>
+        <label class="label-large text-gray-500 block mb-2">Remarks</label>
+        <mat-form-field appearance="outline" class="w-full chip-input-field">
+          <textarea matInput [(ngModel)]="reopenRemark" placeholder="" cdkAutosizeMinRows="1" cdkTextareaAutosize
+            cdkAutosizeMaxRows="5" #autosize="cdkTextareaAutosize"></textarea>
+        </mat-form-field>
+      </div>
+      }
+      }
+      @else{
+      <div class="md:col-span-1 xl:col-span-1 mb-4">
+        <ng-container *ngTemplateOutlet="showRemarkSection"></ng-container>
+      </div>
+      @if(isAssigned){
+      <mat-form-field appearance="outline" class="w-full chip-input-field">
+        <mat-label>Comment/Remark</mat-label>
+        <textarea matInput [(ngModel)]="remark" placeholder="Enter your comment or remark" cdkAutosizeMinRows="1"
+          cdkTextareaAutosize cdkAutosizeMaxRows="5" #autosize="cdkTextareaAutosize"></textarea>
+      </mat-form-field>
+      }
+      }
+    </div>
+  </div>
+</ng-template> -->
+
+
+<!-- Task Edit Drawer -->
+<mat-drawer-container class="drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #editTaskDrawer mode="over" position="end" [disableClose]="true" class="task-edit-drawer">
+    <app-create-task-drawer [requestRid]="requestRid || 0" [requestStage]="taskDrawerRequestStage"
+      [documentsList]="taskDrawerDocumentsList" [task]="editTaskData" [isEditMode]="isEditTaskMode"
+      [dsrRequestDetails]="dsrRequestDetails" (onClose)="closeEditTaskDrawer()" (onSaveTask)="onSaveTask($event)">
+    </app-create-task-drawer>
+  </mat-drawer>
+</mat-drawer-container>
+
+<ng-template #errorLoading>
+  <div class="d-flex flex-column rounded overflow-hidden h-screen bg-white p-2 mt-3 justify-center">
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+  </div>
+</ng-template>

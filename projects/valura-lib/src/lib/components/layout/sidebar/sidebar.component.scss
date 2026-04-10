@@ -1,0 +1,50 @@
+$border-radius: 12px;
+
+mat-sidenav-content {
+  transition: 0.5s;
+  margin-left: 260px !important;
+  width: calc(100% - 260px) !important;
+  z-index: 1;
+
+  &.expanded {
+    width: calc(100% - 80px) !important;
+    margin-left: 80px !important;
+  }
+}
+
+.sidebar {
+  width: 260px !important;
+
+  &.collapsed {
+    width: 80px !important;
+  }
+}
+
+.mat-drawer-content {
+  overflow-x: hidden !important;
+}
+
+.br-md {
+  border-radius: $border-radius !important;
+}
+
+// Submenu tooltip z-index override to appear above task drawer
+.sidebar-submenu-tooltip {
+  z-index: 1000001 !important;
+  position: fixed !important;
+}
+
+// Global override to ensure submenu appears above all overlays
+::ng-deep {
+  .sidebar-submenu-tooltip {
+    z-index: 1000001 !important;
+    position: fixed !important;
+  }
+
+  // Prevent mat-sidenav from creating a containing block for fixed positioning
+  mat-sidenav {
+    transform: none !important;
+    will-change: auto !important;
+    filter: none !important;
+  }
+}

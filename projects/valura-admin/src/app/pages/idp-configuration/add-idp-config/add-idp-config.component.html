@@ -1,0 +1,205 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{
+  data?.mode === 'edit'? "Edit IDP" : "Add IDP" }}
+</h3>
+<button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 mat-md-icon material-symbols-outlined">close</mat-icon>
+</button>
+@if(isDetailsLoading){
+<mat-card class="border border-gray-300 rounded shadow-none mx-4 mb-3">
+  <mat-card-content class="space-y-3">
+    <div class="shimmer-line w-2/5"></div>
+    <div class="shimmer-line w-4/5"></div>
+    <div class="shimmer-line w-3/5"></div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="border border-gray-300 rounded shadow-none mx-4 mb-3">
+  <mat-card-content class="space-y-3">
+    <div class="shimmer-line w-1/3"></div>
+    <div class="shimmer-line w-5/6"></div>
+  </mat-card-content>
+</mat-card>
+}
+
+@if(!isDetailsLoading && isSAML && clientIdData && redirectUri){
+<mat-card class="border border-gray-300 rounded shadow-none mx-4 mb-3">
+  <mat-card-content class="flex items-center justify-between gap-3">
+
+    <div class="flex items-center gap-2 overflow-hidden">
+      <span class="body-small text-gray-600 whitespace-nowrap">
+        Client ID:
+      </span>
+
+      <span class="body-small font-mono text-gray-900 max-w-[240px] truncate" [matTooltip]="clientIdData">
+        {{ clientIdData }}
+      </span>
+
+      <span matTooltip="Copy" (click)="copyClientId()" class="material-symbols-outlined mat-md-icon pointer">
+
+        <mat-icon>
+          {{ copied ? 'check' : 'content_copy' }}
+        </mat-icon>
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2 overflow-hidden mt-2">
+      <span class="body-small text-gray-600 whitespace-nowrap">
+        Redirect URI:
+      </span>
+
+      <span class="body-small font-mono text-gray-900 max-w-[320px] truncate" [matTooltip]="redirectUri">
+        {{ redirectUri }}
+      </span>
+
+
+      <span matTooltip="Copy" (click)="copyRedirectUri()" class="material-symbols-outlined mat-md-icon pointer">
+
+        <mat-icon>
+          {{ copiedRedirectUri ? 'check' : 'content_copy' }}
+        </mat-icon>
+      </span>
+    </div>
+
+
+    <div class="flex items-center gap-2 overflow-hidden mt-2">
+      <span class="body-small text-gray-600 whitespace-nowrap">
+        Name ID Format
+      </span>
+
+      <span class="body-small font-mono text-gray-900 break-all">
+        email
+      </span>
+
+
+    </div>
+
+  </mat-card-content>
+</mat-card>
+
+}
+
+
+@if(!isDetailsLoading && isOIDC && redirectUriOidc ){
+<mat-card class="border border-gray-300 rounded shadow-none mx-4 mb-3">
+  <mat-card-content class="flex items-center justify-between gap-3">
+
+    <div class="flex items-center gap-2 overflow-hidden mt-2">
+      <span class="body-small text-gray-600 whitespace-nowrap">
+        Redirect URI:
+      </span>
+      <span class="body-small font-mono text-gray-900 max-w-[320px] truncate" [matTooltip]="redirectUriOidc">
+        {{ redirectUriOidc }}
+      </span>
+
+
+      <span matTooltip="Copy Client ID" (click)="copyRedirectUriOidc()"
+        class="material-symbols-outlined mat-md-icon pointer">
+
+        <mat-icon>
+          {{ copiedRedirectUri ? 'check' : 'content_copy' }}
+        </mat-icon>
+      </span>
+    </div>
+
+  </mat-card-content>
+</mat-card>
+
+}
+@if(!isDetailsLoading){
+<form mat-dialog-content [formGroup]="clientForm" class="space-y-4 scroll-w-0">
+
+  <label class="font-medium">IDP Type</label>
+  <mat-radio-group formControlName="idpType" class="flex gap-4">
+    <mat-radio-button value="OIDC">OIDC</mat-radio-button>
+    <mat-radio-button value="SAML">SAML</mat-radio-button>
+  </mat-radio-group>
+
+  <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+    <mat-label>Display Name</mat-label>
+    <input matInput formControlName="displayName" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-full  mat-sm-input mat-mdc-mb-0">
+    <mat-label>Registration ID</mat-label>
+    <input matInput formControlName="registrationId" />
+  </mat-form-field>
+
+  @if(isOIDC){
+  <div formGroupName="oidc" class="space-y-4">
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0"><mat-label>Client ID</mat-label><input
+        matInput formControlName="clientId"></mat-form-field>
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+      <mat-label>Client Secret</mat-label>
+
+      <input matInput [type]="hideClientSecret ? 'password' : 'text'" formControlName="clientSecret" />
+
+      <button mat-icon-button matSuffix type="button" (click)="hideClientSecret = !hideClientSecret"
+        [attr.aria-label]="hideClientSecret ? 'Show client secret' : 'Hide client secret'">
+        <mat-icon class="material-symbols-outlined mat-md-icon">
+          {{ hideClientSecret ? 'visibility_off' : 'visibility' }}
+        </mat-icon>
+      </button>
+    </mat-form-field>
+
+  </div>
+
+  }
+
+
+  <mat-checkbox formControlName="isActive">Is Active</mat-checkbox>
+
+  <mat-radio-group formControlName="configMode" class="flex gap-4">
+    <mat-radio-button value="manual">Manual</mat-radio-button>
+    <mat-radio-button value="metadata">Metadata URL</mat-radio-button>
+  </mat-radio-group>
+
+  @if(isOIDC && isManual){
+  <div formGroupName="oidc" class="space-y-4">
+    <mat-form-field appearance="outline" class="w-full  mat-sm-input mat-mdc-mb-0"><mat-label>Authorization
+        URI</mat-label><input matInput formControlName="authorizationUri"></mat-form-field>
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0"><mat-label>Token URI</mat-label><input
+        matInput formControlName="tokenUri"></mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0"><mat-label>Issuer
+        URI</mat-label><input matInput formControlName="issuerUri"></mat-form-field>
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0"><mat-label>JWK Set
+        URI</mat-label><input matInput formControlName="jwkSetUri"></mat-form-field>
+  </div>
+  }
+
+  @if(isOIDC && isMetadata){
+  <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+    <mat-label>OIDC Metadata URL</mat-label>
+    <input matInput formControlName="oidcLink" />
+  </mat-form-field>
+  }
+
+
+  @if(isSAML && isManual){
+  <div formGroupName="saml" class="space-y-4">
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0"><mat-label>IdP Entity
+        ID</mat-label><input matInput formControlName="idpEntityId"></mat-form-field>
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0"><mat-label>SSO Login Service
+        Location</mat-label><input matInput formControlName="ssoServiceLocation"></mat-form-field>
+    <app-custom-mat-textarea [label]="IdP
+        Certificate" [control]="idpCertificate" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+  }
+
+  @if(isSAML && isMetadata){
+  <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+    <mat-label>SAML Metadata URL</mat-label>
+    <input matInput formControlName="samlLink" />
+  </mat-form-field>
+  }
+
+</form>
+}
+
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()">Save</button>
+</mat-dialog-actions>

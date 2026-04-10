@@ -1,0 +1,217 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+
+body {
+  overflow: hidden;
+}
+
+.custom-tab-group {
+  height: 100%;
+
+  ::ng-deep .mat-mdc-tab-list {
+    margin-bottom: 12px !important;
+  }
+
+  .mat-mdc-tab-group {
+    height: 100%;
+  }
+
+  .mat-mdc-tab-body-wrapper {
+    height: calc(100% - 48px);
+    overflow: hidden;
+  }
+
+  .mat-mdc-tab-body-content {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .mat-mdc-tab-list {
+    margin-bottom: 0 !important;
+  }
+
+  .mat-mdc-tab {
+    color: #6b7280;
+    font-weight: 500;
+
+    &.mdc-tab--active {
+      color: #3b82f6;
+    }
+  }
+
+  .mat-mdc-tab-ink-bar {
+    background-color: #3b82f6;
+    height: 2px;
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    margin-bottom: 0 !important;
+  }
+}
+
+.mat-tab-100 {
+  .mat-mdc-tab-body-wrapper {
+    flex: 1;
+    overflow: hidden;
+  }
+}
+
+// Ellipsis styles
+.truncate-cell {
+  max-width: 0; // Important for table cell truncation
+  overflow: hidden;
+}
+
+.truncate-text {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+// Column specific widths for better truncation
+.mat-column-templateName {
+  width: 30%;
+  max-width: 300px;
+}
+
+.mat-column-triggerEvent {
+  width: 25%;
+  max-width: 200px;
+}
+
+.mat-column-subject {
+  width: 35%;
+  max-width: 400px;
+}
+
+.mat-column-actions {
+  width: 10%;
+  min-width: 120px;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.mat-mdc-icon-button {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  margin: 0 2px;
+}
+
+.mat-mdc-icon-button mat-icon {
+  font-size: 18px;
+}
+
+.no-data-row {
+  .mat-mdc-cell {
+    padding: 60px 20px !important;
+    text-align: center;
+    border-bottom: none !important;
+
+    mat-icon {
+      font-size: 4rem !important;
+      width: 4rem !important;
+      height: 4rem !important;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .custom-table {
+    min-width: 900px;
+  }
+
+  .mat-column-templateName {
+    width: 25%;
+  }
+
+  .mat-column-triggerEvent {
+    width: 20%;
+  }
+
+  .mat-column-subject {
+    width: 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-table {
+    min-width: 800px;
+
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 10px 12px !important;
+      font-size: 0.8rem !important;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .custom-table {
+    min-width: 750px;
+
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 8px 10px !important;
+      font-size: 0.75rem !important;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer-line {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  height: 16px;
+
+  &.shimmer-small {
+    width: 60px;
+  }
+
+  &.shimmer-medium {
+    width: 150px;
+  }
+
+  &.shimmer-large {
+    width: 200px;
+  }
+}
+
+.shimmer-row {
+  .mat-mdc-cell {
+    padding: 12px 16px !important;
+
+    .shimmer-line {
+      margin: 4px 0;
+    }
+  }
+}
+
+.no-data-row {
+  .mat-mdc-cell {
+    padding: 60px 20px !important;
+    text-align: center;
+    border-bottom: none !important;
+  }
+}
+
+.close-btn {
+  height: 25px;
+  width: 25px;
+  padding: 0;
+}

@@ -1,0 +1,9 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+    <app-regulation-bpa-table
+      [data]="legalBasisData()"
+      [columns]="tableColumns"
+      (dataChanged)="onDataChanged()">
+    </app-regulation-bpa-table>
+  </div>
+</div>

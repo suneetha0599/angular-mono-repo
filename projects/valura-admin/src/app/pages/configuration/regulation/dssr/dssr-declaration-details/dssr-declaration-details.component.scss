@@ -1,0 +1,49 @@
+@use "../../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../../styles/custom/typography.scss" as typography;
+
+.hr-bold {
+  height: 5px;
+  margin-top: 0px !important;
+}
+
+.custom-textarea {
+  resize: none;
+  overflow-y: auto;
+  max-height: 3.5rem;
+}
+
+.back-icon {
+  font-size: typography.$fs-22;
+}
+
+.shimmer-line {
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.shimmer-small {
+  width: 400px;
+  height: 56px;
+}
+
+.shimmer-medium {
+  width: 400px;
+  height: 56px;
+}
+
+.shimmer-large {
+  width: 400px;
+  height: 100px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

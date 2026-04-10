@@ -1,0 +1,280 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="flex justify-between items-center p-3 pb-0">
+      <div class="flex items-center">
+
+        <button (click)="goBack() "
+          class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200 ">
+          <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+        </button>
+        <div class="headline-medium my-auto ml-2">User Details</div>
+        <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToPrevRequest()">
+          <mat-icon class="material-symbols-outlined"
+            [ngClass]="disablePrevBtn ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+        </button>
+        <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToNextRequest()" [ngClass]="disableNextBtn ? '!text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+        </button>
+      </div>
+      <loading-button type="light" [basicButton]="true" (onButtonClick)="ShowActivityLog()">
+        Activity Log
+      </loading-button>
+    </div>
+  </div>
+  <div class="p-4 flex-1 min-h-0">
+    @if(hasApiError){
+    <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+    }@else{
+    <div class="flex flex-col overflow-auto rounded-lg relative h-fit max-h-full bg-white">
+      <div *ngIf="!isLoading && userDetails; else loadingTemplate" class="flex flex-col h-full">
+        <form [formGroup]="form" class="flex flex-col h-full">
+
+          <div class="flex-1 overflow-y-auto p-6 pl-8 pb-2">
+            <div class="mb-8">
+              <p class="label-large mb-2">User Email</p>
+              <div class="flex flex-wrap gap-3">
+                <div class="flex items-center bg-blue-100 rounded-full px-4 py-2 relative">
+                  <span class="text-gray-800 pr-8">{{ userDetails.email }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-8">
+              <p class="label-large mb-2">First Name</p>
+              <mat-form-field appearance="outline" class="w-full max-w-md chip-input-field">
+                <input matInput formControlName="firstName" placeholder="Enter full name">
+                <mat-error *ngIf="form.get('firstName')?.hasError('required')">
+                  Full name is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="mb-8">
+              <p class="label-large mb-2">Last Name</p>
+              <mat-form-field appearance="outline" class="w-full max-w-md chip-input-field">
+                <input matInput formControlName="lastName" placeholder="Enter full name">
+                <mat-error *ngIf="form.get('lastName')?.hasError('required')">
+                  Full name is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="mb-8">
+              <p class="label-large mb-2">Display Name</p>
+              <mat-form-field appearance="outline" class="w-full max-w-md chip-input-field">
+                <input matInput formControlName="displayName">
+                <mat-error *ngIf="form.get('displayName')?.hasError('required')">
+                  Full name is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="mb-8">
+              <p class="label-large mb-2">Phone Number</p>
+              <mat-form-field appearance="outline" class="w-full max-w-md  chip-input-field">
+                <input matInput formControlName="phoneNumber">
+                <mat-error *ngIf="form.get('phoneNumber')?.hasError('pattern')">
+                  Please enter a valid phone number
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="mb-8">
+              <p class="label-large mb-2">Departments</p>
+              <div class="flex flex-wrap gap-3 items-center">
+
+                <div *ngFor="let dept of selectedDepartments"
+                  class="flex items-center bg-blue-100 rounded-full px-4 py-2 gap-2 max-w-xs h-10 relative">
+                  <span class="text-md text-blue-700 font-normal truncate pr-4">
+                    {{ dept.name }}
+                  </span>
+                  <button mat-icon-button class="chip-remove-btn" (click)="removeDepartment(dept.id)">
+                    <mat-icon class="text-gray-600 material-symbols-outlined">remove</mat-icon>
+                  </button>
+                </div>
+
+                <div class="flex items-center min-w-[322px]">
+                  <mat-form-field appearance="outline" class="w-full mat-sm-xl-input enabled-mat-input mat-mdc-mb-0">
+                    <!-- <mat-label>Select Department</mat-label> -->
+                    <input type="text" matInput [formControl]="departmentControl" [matAutocomplete]="autoDepartment"
+                      (input)="onSearchDepartment($any($event.target).value)" />
+                    <button mat-icon-button matSuffix tabindex="-1">
+                      <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                    </button>
+                    <mat-autocomplete #autoDepartment="matAutocomplete" [displayWith]="displayDepartmentName"
+                      (optionSelected)="onSelectDepartment($event.option.value)">
+                      @for(department of filteredDepartmentList; track i; let i = $index) {
+                      <mat-option [value]="department">
+                        {{ department.name }}
+                      </mat-option>
+                      }
+                      @if (departmentSearchTerm && !isExistingDepartment(departmentSearchTerm)) {
+                      <mat-option (click)="openAddDialog('userDepartment', departmentSearchTerm)">
+                        Other
+                      </mat-option>
+                      }
+                    </mat-autocomplete>
+                    <mat-error>
+                      <custom-mat-error class="inline-block" [errors]="departmentControl.errors"
+                        [control]="departmentControl" controlActualName="Select department">
+                      </custom-mat-error>
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-8">
+              <p class="label-large mb-2">Roles</p>
+              <div class="flex flex-wrap gap-3 items-center">
+
+                <div *ngFor="let role of selectedRoles"
+                  class="flex items-center bg-blue-100 rounded-full px-4 py-2 gap-2 max-w-xs h-10 relative">
+                  <span class="text-md text-blue-700 font-normal truncate pr-4">
+                    {{ role.name }}
+                  </span>
+                  <button mat-icon-button class="chip-remove-btn" (click)="removeRole(role.id)">
+                    <mat-icon class="text-gray-600 material-symbols-outlined">remove</mat-icon>
+                  </button>
+                </div>
+
+                <div class="flex items-center min-w-[322px]">
+                  <mat-form-field appearance="outline" class="w-full chip-input-field">
+
+                    <mat-select formControlName="role" (selectionChange)="onRoleSelected($event)">
+                      <mat-option *ngFor="let role of availableRoles" [value]="role">
+                        {{ role.name }}
+                        <span class="text-xs text-gray-500 ml-2">{{ role.description }}</span>
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="hasRoleSelectionError">
+                      {{ getRoleSelectionError() }}
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-8">
+              <p class="font-semibold text-gray-800 mb-4">Permissions</p>
+              <div *ngFor="let module of objectKeys(primitives)" class="mb-6">
+                <p class="label-large mb-2">{{ module }}</p>
+                <div class="flex flex-col space-y-3 ml-4">
+                  <div *ngFor="let primitive of primitives[module]"
+                    class="flex items-center justify-between max-w-2xl p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                      <span class="label-large block">{{ primitive.name }}</span>
+                      <div class="text-sm text-gray-600 mb-1">
+                        <span>{{ primitive.description }}</span>
+                      </div>
+
+                      <div *ngIf="primitive.source" class="text-xs mt-1">
+
+                        <span
+                          *ngIf="primitive.source.includes('Manually Overridden') || primitive.source.startsWith('Override:')"
+                          class="inline-flex items-center px-2 py-1 rounded-full"
+                          [ngClass]="primitive.enabled ? 'bg-blue-100 text-blue-800' : 'bg-gray-200 text-gray-700'">
+
+                          <mat-icon class="text-xs mr-1 material-symbols-outlined"
+                            style="font-size: 15px; width: 15px; height: 15px;">
+                            {{ primitive.enabled ? 'person' : 'do_not_disturb' }}
+                          </mat-icon>
+                          <span>
+                            {{ primitive.source }}
+                          </span>
+                        </span>
+
+                        <span *ngIf="primitive.source.startsWith('Role:')"
+                          class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full">
+
+                          <mat-icon class="text-xs mr-1 material-symbols-outlined"
+                            style="font-size: 15px; width: 15px; height: 15px;">
+                            admin_panel_settings
+                          </mat-icon>
+
+                          <span [appEllipsisTooltip]="'Permission from ' + primitive.source.replace('Role: ', '')"
+                            matTooltip [maxWidth]="240">
+                            Permission from {{ primitive.source.replace('Role: ', '') }}
+                          </span>
+                        </span>
+
+                      </div>
+
+                    </div>
+                    <mat-slide-toggle [checked]="primitive.enabled" (change)="onPermissionToggle(primitive, module)"
+                      color="primary">
+                    </mat-slide-toggle>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sticky bottom-0 left-0 right-0 bg-white  px-6 py-2 pb-3 ">
+            <div class="flex justify-end gap-3">
+              <button mat-button type="button" (click)="resetForm()" [disabled]="submitLoading">
+                <span class="label-large">Reset</span>
+              </button>
+              <loading-button type="primary" [loading]="submitLoading" (onButtonClick)="onSubmit()">
+                <span class="label-large">Save Changes</span>
+              </loading-button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <ng-template #loadingTemplate>
+        <div class="flex-1 overflow-y-auto p-6 pl-8 pb-2">
+          <div class="mb-8">
+            <div class="shimmer shimmer-label mb-2"></div>
+            <div class="shimmer shimmer-chip"></div>
+          </div>
+          <div class="mb-8">
+            <div class="shimmer shimmer-label mb-2"></div>
+            <div class="shimmer shimmer-input"></div>
+          </div>
+          <div class="mb-8">
+            <div class="shimmer shimmer-label mb-2"></div>
+            <div class="shimmer shimmer-input"></div>
+          </div>
+          <div class="mb-8">
+            <div class="shimmer shimmer-label mb-2"></div>
+            <div class="shimmer shimmer-input"></div>
+          </div>
+          <div class="mb-8">
+            <div class="shimmer shimmer-label mb-2"></div>
+            <div class="flex flex-wrap gap-3 items-center">
+              <div class="shimmer shimmer-chip"></div>
+              <div class="shimmer shimmer-chip"></div>
+              <div class="shimmer shimmer-input"></div>
+            </div>
+          </div>
+          <div class="mb-8">
+            <div class="shimmer shimmer-label mb-2"></div>
+            <div class="flex flex-wrap gap-3 items-center">
+              <div class="shimmer shimmer-chip"></div>
+              <div class="shimmer shimmer-input"></div>
+            </div>
+          </div>
+          <div class="mb-8">
+            <div class="shimmer shimmer-label mb-4"></div>
+            <div class="mb-6">
+              <div class="shimmer shimmer-module-title mb-2"></div>
+              <div class="flex flex-col space-y-3 ml-4">
+                <div class="shimmer shimmer-permission-item"></div>
+                <div class="shimmer shimmer-permission-item"></div>
+                <div class="shimmer shimmer-permission-item"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>}
+  </div>
+</div>
+
+
+<ng-template #errorLoading>
+  <div class="flex flex-col overflow-auto rounded-lg relative h-screen max-h-full bg-white justify-center">
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+  </div>
+</ng-template>

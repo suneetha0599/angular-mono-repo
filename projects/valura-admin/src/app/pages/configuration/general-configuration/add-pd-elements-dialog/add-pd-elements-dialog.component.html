@@ -1,0 +1,156 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{ header }}
+</h3>
+<button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+@if(isViewMode) {
+<div mat-dialog-content class="m-0 p-3" [formGroup]="form">
+  @if(isDataElements) {
+  <div class="mt-2 mb-3">
+    <mat-label class="fs-sm-med text-grey">Name</mat-label>
+    <div>{{ data?.elementData?.name || '-' }}</div>
+  </div>
+  <div class="mt-3">
+    <mat-label class="fs-sm-med text-grey">Category</mat-label>
+    <div>{{ data?.elementData?.categoryName || '-' }}</div>
+  </div>
+  <div class="mt-3">
+    <mat-label class="fs-sm-med text-grey">Classification</mat-label>
+    <div>{{ data?.elementData?.classification || '-' }}</div>
+  </div>
+  } @else if(isCategory) {
+  <div class="mt-2 mb-3">
+    <mat-label class="fs-sm-med text-grey">Name</mat-label>
+    <div>{{ data?.elementData?.name || '-' }}</div>
+  </div>
+  <div class="mt-3">
+    <mat-label class="fs-sm-med text-grey">Description</mat-label>
+    <div>{{ data?.elementData?.description || '-' }}</div>
+  </div>
+  } @else if(isClassification) {
+  <div class="mt-2 mb-3">
+    <mat-label class="fs-sm-med text-grey">Classification Name</mat-label>
+    <div>{{ data?.elementData?.name || '-' }}</div>
+  </div>
+  <div class="mt-3">
+    <mat-label class="fs-sm-med text-grey">Description</mat-label>
+    <div>{{data?.elementData?.description || '-' }}</div>
+  </div>
+  }
+</div>
+<div mat-dialog-actions class="flex justify-center mt-4 pt-2">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" (onButtonClick)="onEditMode()">
+      <mat-icon class="text-light me-2 mat-md-icon material-symbols-outlined">edit</mat-icon>
+      <div>Edit</div>
+    </loading-button>
+  </div>
+</div>
+} @else {
+<div mat-dialog-content class="m-0 p-3" [formGroup]="form">
+  @if(isDataElements) {
+  <mat-form-field appearance="outline" class="enabled-mat-input mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="elementName" />
+    <mat-error>
+      <custom-mat-error class="inline-block" [errors]="elementName.errors" [control]="elementName"
+        controlActualName="name"></custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="w-100 mt-4 mat-sm-input mat-mdc-mb-0">
+    <mat-label>Category</mat-label>
+    <mat-select formControlName="category" multiple (closed)="onCategoryPanelClosed()">
+      <mat-select-trigger>
+        {{ getCategoryDisplayText() }}
+      </mat-select-trigger>
+      <div class="search-input-container" (click)="$event.stopPropagation()">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input search-mat-field">
+          <input matInput [formControl]="categorySearchControl" placeholder="Search category..." autocomplete="off"
+            aria-label="Search category" />
+        </mat-form-field>
+      </div>
+      @for (c of filteredCategories; track c.id) {
+      <mat-option [value]="c.id">
+        {{ c.name }}
+      </mat-option>
+      }
+      @if (filteredCategories.length === 0) {
+      <div class="no-results-message">No categories found</div>
+      }
+    </mat-select>
+    <mat-error>
+      <custom-mat-error [errors]="category.errors" [control]="category" controlActualName="Category">
+      </custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="w-100 mt-4 mat-sm-input mat-mdc-mb-0">
+    <mat-label>Classification</mat-label>
+    <mat-select formControlName="classification" multiple (closed)="onClassificationPanelClosed()">
+      <mat-select-trigger>
+        {{ getClassificationDisplayText() }}
+      </mat-select-trigger>
+      <div class="search-input-container" (click)="$event.stopPropagation()">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input search-mat-field">
+          <input matInput [formControl]="classificationSearchControl" placeholder="Search classification..."
+            autocomplete="off" aria-label="Search classification" />
+        </mat-form-field>
+      </div>
+      @for (cl of filteredClassifications; track cl.id) {
+      <mat-option [value]="cl.id">
+        {{ cl.name }}
+      </mat-option>
+      }
+      @if (filteredClassifications.length === 0) {
+      <div class="no-results-message">No classifications found</div>
+      }
+    </mat-select>
+    <mat-error>
+      <custom-mat-error [errors]="classification.errors" [control]="classification" controlActualName="Classification">
+      </custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  }
+  @else if(isCategory) {
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="categoryName" />
+    <mat-error>
+      <custom-mat-error class="inline-block" [errors]="categoryName.errors" [control]="categoryName"
+        controlActualName="Name"></custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  <div class="mt-4 ">
+    <app-custom-mat-textarea [control]="description" label="Description" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+  }
+  @else if(isClassification) {
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+    <mat-label>Classification Name</mat-label>
+    <input matInput formControlName="classificationName" />
+    <mat-error>
+      <custom-mat-error class="inline-block" [errors]="classificationName.errors" [control]="classificationName"
+        controlActualName="Classification Name"></custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  <div class="mt-4 ">
+    <app-custom-mat-textarea [control]="description" label="Description" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+  }
+</div>
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" [disabled]="form.invalid" [loading]="isSubmitLoading" (onButtonClick)="onSave()">
+      {{ buttonName }}
+    </loading-button>
+  </div>
+</div>
+}

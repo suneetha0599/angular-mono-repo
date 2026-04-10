@@ -1,0 +1,301 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+  <div class="d-flex justify-between mb-2">
+    <div class="d-flex">
+
+      <div class="my-auto flex items-center gap-2">
+        @if(showBackButton){
+        <button (click)="goBack()"
+          class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+          <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+        </button>
+        }
+        @if(needsAction){
+        <mat-icon [matTooltip]="actionToolTipMessage"
+          class="text-base icon-warning info-icn my-auto material-symbols-outlined">info</mat-icon>
+        }
+        <span class="headline-medium">Assessment Overview</span>
+        <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToPrevRequest()" [ngClass]="disablePrevBtn ? 'text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_left</mat-icon>
+        </button>
+        <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToNextRequest()" [ngClass]="disableNextBtn ? 'text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+    <!-- @if(!hasApiError){
+    <loading-button type="light" [basicButton]="true" (onButtonClick)="openStepperPopup()">
+      View Activity
+    </loading-button>
+    } -->
+  </div>
+  @if(hasApiError){
+  <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+  }@else{
+  <div class="flex main-wrapper overflow-hidden position-relative border border-[#EEEEEE] rounded h-100 ">
+    <div class="col w-100 h-100 overflow-hidden bg-white border border-white   ">
+      <div class="relative  h-full ">
+        <!-- MAT TABS -->
+        <mat-tab-group disableRipple animationDuration="300ms"
+          class="custom-tab-group mat-tab-100 mat-tab-disable-ripple" [(selectedIndex)]="selectedTabIndex"
+          (selectedTabChange)="onTabChange($event)">
+          @for(tab of tabHeaderDetails; track tab.key; let i = $index) {
+          <mat-tab [disabled]="isLoading">
+            <ng-template mat-tab-label>
+              <span>{{ tab.name }}</span>
+            </ng-template>
+            <ng-template matTabContent>
+              <div class="h-full flex flex-col overflow-hidden">
+                <div class="flex-1 overflow-hidden rounded-lg no-scrollbar main-wrapper bg-white">
+                  <ng-container *ngTemplateOutlet="ngTabContent;
+                     context: { bpaTab: tab, index: i }
+                     "></ng-container>
+                </div>
+              </div>
+            </ng-template>
+          </mat-tab>
+          }
+        </mat-tab-group>
+
+        <div class="action-btns">
+          <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="dowload()">
+            <mat-icon color="primary" class="material-symbols-outlined">download</mat-icon>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  }
+</div>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #assessmentRiskViewDrawer mode="over" position="end" class="risk-view-mat-drawer" [disableClose]="true">
+    <app-risk-view-drawer [riskData]="riskViewData" [assessmentId]="riskViewPayload?.assessmentId ?? 0"
+      [sections]="riskViewPayload?.sections || []" [isApprover]="riskViewPayload?.isApprover ?? false"
+      [isRespondent]="riskViewPayload?.isRespondent ?? false" [assessmentStatus]="assessmentStatus"
+      (onClose)="closeRiskViewDrawer()" (onEdit)="onRiskViewEdit($event)" (onDelete)="onRiskViewDelete($event)"
+      (onCreateTask)="onRiskViewCreateTask($event)" (onRefresh)="onRiskViewRefresh()"
+      (onNavigateToTask)="onNavigateToTask($event)">
+    </app-risk-view-drawer>
+  </mat-drawer>
+</mat-drawer-container>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #assessmentRiskDrawer mode="over" position="end" class="create-risk-mat-drawer" [disableClose]="true">
+    <app-create-risk-drawer [assessmentId]="riskDrawerPayload.assessmentId"
+      [questionId]="riskDrawerPayload.questionId ?? 0" [sections]="riskDrawerPayload.sections"
+      [editData]="riskDrawerPayload.editData" [isEditMode]="riskDrawerPayload.isEditMode"
+      [source]="riskDrawerPayload.source" [riskMatrix]="riskDrawerPayload.riskMatrix ?? 'M5'"
+      [hideQuestionFields]="riskDrawerPayload.hideQuestionFields ?? false" [isVendorContext]="isVendorContext"
+      [sectionContext]="riskDrawerPayload.sectionContext" (onClose)="closeRiskDrawer()" (onSaved)="onRiskSaved()">
+    </app-create-risk-drawer>
+  </mat-drawer>
+</mat-drawer-container>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #assessmentCreateTaskDrawer mode="over" position="end" [disableClose]="true"
+    class="create-task-mat-drawer">
+    @if (createTaskRiskData) {
+    <app-create-task-drawer [isRiskContext]="true" [isEditMode]="createTaskRiskData.isEditMode ?? false"
+      [task]="createTaskRiskData.taskData ?? null" [assessmentId]="createTaskRiskData.assessmentId"
+      [sections]="createTaskRiskData.sections" [risks]="createTaskRiskData.risks || []"
+      [isVendorContext]="isVendorContext"
+      [riskId]="createTaskRiskData.riskData ? 'R-' + (createTaskRiskData.riskData.riskId ?? createTaskRiskData.riskData.id ?? '') : ''"
+      [questionId]="createTaskRiskData.questionId ?? 0" [source]="createTaskRiskData.source"
+      [hideParameterFields]="createTaskRiskData.hideParameterFields ?? false" (onClose)="closeCreateTaskDrawer()"
+      (onSaveTask)="onCreateTaskSaved($event)">
+    </app-create-task-drawer>
+    }
+  </mat-drawer>
+</mat-drawer-container>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #rightDrawer mode="over" position="end" class="task-edit-drawer" class="w-75 section-mat-drawer"
+    [disableClose]="true">
+    <ng-container [ngSwitch]="drawerType">
+      <ng-container *ngSwitchCase="'risk'">
+        <app-risk-mitigation-drawer [formGroup]="securityControlForm" [securityControlList]="securityControlList"
+          [viewMode]="drawerMode.mode" [risk]="drawerMode.data?.risk" [measure]="drawerMode.data?.measure"
+          [approver]="isApprover" (onCloseDrawer)="closeDrawer()" (onApplyChanges)="onMeasureUpdated($event)">
+        </app-risk-mitigation-drawer>
+      </ng-container>
+      <ng-container *ngSwitchCase="'trigger'">
+        <app-trigger-detail-drawer (onCloseDrawer)="closeDrawer()" [triggers]="drawerMode.data">
+        </app-trigger-detail-drawer>
+      </ng-container>
+    </ng-container>
+  </mat-drawer>
+</mat-drawer-container>
+
+
+<ng-template #errorLoading>
+  <div class="flex-1 flex items-center justify-center bg-white">
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+  </div>
+</ng-template>
+
+
+<ng-template #ngTabContent let-i="index" let-tab="bpaTab">
+  @if (selectedTabIndex === i) {
+  @switch (tab.key) {
+  @case (AssessmentDetailsKey.DETAILS) {
+  @if(isLoading){
+
+  <div class="h-100 overflow-hidden flex gap-2 p-3">
+    <div class="flex-1 overflow-hidden">
+
+      <div class="border rounded-md p-4 mb-4">
+        <div class="grid grid-cols-5 gap-4">
+          <div class="h-5 shimmer rounded col-span-1"></div>
+          <div class="h-5 shimmer rounded col-span-1"></div>
+          <div class="h-5 shimmer rounded col-span-1"></div>
+          <div class="h-5 shimmer rounded col-span-1"></div>
+          <div class="h-5 shimmer rounded col-span-1"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="h-[270px] shimmer rounded-lg"></div>
+        <div class="h-[270px] shimmer rounded-lg"></div>
+        <div class="h-[270px] shimmer rounded-lg"></div>
+      </div>
+
+      <div class="h-[350px] shimmer rounded-lg mb-4"></div>
+
+      <div class="space-y-3 mb-4">
+        <div class="h-4 w-32 shimmer rounded"></div>
+        <div class="h-6 w-72 shimmer rounded"></div>
+        <div class="h-4 w-24 shimmer rounded mt-4"></div>
+        <div class="h-4 w-full shimmer rounded"></div>
+        <div class="h-4 w-5/6 shimmer rounded"></div>
+      </div>
+
+      <div class="h-[200px] shimmer rounded mb-4"></div>
+      <div class="h-[200px] shimmer rounded"></div>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="w-[380px] bg-[#F3F5F6] p-3 space-y-4">
+      <div class="h-[140px] shimmer rounded-lg"></div>
+      <div class="h-[100px] shimmer rounded-lg"></div>
+      <div class="h-[100px] shimmer rounded-lg"></div>
+    </div>
+
+  </div>
+
+  }
+
+  @else {
+  @if(assessmentData) {
+  <app-assessment-details [assessmentData]="assessmentData" [element]="element" [assessmentSource]="assessmentSource"
+    [respondentDataSource]="respondentDataSource" [approverDataSource]="approverDataSource"
+    [assessmentId]="assessmentId" (openStatus)="openEditStatus()" (goToTasksTab)="goToTasksTab()"
+    (goToRiskTab)="goToRiskTab()" [approver]="isApprover" (openDrawer)="openTriggerDrawer()"
+    (onAssessemntLinkClick)="onAssessemntLinkClick()"></app-assessment-details>
+  }
+
+  }
+  }
+  @case (AssessmentDetailsKey.QUESTION_AND_RESPONSE) {
+  @if(userCanDoSubmitAssessment){
+  <assessment-external-respondent [assessmentLink]="assessmentData?.uuid ??''"
+    (onPostExternalLink)="onPostExternalLink($event)">
+  </assessment-external-respondent>
+  }
+  @else{
+  <app-question-and-response [assessmentId]="assessmentId" [assessmentSections]="assessments"
+    [status]="assessmentStatus" [isAuthor]="isAuthor" [assessmentSource]="assessmentSource"
+    [risks]="assessmentData?.risks || []" [templateId]="templateId" [riskMatrix]="assessmentData?.riskMatrix ?? 'M5'"
+    [focusTarget]="qrFocusTarget" />
+  }
+  }
+  @case (AssessmentDetailsKey.DISCUSSION_LOG) {
+  <app-assessment-discussion-log [assessmentId]="assessmentId" (navigateToMessage)="onNavigateToMessage($event)"
+    (navigateToTask)="onNavigateToTask($event)" />
+  }
+  @case (AssessmentDetailsKey.TASKS) {
+  <app-assessment-task-list [assessmentId]="assessmentId" [pendingTaskId]="pendingTaskId"
+    [pendingMessageId]="pendingMessageId" [assessmentStatus]="assessmentStatus"
+    (navigateToQuestion)="onRiskBasisNavigate($event)"
+    (navigateToAssessment)="onNavigateToAssessment($event)"></app-assessment-task-list>
+  }
+  @case (AssessmentDetailsKey.RISK_AND_MEASURES) {
+  <app-assessment-risk-list [assessmentId]="assessmentId" [sections]="assessments" [isApprover]="isApprovers"
+    [isRespondent]="assessmentData?.isRespondent ?? false" [assessmentStatus]="assessmentStatus"
+    (openCreate)="openRiskDrawer()" (openEdit)="openEditRiskDrawer($event)"
+    (onRefresh)="loadAssessmentDetails(assessmentId)" (navigateToQuestion)="onRiskBasisNavigate($event)"
+    (navigateToAssessment)="onNavigateToAssessment($event)">
+  </app-assessment-risk-list>
+  }
+
+  @case (AssessmentDetailsKey.APPROVERS) {
+  <app-assessment-approvers [assessmentId]="assessmentId" [approversData]="approverLevels" [isApprover]="isApprovers"
+    [isAuthor]="isAuthor" (refreshApprovers)="onRefreshApprovers()" [status]="assessmentStatus">
+  </app-assessment-approvers>
+  }
+  @case (AssessmentDetailsKey.RELATED_ASSESSMENT) {
+  <app-related-information [assessmentId]="assessmentId"></app-related-information>
+  }
+  @case (AssessmentDetailsKey.ACTIVITY_LOG) {
+  <app-assessment-activity [assessmentId]="assessmentId" [isVendorContext]="isVendorContext"></app-assessment-activity>
+  }
+  @default {
+  <div></div>
+  }
+  }
+  }
+</ng-template>
+
+<ng-template #respondentTable let-dataSource="dataSource">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table table-md-row">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Respondent Name</th>
+      <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+    </ng-container>
+    <ng-container matColumnDef="userType">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> User Type </th>
+      <td mat-cell *matCellDef="let element">{{ element.userType }}</td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders"></tr>
+  </table>
+</ng-template>
+
+<ng-template #approverTable>
+  <table mat-table [dataSource]="approverDataSource" class="mat-elevation-z8 w-100 custom-table table table-md-row">
+
+
+    <ng-container matColumnDef="level">
+      <th mat-header-cell *matHeaderCellDef> Level </th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.level }}
+      </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="totalApprovers">
+      <th mat-header-cell *matHeaderCellDef> Total Approvers </th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.totalApprovers }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Approver Name </th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.name }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="approverDisplayedHeaders"></tr>
+    <tr mat-row *matRowDef="let row; columns: approverDisplayedHeaders"></tr>
+  </table>
+</ng-template>

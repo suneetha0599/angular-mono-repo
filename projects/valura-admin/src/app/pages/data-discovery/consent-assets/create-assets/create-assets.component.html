@@ -1,0 +1,270 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+  <div class="mb-2">
+    <div class="headline-medium">{{ pageTitle }}</div>
+  </div>
+
+  <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative p-3 bg-white rounded">
+    <div class="d-flex h-100 w-100 flex-column main-canvas bg-white">
+      <form [formGroup]="assetForm" class="flex flex-col gap-8 overflow-auto scroll-w-0" cdkScrollable>
+
+        <section>
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pt-1">
+            <div class="md:col-span-8 flex flex-col gap-2">
+              <!-- Name -->
+              <div class="grid grid-cols-1 md:grid-cols-12 ">
+                <div class="md:col-span-6">
+                  <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0  mb-3 mt-2">
+                    <mat-label>Asset Name</mat-label>
+                    <input matInput formControlName="name" class="body-medium" />
+                    <mat-error>
+                      <custom-mat-error class="inline-block" [errors]="nameControl.errors" [control]="nameControl"
+                        controlActualName="Asset Name"></custom-mat-error>
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+
+              <!-- Description -->
+              <app-custom-mat-textarea label="Asset Description" [minRows]="1" [maxRows]="5">
+              </app-custom-mat-textarea>
+
+              <!-- Asset Type & Category -->
+              <div>
+                <label class="label-large text-gray-700 mb-2 block">Asset Type</label>
+                <mat-radio-group formControlName="assetType" class="flex gap-6">
+                  <mat-radio-button value="INTERNAL">Internal</mat-radio-button>
+                  <mat-radio-button value="EXTERNAL">External</mat-radio-button>
+                </mat-radio-group>
+              </div>
+
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6  mb-2">
+
+                @if(assetForm.get('assetType')?.value === 'EXTERNAL') {
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                  <mat-label>Vendor Name</mat-label>
+                  <input matInput class="body-medium" formControlName="vendorDetail" [matAutocomplete]="vendorAuto"
+                    (input)="vendorSearch = $any($event.target).value; filterVendors()" />
+                  <button *ngIf="vendorSearch" matSuffix mat-icon-button type="button" (click)="clearVendorSearch()">
+                    <mat-icon class="material-symbols-outlined">close</mat-icon>
+                  </button>
+                  <mat-autocomplete #vendorAuto="matAutocomplete" (opened)="onVendorPanelOpen()"
+                    (optionSelected)="onVendorSelected($event.option.value)" [displayWith]="displayVendorName">
+
+                    @for (vendor of filteredVendors; track $index) {
+                    <mat-option [value]="vendor" class="flex justify-between items-center">{{ vendor.name }}
+                      <!-- <button mat-icon-button type="button" (click)="$event.stopPropagation(); onDeleteVendor(vendor)">
+                        <mat-icon color="warn" fontIcon="delete" class="delete-icn material-icons-outlined"></mat-icon>
+                      </button> -->
+                    </mat-option>
+                    }
+
+                    @if(vendorSearch && !isVendorExist(vendorSearch)) {
+                    <mat-option [value]="vendorSearch"
+                      (onSelectionChange)="openAddDialog('vendor', vendorSearch.trim())" class="add-option">
+                      Other
+                    </mat-option>
+                    }
+                  </mat-autocomplete>
+                </mat-form-field>
+                }
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                  <mat-label>Asset Category</mat-label>
+                  <input matInput class="body-medium" formControlName="assetCategoryId" [matAutocomplete]="autoCategory"
+                    (input)="onSearchCategory($any($event.target).value)" />
+                  <mat-autocomplete #autoCategory="matAutocomplete"
+                    (optionSelected)="selectCategory($event.option.value)" [displayWith]="displayCategoryName">
+                    @for (category of filteredCategoryList; track category.id) {
+                    <mat-option [value]="category">{{ category.name }}
+                      <button mat-icon-button type="button"
+                        (click)="$event.stopPropagation(); onDeleteCategory(category)">
+                        <mat-icon color="warn" fontIcon="delete"
+                          class="delete-icn material-symbols-outlined"></mat-icon>
+                      </button>
+                    </mat-option>
+                    }
+                    @if(catSearchTerm && !isExistingCategory(catSearchTerm)) {
+                    <mat-option [value]="catSearchTerm" (onSelectionChange)="onAddCategory($event, catSearchTerm)"
+                      class="add-option">
+                      + Add "{{ catSearchTerm }}"
+                    </mat-option>
+                    }
+                  </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+                  <mat-label> Asset Owner</mat-label>
+                  <input matInput formControlName="systemOwner" class="body-medium" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+                  <mat-label>Asset URL</mat-label>
+                  <input matInput formControlName="assetUrl" class="body-medium" />
+                </mat-form-field>
+
+
+
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                  <mat-label>Department</mat-label>
+                  <input type="text" matInput [formControl]="departmentControl" [matAutocomplete]="autoDepartment"
+                    (input)="onSearchDepartment($any($event.target).value)" class="body-medium" />
+                  <mat-autocomplete #autoDepartment="matAutocomplete" [displayWith]="displayDepartmentName"
+                    (optionSelected)="selectDepartment($event.option.value)">
+                    @for( department of filteredDepartmentList; track department.id) {
+                    <mat-option [value]="department" class="flex justify-between items-center">
+                      {{ department.name }}
+                      <!-- <button mat-icon-button type="button"
+                        (click)="$event.stopPropagation(); onDeleteDepartment(department)">
+                        <mat-icon color="warn" fontIcon="delete" class="delete-icn material-icons-outlined"></mat-icon>
+                      </button> -->
+                    </mat-option>
+                    }
+                    @if(departmentSearchTerm && !isExistingDepartment(departmentSearchTerm)) {
+                    <mat-option (onSelectionChange)="openAddDialog('assetDepartment', departmentSearchTerm)"
+                      class="add-option">
+                      Other
+                    </mat-option>
+                    }
+                  </mat-autocomplete>
+                </mat-form-field>
+
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="flex justify-between items-center mb-4">
+            <span class="label-large text-gray-700 mb-2 block">Hosting Details</span>
+
+            <loading-button type="secondary" (onButtonClick)="addHostingDetail()">
+              + Add Hosting
+            </loading-button>
+          </div>
+
+
+          <div formArrayName="hostingDetails" class="flex flex-col gap-4">
+            @for (detail of hostingDetails.controls; track detail; let i = $index) {
+            @if(!detail.get('isDeleted')?.value){
+            <div [formGroupName]="i"
+              class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center border rounded-lg p-4 bg-white">
+              <!-- Hosting Type -->
+              <mat-form-field appearance="outline" class="md:col-span-3 w-full mat-sm-xl-input mat-mdc-mb-0">
+                <mat-label>Hosting Type</mat-label>
+                <mat-select formControlName="site">
+                  @for (site of HOSTING_SITE; track site.key) {
+                  <mat-option [value]="site.key">
+                    {{ site.label }}
+                  </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Provider -->
+              <mat-form-field appearance="outline" class="md:col-span-4 w-full mat-sm-xl-input mat-mdc-mb-0">
+                <mat-label>Hosting Provider</mat-label>
+                <input matInput formControlName="name" />
+              </mat-form-field>
+
+              <!-- Location -->
+              <mat-form-field appearance="outline" class="md:col-span-4 w-full mat-sm-xl-input mat-mdc-mb-0">
+                <mat-label>Hosting Location</mat-label>
+                <input matInput formControlName="location" [matAutocomplete]="locationAuto"
+                  (input)="filterLocations($any($event.target).value)" />
+
+                <mat-autocomplete #locationAuto="matAutocomplete" [displayWith]="displayLocationName">
+                  @for (location of filteredLocationList; track location.id) {
+                  <mat-option [value]="location">
+                    {{ location.name }}
+                  </mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+
+
+
+              <div class="md:col-span-1 flex justify-end">
+                <button mat-icon-button color="warn" type="button" (click)="removeHostingDetail(i)" matTooltip="Remove">
+                  <mat-icon class="mat-md-icon material-symbols-outlined fontColor">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            }
+            }
+          </div>
+        </section>
+
+
+        <section>
+          <div class="label-large text-gray-700 mb-3 block">Security Control</div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
+            <div class="md:col-span-4 flex flex-col">
+              <mat-form-field appearance="outline" class="w-full mat-sm-auto-input">
+                <mat-label class="body-medium">Security Control</mat-label>
+
+                <mat-chip-grid #chipGrid>
+                  @for (sc of assetForm.get('securityMeasures')?.value || []; track sc.id) {
+                  <mat-chip-row (removed)="removeControl(sc)">
+                    {{ sc.name }}
+                    <button matChipRemove>
+                      <mat-icon class="material-symbols-outlined">close</mat-icon>
+                    </button>
+
+                  </mat-chip-row>
+                  }
+                </mat-chip-grid>
+
+                <input matInput [matChipInputFor]="chipGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  (matChipInputTokenEnd)="add($event)" [matAutocomplete]="auto" [(ngModel)]="searchTerm"
+                  [ngModelOptions]="{ standalone: true }" (ngModelChange)="onSearchControl($event)" />
+
+                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectControl($event.option.value)"
+                  [autoActiveFirstOption]="true" [panelWidth]="0">
+                  @for (item of filteredSecurityControlList; track item.id) {
+                  <mat-option [value]="item">
+                    {{ item.name }}
+                  </mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
+          </div>
+        </section>
+
+      </form>
+      <div class="flex justify-between gap-4">
+        <div class="flex justify-start  gap-4">
+          @if(!editDetailMode) {
+          <loading-button type="primary" [loading]="isSubmitLoading" (onButtonClick)="onSubmit()"
+            [disabled]="isSubmitLoading || assetForm.invalid">
+            <span class="label-large">Create Asset</span>
+          </loading-button>
+
+          <loading-button type="secondary" (onButtonClick)="saveAsDraft()" [loading]="isDraftLoading"
+            [disabled]="isFinalSaved">
+            <span class="label-large">Save Draft</span>
+          </loading-button>
+          }
+          @else {
+          <loading-button type="primary" [loading]="isSubmitLoading" (onButtonClick)="onSubmit()"
+            [disabled]="isSubmitLoading || assetForm.invalid">
+            <span class="label-large">Save</span>
+          </loading-button>
+          }
+
+          @if(editMode) {
+          <loading-button type="secondary" [loading]="deleteDraftLoading" (onButtonClick)="onDeleteDraft()">
+            <span class="label-large">Delete draft</span>
+          </loading-button>
+          }
+        </div>
+        <loading-button type="light" [basicButton]="true" (onButtonClick)="goBack()">
+          <span class="label-large">Cancel</span>
+        </loading-button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,151 @@
+.shimmer-box {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.create-risk-drawer-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  overflow: hidden;
+
+  > div:first-child {
+    flex-shrink: 0;
+  }
+
+  > .flex-1.overflow-y-auto {
+    flex: 1 1 auto;
+    overflow-x: hidden !important;
+    overflow-y: auto;
+    min-height: 0;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #d9d8d8d3;
+      border-radius: 4px;
+
+      &:hover {
+        background: #555555a9;
+      }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: #c3c1c1 #f1f1f1;
+  }
+
+  > div:last-child {
+    flex-shrink: 0;
+  }
+
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  form {
+    max-width: 100%;
+    overflow-x: hidden;
+
+    .grid {
+      > * {
+        min-width: 0;
+      }
+
+      ::ng-deep {
+        .mat-mdc-form-field,
+        .mat-mdc-text-field-wrapper,
+        .mat-mdc-form-field-flex,
+        .mat-mdc-form-field-infix,
+        .mat-mdc-form-field-subscript-wrapper {
+          min-width: 0 !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+        }
+      }
+    }
+  }
+}
+
+.measure-chip {
+  transition: all 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+  .checkmark-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 0;
+    margin-right: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width 0.18s ease, margin-right 0.18s ease, opacity 0.18s ease;
+
+    .checkmark-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+      color: #1c2b70 !important;
+    }
+
+    &.visible {
+      max-width: 18px;
+      margin-right: 6px;
+      opacity: 1;
+    }
+  }
+
+  &.selected {
+    background-color: #f8f8f8 !important;
+    color: #1c2b70 !important;
+    border-color: transparent !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  &.unselected {
+    background-color: white !important;
+    color: #374151 !important;
+    border-color: #eeeeee !important;
+    font-weight: 500 !important;
+
+    &:hover {
+      background-color: #ebebeb !important;
+      border-color: transparent !important;
+    }
+  }
+}
+
+
+::ng-deep {
+  .create-risk-drawer-wrapper {
+    .mat-mdc-form-field {
+      &.mat-sm-input {
+        .mat-mdc-text-field-wrapper {
+          .mat-mdc-form-field-flex {
+            .mat-mdc-form-field-infix {
+              padding-top: 8px;
+              padding-bottom: 8px;
+              min-height: 40px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

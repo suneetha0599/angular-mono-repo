@@ -1,0 +1,48 @@
+.position-relative {
+  position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+}
+
+.mat-tab-group {
+  position: relative;
+  z-index: 1;
+}
+
+button[mat-icon-button] {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1001;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.regulation-title {
+  max-width: 1000px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.search {
+  width: 220px !important;
+  height: 32px !important;
+}
+
+.close-btn {
+  height: 25px;
+  width: 25px;
+  padding: 0;
+}

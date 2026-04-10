@@ -1,0 +1,639 @@
+<div class="p-3 pb-0">
+  <div class="d-flex justify-between">
+    <div class="headline-medium leading-7 text-black m-0">
+      {{title }}
+    </div>
+  </div>
+  <div class="text-sm font-normal text-[#161D1D] tracking-[0.5px] m-0 w-4/5">
+    {{description}}
+  </div>
+  <div class="h-0 border-t mt-2"
+    style="border-top-width: 0.1px; border-style: dashed; border-color: #AFAFAF; border-image: repeating-linear-gradient(to right, #AFAFAF 0, #AFAFAF 6px, transparent 6px, transparent 10px) 100;">
+  </div>
+</div>
+
+<div mat-dialog-content class="m-0 p-3" style="height: 75vh;">
+  <!-- Horizontal Divider -->
+  <!-- Main Content Section -->
+  <div class="flex flex-row items-center h-100">
+    <ng-container *ngTemplateOutlet="ngTemplateMainContent; context:{}">
+    </ng-container>
+  </div>
+</div>
+
+<div mat-dialog-actions class="mx-3 mb-3 flex justify-center  border-t"
+  style="border-top-width: 0.1px; border-style: dashed; border-color: #AFAFAF; border-image: repeating-linear-gradient(to right, #AFAFAF 0, #AFAFAF 6px, transparent 6px, transparent 10px) 100;">
+</div>
+
+
+<!-- Main Content -->
+<ng-template #ngTemplateMainContent>
+  <!-- Main content area -->
+  <div class="d-flex flex-column h-100  w-100 overflow-hidden">
+    <div class="d-flex main-wrapper overflow-hidden position-relative h-100  w-100">
+      <div
+        class="w-[350px] min-w-[330px] bg-white border-[0.2px] border-solid border-[#CFCFCF] rounded-xl h-100 relative">
+        <ng-container *ngTemplateOutlet="ngTemplateTabLeftContent; context:{}">
+        </ng-container>
+      </div>
+      <div class="h-full w-0 border-l mx-3"
+        style="border-left-width: 0.1px; border-style: dashed; border-color: #AFAFAF; border-image: repeating-linear-gradient(to bottom, #AFAFAF 0, #AFAFAF 6px, transparent 6px, transparent 10px) 100;">
+      </div>
+      <!-- Right table panel -->
+      <div class="col w-100 h-100 overflow-auto bg-white border-[0.2px] border-solid border-[#CFCFCF] rounded-xl">
+        @if(showClarificationDetails){
+        <mat-tab-group disableRipple animationDuration="300ms" mat-align-tabs="start"
+          class="mat-tab-100 mat-tab-disable-ripple tab-highlight mat-tab-scroll-0 mat-tab-flex-0  mat-tab-padding-sm"
+          (selectedTabChange)="setActiveTab($event)" [selectedIndex]="selectedTabIndex">
+          @for (tab of rightPanelTabs; track tab.id) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="title-medium text-primary">{{tab.label}}</span>
+            </ng-template>
+            <ng-container *ngTemplateOutlet="ngTemplateTabRightContent; context:{}">
+            </ng-container>
+          </mat-tab>
+          }
+        </mat-tab-group>
+        }
+        @else{
+        <div #scrollContainer class="flex flex-column overflow-hidden position-relative h-100 ">
+          <div class="title-medium leading-7 m-0 text-primary p-3">
+            Create clarification
+          </div>
+          <div class="w-100 h-100 overflow-auto scroll-w-0 p-3">
+            <ng-container *ngTemplateOutlet="ngTemplateClarificationForm; context:{}">
+            </ng-container>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Left Content -->
+<ng-template #ngTemplateTabLeftContent>
+
+  <div #scrollContainer class="d-flex flex-column overflow-hidden position-relative h-100">
+    <div class="title-medium leading-7 m-0 text-primary p-3">
+      Request clarification
+    </div>
+    <div class="w-100 h-100 overflow-auto scroll-w-0  p-3">
+      <!-- Shimmer Effect during Loading -->
+      @if (clarificationsLoading()) {
+      <div class="shimmer-wrapper w-full flex flex-col gap-[30px]">
+        @for (item of [1, 2, 3]; track item) {
+        <div class="relative h-[138px]">
+          <div class="shimmer-card absolute h-[130px] left-0 top-[8px] rounded-xl"></div>
+        </div>
+        }
+      </div>
+      }
+      <!-- Clarification List -->
+      @if (!clarificationsLoading()) {
+      @if (clarifications.length === 0) {
+      <div class="flex items-center justify-center w-full h-full">
+        <div class="text-gray-500 px-3 py-2">No clarifications found.</div>
+      </div>
+      }
+      @for (clarification of clarifications; track clarification.id; let i = $index;;let isLast=$last) {
+      <!-- Clarification Item Container -->
+      <div
+        class="p-3 relative cursor-pointer  bg-[#E7E7E7] border-[0.2px] border-solid border-[#AFAFAF] rounded-xl hover:bg-white [.selected]:bg-white transition-colors duration-200"
+        (click)="selectClarification(clarification)" [class.selected]="selectedClarificationId === clarification.id"
+        [ngClass]="['flex-none', 'order-' + i, !isLast ? 'mb-3' : '']">
+        <!-- Clarification Card Background -->
+
+        <!-- Status Indicator -->
+        @if (!clarification.resolved) {
+        <div class="absolute w-4 h-4 right-[-5px] top-[-5px] rounded-full"
+          [class]="getClarificationPriorityIndicator(clarification)"></div>
+        }
+        <!-- Clarification Content Container -->
+        <div class="flex flex-col items-start">
+          <!-- Clarification Title -->
+          <div class=" text-black m-0 mb-2 flex items-center title-medium flex-none order-0 self-stretch">
+            {{ clarification.title }}
+          </div>
+          <!-- Clarification Description -->
+          <p class="text-[#161D1D] m-0 flex items-center title-small flex-none order-1 self-stretch">
+            {{ clarification.description }}
+          </p>
+        </div>
+        <!-- Delete Button -->
+        @if (selectedClarificationId === clarification.id) {
+        <button type="button"
+          class="absolute top-[10px] right-[5px] w-6 h-6 d-flex border !rounded-full flex items-center justify-center transition-colors duration-200"
+          (click)="deleteClarification(clarification.id); $event.stopPropagation()"
+          [attr.aria-label]="'Delete clarification: ' + clarification.title">
+          <mat-icon class="!text-primary-80 my-auto delete-md-icon material-symbols-outlined">delete</mat-icon>
+        </button>
+        }
+      </div>
+      }
+      }
+    </div>
+  </div>
+  <!-- Floating Add Button -->
+  <div class="absolute bottom-0 end-0">
+    <!-- Circle Background -->
+    <button mat-icon-button aria-label="Toggle sidebar" (click)="newClarification()" class="!bg-primary-40">
+      <mat-icon class="text-white material-symbols-outlined">add</mat-icon>
+    </button>
+    <!-- <div
+      class="w-full h-full bg-[#1C2B70] rounded-full cursor-pointer hover:bg-[#1a2866] transition-colors duration-200 flex items-center justify-center shadow-[0px_20px_20px_-5px_rgba(0,0,0,0.25)]"
+      (click)="newClarification()">
+      <div class="text-white font-normal text-[38px] leading-none">
+        +
+      </div>
+    </div> -->
+  </div>
+</ng-template>
+
+
+<!-- Right Tab Content -->
+<ng-template #ngTemplateTabRightContent>
+  <!-- Right Panel -->
+  <div #scrollContainer class="d-flex overflow-hidden position-relative h-100 ">
+    <div class="w-100 h-100 overflow-auto scroll-w-0 p-3">
+      @if (activeTab() === 'form'){
+      <ng-container *ngTemplateOutlet="ngTemplateClarificationForm; context:{}">
+      </ng-container>
+      }
+      <!-- Comments Tab Content -->
+      @if (activeTab() === 'comments') {
+      <ng-container *ngTemplateOutlet="ngTemplateClarificationComments; context:{}">
+      </ng-container>
+      }
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Clarification Form -->
+<ng-template #ngTemplateClarificationForm>
+  <form [formGroup]="clarificationForm" (ngSubmit)="submitClarification()" class="flex flex-col">
+    <div class="grid grid-cols-12  gap-2 mb-4 mt-1">
+      <!-- Title Field -->
+      <div class="col-span-6">
+        <div>
+          <mat-form-field appearance="outline" class="w-full mat-md-input mat-mdc-mb-0">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="col-span-6">
+        <!-- Due Date Field -->
+        <mat-form-field appearance="outline" class="w-full mat-md-input">
+          <mat-label>Due date</mat-label>
+          <input matInput [matDatepicker]="toPicker" formControlName="dueDate">
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker">
+            <mat-icon matDatepickerToggleIcon
+              class="calendar-md-icon material-symbols-outlined">calendar_month</mat-icon>
+          </mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="grid grid-cols-12  gap-2 mb-4">
+      <!-- Select Assignee Field -->
+      <div class="col-span-6">
+        <div>
+          <mat-form-field appearance="outline" class="w-full mat-md-input">
+            <mat-label> Select assignee</mat-label>
+            <mat-select formControlName="assignedTo">
+              @for (user of userList; track user.id) {
+              <mat-option [value]="user.id">{{ user.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="col-span-6"> </div>
+    </div>
+    <div class="grid grid-cols-12  gap-2 mb-4">
+      <div class="col-span-6">
+        <div>
+          <!-- Description Field -->
+          <app-custom-mat-textarea label="Description" [minRows]="1" [maxRows]="5">
+          </app-custom-mat-textarea>
+        </div>
+      </div>
+      <div class="col-span-6"> </div>
+    </div>
+    <!-- DSR Request Documents Section -->
+    @if (selectedClarificationId && shouldShowDocumentSelection) {
+    <div class="flex flex-col mt-4" style="gap: 15px;">
+      <!-- Documents Header -->
+      <div class="flex flex-row justify-between items-center">
+        <div class="flex flex-col">
+          <h6 class="text-sm font-medium leading-5 text-black m-0">
+            Available DSR Request Documents
+          </h6>
+          <p class="text-xs font-normal leading-4 text-[#767676] m-0 mt-1"
+            style="font-family: 'Source Sans 3', sans-serif;">
+            Select documents from the original DSR request to attach to this clarification
+          </p>
+        </div>
+        @if (getSelectedRequestDocumentsCount() > 0) {
+        <button type="button" class="text-xs text-[#1C2B70] hover:text-[#1a2866] font-medium underline"
+          style="font-family: 'Source Sans 3', sans-serif;" (click)="clearAllRequestDocuments()">
+          Clear All ({{ getSelectedRequestDocumentsCount() }})
+        </button>
+        }
+      </div>
+      <!-- Documents Grid -->
+      <div class="min-h-[120px] max-h-[200px] overflow-y-auto border border-gray-200 rounded-lg p-3"
+        style="background-color: #fafafa;">
+        <div class="grid grid-cols-2 gap-3">
+          @for (attachment of dsrRequestAttachments; track attachment.url) {
+          <label
+            class="flex items-center p-3 cursor-pointer hover:bg-white rounded-lg transition-colors duration-200 border border-transparent hover:border-gray-300"
+            style="min-height: 60px;">
+            <!-- Checkbox -->
+            <input type="checkbox" [checked]="isRequestDocumentSelected(attachment.url)"
+              (change)="toggleRequestDocument(attachment.url)"
+              class="w-4 h-4 text-[#1C2B70] border-gray-300 rounded focus:ring-[#1C2B70] mr-3 flex-shrink-0">
+            <!-- Document Icon and Info -->
+            <div class="flex items-center flex-1 min-w-0">
+              <mat-icon class="text-gray-500 mr-3 flex-shrink-0 material-symbols-outlined"
+                style="font-size: 20px; width: 20px; height: 20px;">
+                {{ getRequestDocumentIcon(attachment.name) }}
+              </mat-icon>
+              <div class="flex-1 min-w-0">
+                <span class="text-sm font-medium text-black block truncate"
+                  style="font-family: 'Source Sans 3', sans-serif;" [title]="attachment.name">
+                  {{ attachment.name }}
+                </span>
+                <div class="mt-1">
+                  <div class="body-large  text-gray-500">{{ attachment.createdByUserType }}</div>
+                </div>
+                <div class="flex justify-between mt-1">
+                  <div class="body-small  text-gray-500">{{ attachment.through }}</div>
+                  <div class="body-small  text-gray-500">{{ attachment.createdAt | date:'dd.MM.yyyy' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </label>
+          }
+        </div>
+        <!-- Empty State -->
+        @if (dsrRequestAttachments.length === 0) {
+        <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+          <mat-icon class="material-symbols-outlined"
+            style="font-size: 32px; margin-bottom: 8px; ">folder_open</mat-icon>
+          <p class="text-sm text-center">
+            No documents available from the DSR request
+          </p>
+        </div>
+        }
+      </div>
+      <!-- Selection Summary -->
+      @if (getSelectedRequestDocumentsCount() > 0) {
+      <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <span class="text-sm text-blue-800" style="font-family: 'Source Sans 3', sans-serif;">
+          {{ getSelectedRequestDocumentsCount() }} document{{ getSelectedRequestDocumentsCount() !== 1 ? 's'
+          :
+          '' }} selected from DSR request
+        </span>
+        <mat-icon class="text-blue-600 material-symbols-outlined" style="font-size: 18px;">check_circle</mat-icon>
+      </div>
+      }
+    </div>
+    }
+    <!-- Action Buttons Section -->
+    <div class="flex flex-wrap justify-end w-full mt-3">
+      @if (!selectedClarificationId){
+      <loading-button [type]="'secondary'" class="text-white flex-shrink-0 me-2" (onButtonClick)="onCancelForm()">
+        Cancel
+      </loading-button>
+      }
+      <!-- Resolve Button - Show for completed clarifications that can be resolved -->
+      @if (selectedClarificationId && canResolveCompletedClarification) {
+      <loading-button [loading]="resolveClarificationLoading()" [disabled]="!canResolveCompletedClarification"
+        [isSubmitButton]="false" [type]="'secondary'" class="text-white flex-shrink-0 me-2"
+        (onButtonClick)="resolveCompletedClarification()">
+        <span class="flex items-center justify-center">
+          <mat-icon class="mr-1 material-symbols-outlined"
+            style="font-size: 16px; width: 16px; height: 16px;">task_alt</mat-icon>
+          Resolve
+        </span>
+      </loading-button>
+      }
+      <!-- Complete Button - Show for existing clarifications that can be completed -->
+      @if (selectedClarificationId && canCompleteClarification) {
+      <loading-button [loading]="completeLoading()" [disabled]="!canCompleteClarification" [isSubmitButton]="false"
+        [type]="'secondary'" class="text-white flex-shrink-0 me-2"
+        (onButtonClick)="completeClarificationWithDocuments()">
+        <span class="flex items-center justify-center">
+          <mat-icon class="mr-1 material-symbols-outlined"
+            style="font-size: 16px; width: 16px; height: 16px;">check_circle</mat-icon>
+          Complete
+        </span>
+      </loading-button>
+      }
+      <!-- Primary Submit Button -->
+      <loading-button [loading]="submitLoading()" [disabled]="clarificationForm.invalid" [isSubmitButton]="true"
+        [type]="'primary'" class="text-white flex-shrink-0" (onButtonClick)="submitClarification()">
+        {{ selectedClarificationId ? "Update" : "Save and Continue" }}
+      </loading-button>
+    </div>
+  </form>
+</ng-template>
+
+
+<!-- Comments contents -->
+<ng-template #ngTemplateClarificationComments>
+  <div class="h-full flex flex-col">
+    <!-- Comments Header -->
+    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
+      <div class="title-sm  text-black m-0">
+        Discussion
+      </div>
+      <span class="text-sm text-gray-500 title-small">
+        {{ commentsData().length }} comment{{ commentsData().length !== 1 ? 's' : '' }}
+      </span>
+    </div>
+    <!-- Comments List Container with Canvas -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar mb-4 relative">
+      <!-- Threading Canvas - Positioned absolutely behind comments -->
+      <canvas #threadingCanvas class="absolute top-0 left-0 w-full h-full pointer-events-none"
+        style="z-index: 1;"></canvas>
+      <!-- Comments Content Container -->
+      <div class="relative" style="z-index: 2;">
+        <!-- Loading State -->
+        @if (commentsLoading()) {
+        <div class="flex flex-col gap-4">
+          @for (item of [1, 2, 3]; track item) {
+          <div class="flex gap-3">
+            <div class="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+            <div class="flex-1">
+              <div class="h-4 bg-gray-200 rounded animate-pulse mb-2 w-3/4"></div>
+              <div class="h-3 bg-gray-200 rounded animate-pulse mb-1"></div>
+              <div class="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+            </div>
+          </div>
+          }
+        </div>
+        }
+        <!-- Comments Display -->
+        @if (!commentsLoading()) {
+        <div class="space-y-4">
+          @if (commentsData().length === 0) {
+          <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+            <mat-icon style="font-size: 48px; margin-bottom: 8px;"
+              class="material-symbols-outlined">chat_bubble_outline</mat-icon>
+            <p class="text-sm text-center" style="font-family: 'Source Sans 3', sans-serif;">
+              No comments yet. Start the discussion!
+            </p>
+          </div>
+          } @else {
+          @for (comment of commentsData(); track trackCommentById($index, comment)) {
+          <div class="flex gap-3" [class.ml-8]="comment.isReply" [id]="'comment-' + comment.id">
+            <!-- Avatar with threading-required class -->
+            <div class="flex-shrink-0">
+              <div
+                class="w-8 h-8 bg-[#902EE5] rounded-full flex items-center justify-center text-white text-sm font-semibold avatar"
+                style="font-family: 'Roboto', sans-serif;">
+                {{ comment.avatar }}
+              </div>
+            </div>
+            <!-- Comment Content -->
+            <div class="flex-1 min-w-0">
+              <!-- Comment Header -->
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm font-medium text-black" style="font-family: 'Source Sans 3', sans-serif;">
+                  {{ comment.author }}
+                </span>
+                <span class="text-xs text-gray-500" style="font-family: 'Source Sans 3', sans-serif;">
+                  {{ comment.timestamp }}
+                </span>
+                @if (comment.isReply) {
+                <mat-icon class="text-gray-400 material-symbols-outlined" style="font-size: 14px;">reply</mat-icon>
+                }
+              </div>
+              <!-- Comment Text -->
+              <div class="text-sm text-gray-800 mb-2" style="font-family: 'Source Sans 3', sans-serif;"
+                [innerHTML]="comment.content">
+              </div>
+              <!-- Comment Attachments -->
+              @if (comment.attachments && comment.attachments.length > 0) {
+              <div class="flex flex-wrap gap-2 mb-2">
+                @for (attachment of comment.attachments; track attachment.fileKey) {
+                <a [href]="getAttachmentUrl(attachment.fileKey)" target="_blank"
+                  class="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-md text-xs text-gray-700 hover:bg-gray-200 transition-colors"
+                  style="font-family: 'Source Sans 3', sans-serif;">
+                  <mat-icon class="material-symbols-outlined" style="font-size: 14px;">attachment</mat-icon>
+                  <span class="truncate max-w-[150px]">{{ getFileName(attachment.fileName || attachment.fileKey)
+                    }}</span>
+                </a>
+                }
+              </div>
+              }
+              <!-- Comment Actions -->
+              <div class="flex items-center gap-3 text-xs" style="font-family: 'Source Sans 3', sans-serif;">
+                <button type="button" class="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  (click)="onReplyComment(comment)">
+                  Reply
+                </button>
+                <button type="button" class="text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                  (click)="onEditComment(comment)">
+                  Edit
+                </button>
+                <button type="button" class="text-red-600 hover:text-red-800 font-medium transition-colors"
+                  (click)="deleteComment(comment.id)">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+          }
+        </div>
+        }
+      </div>
+    </div>
+    <!-- Comment Input Section -->
+    <div class="border-t border-gray-200 pt-4">
+      <!-- Comment Form Header -->
+      @if (editingCommentId || replyToCommentId) {
+      <div class="flex items-center justify-between mb-3 p-2 bg-blue-50 rounded-lg">
+        <span class="text-sm text-blue-800" style="font-family: 'Source Sans 3', sans-serif;">
+          {{ editingCommentId ? 'Editing comment' : 'Replying to comment' }}
+        </span>
+        <button type="button" class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          (click)="cancelCommentEdit()">
+          Cancel
+        </button>
+      </div>
+      }
+      <!-- Comment Attachments Display -->
+      @if (commentAttachments.length > 0) {
+      <div class="mb-3">
+        <div class="flex flex-wrap gap-2">
+          @for (file of commentAttachments; track file.id) {
+          <div class="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-md text-xs">
+            <mat-icon class="material-symbols-outlined" style="font-size: 14px;">{{ getFileIcon(file.type) }}</mat-icon>
+            <span class="truncate max-w-[120px]">{{ file.name }}</span>
+            <button type="button" class="text-red-500 hover:text-red-700" (click)="removeCommentAttachment(file.id)">
+              <mat-icon class="material-symbols-outlined" style="font-size: 12px;">close</mat-icon>
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+      }
+      <!-- Comment Textarea -->
+      <div class="relative">
+        <textarea id="commentTextarea" [(ngModel)]="newCommentText" (input)="onCommentInput($event)"
+          placeholder="Write a comment..." cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:outline-none text-sm"
+          style="font-family: 'Source Sans 3', sans-serif; min-height: 80px;" rows="3"></textarea>
+        <!-- Mention Dropdown -->
+        @if (showMentionList && mentionResults.length > 0) {
+        <div class="absolute z-50 w-64 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto"
+          style="top: -180px; left: 0;">
+          @for (user of mentionResults; track user.id) {
+          <button type="button"
+            class="w-full px-3 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm transition-colors"
+            (click)="selectMention(user)">
+            <div
+              class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+              {{ getInitials(user.name) }}
+            </div>
+            <span style="font-family: 'Source Sans 3', sans-serif;">{{ user.name }}</span>
+          </button>
+          }
+        </div>
+        }
+      </div>
+      <!-- Comment Actions -->
+      <div class="flex justify-between items-center mt-3">
+        <div class="flex items-center gap-2">
+          <button type="button"
+            class="p-2 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+            (click)="openCommentFileExplorer()" title="Attach files">
+            <mat-icon class="material-symbols-outlined" style="font-size: 18px;">attach_file</mat-icon>
+          </button>
+          @if (commentAttachments.length > 0) {
+          <span class="text-xs text-gray-500" style="font-family: 'Source Sans 3', sans-serif;">
+            {{ commentAttachments.length }} file{{ commentAttachments.length !== 1 ? 's' : '' }} attached
+          </span>
+          }
+        </div>
+        <div class="flex items-center gap-2">
+          @if (editingCommentId || replyToCommentId) {
+          <button type="button"
+            class="px-3 py-1.5 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+            style="font-family: 'Source Sans 3', sans-serif;" (click)="cancelCommentEdit()">
+            Cancel
+          </button>
+          }
+          <loading-button [loading]="commentSubmitLoading()"
+            [disabled]="!newCommentText.trim() && commentAttachments.length === 0" [type]="'primary'" class="text-sm"
+            (onButtonClick)="submitComment()">
+            {{ editingCommentId ? 'Update' : 'Post Comment' }}
+          </loading-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+
+<!-- Document Selection Modal (Enhanced) -->
+@if (showDocumentSelector()) {
+<!-- Hidden File Inputs -->
+<input title="file" #fileInput type="file" multiple class="hidden" [accept]="allowedFileTypes.join(',')"
+  (change)="onFileSelect($event)">
+<input title="commentFile" #commentFileInput type="file" multiple class="hidden" [accept]="allowedFileTypes.join(',')"
+  (change)="onCommentFileSelect($event)">
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  (click)="toggleDocumentSelector()">
+  <div class="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[80vh] flex flex-col" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h6 class="text-lg font-semibold text-black" style="font-family: 'Roboto', sans-serif;">
+        Document Library
+      </h6>
+      <button type="button"
+        class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors duration-200"
+        (click)="toggleDocumentSelector()">
+        <mat-icon class="text-gray-500 material-symbols-outlined">close</mat-icon>
+      </button>
+    </div>
+    <!-- Search and Filter -->
+    <div class="flex items-center mb-4" style="gap: 12px;">
+      <div class="flex-1 relative">
+        <input type="text" placeholder="Search documents..."
+          class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:border-[#4447FF] focus:outline-none"
+          style="font-family: 'Source Sans 3', sans-serif;">
+        <mat-icon class="absolute left-3 top-2.5 text-gray-400 material-symbols-outlined"
+          style="font-size: 20px;">search</mat-icon>
+      </div>
+      <button type="button"
+        class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+        style="font-family: 'Source Sans 3', sans-serif;">
+        Filter
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto mb-4" style="max-height: 400px;">
+      @if (documentsList.length === 0) {
+      <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+        <mat-icon style="font-size: 48px; margin-bottom: 8px;" class="material-symbols-outlined">folder_open</mat-icon>
+        <p class="text-sm" style="font-family: 'Source Sans 3', sans-serif;">
+          No documents available in library
+        </p>
+      </div>
+      } @else {
+      <div class="grid gap-2">
+        @for (doc of documentsList; track doc) {
+        <label
+          class="flex items-center py-3 px-3 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors duration-200 border border-transparent hover:border-gray-200">
+          <input type="checkbox" [checked]="isChecked(doc)" (change)="toggleDocument(doc)"
+            class="w-4 h-4 text-[#1C2B70] border-gray-300 rounded focus:ring-[#1C2B70] mr-3">
+          <div class="flex items-center flex-1 min-w-0">
+            <mat-icon class="text-gray-500 mr-3 material-symbols-outlined"
+              style="font-size: 20px;">description</mat-icon>
+            <div class="flex-1 min-w-0">
+              <span class="text-sm font-medium text-black block truncate"
+                style="font-family: 'Source Sans 3', sans-serif;" [title]="doc">
+                {{ doc }}
+              </span>
+              <span class="text-xs text-gray-500" style="font-family: 'Source Sans 3', sans-serif;">
+                Document • Updated 2 days ago
+              </span>
+            </div>
+          </div>
+        </label>
+        }
+      </div>
+      }
+    </div>
+    <!-- Modal Footer -->
+    <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+      <span class="text-sm text-gray-600" style="font-family: 'Source Sans 3', sans-serif;">
+        {{ getSelectedDocuments().length }} document{{ getSelectedDocuments().length !== 1 ? 's' : '' }}
+        selected
+      </span>
+      <div class="flex" style="gap: 12px;">
+        <button type="button"
+          class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+          style="font-family: 'Source Sans 3', sans-serif;" (click)="toggleDocumentSelector()">
+          Cancel
+        </button>
+        <button type="button"
+          class="px-4 py-2 text-sm bg-[#1C2B70] text-white rounded-lg hover:bg-[#1a2866] transition-colors duration-200"
+          style="font-family: 'Source Sans 3', sans-serif;" (click)="toggleDocumentSelector()">
+          Add Selected
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}

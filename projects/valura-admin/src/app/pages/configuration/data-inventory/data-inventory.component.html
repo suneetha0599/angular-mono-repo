@@ -1,0 +1,161 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+    <div class="p-3 pb-0">
+        <div class="d-flex justify-between">
+            <div class="headline-medium my-auto">{{pageTitle}}</div>
+
+        </div>
+    </div>
+
+    <div class="p-3 flex-1 overflow-hidden">
+        <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+            <div class="relative flex-1 overflow-hidden">
+
+
+                <div class="position-absolute" style="right: 0; top: 8px; z-index: 10;">
+                    <button mat-raised-button color="primary" class="bg-primary text-light fw-500 body-small"
+                        (click)="create()">
+                        {{getTabSpecificButtonText()}}
+                    </button>
+                </div>
+
+
+                <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+                    [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
+
+                    @for (category of categories; track category.value) {
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            <span>{{category.label}}</span>
+                        </ng-template>
+                        <div class="h-full flex flex-col overflow-hidden">
+                            <div class="flex-1 flex flex-col overflow-hidden">
+                                <div class="overflow-x-auto flex-1 flex flex-col">
+                                    <ng-container *ngTemplateOutlet="dataTableTemplate"></ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-tab>
+                    }
+                </mat-tab-group>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #dataTableTemplate>
+    <table mat-table [dataSource]="isLoading ? shimmerDataSource : dataSource.data" matSort
+        class="mat-elevation-z8 w-100 data-table table">
+
+
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap id-col">
+                <span class="text-grey title-small">ID</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-4 whitespace-nowrap id-col">
+                <ng-container *ngIf="!isLoading">
+                    <span class="body-large">{{item.id}}</span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-small"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap name-col">
+                <span class="text-grey title-small">Name</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-4 whitespace-nowrap name-col">
+                <ng-container *ngIf="!isLoading">
+
+                  <span [appEllipsisTooltip]=" item.name" [colorType]="'primary'" [maxWidth]="450"
+                  [matTooltip]="item.name" matTooltipPosition="below" matTooltipClass="material-tooltip"
+                  (click)="selectedTabIndex === 1 ? viewCategoryDetails(item) : null">
+                </span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-large"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap desc-col">
+              <span class="text-grey title-small">Description</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-4 whitespace-nowrap desc-col">
+                <ng-container *ngIf="!isLoading">
+                  <span [appEllipsisTooltip]="item.description || 'No description'" [colorType]="'default'" [maxWidth]="450"
+                  [matTooltip]="item.description" matTooltipPosition="below" matTooltipClass="material-tooltip"
+                  (click)="selectedTabIndex === 1 ? viewCategoryDetails(item) : null">
+                </span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-large"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="sensitivity">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap sensitivity-col">
+                <span class="text-grey title-small">Sensitivity</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-4 whitespace-nowrap sensitivity-col">
+                <ng-container *ngIf="!isLoading">
+                    <span class="px-3 py-1 rounded-full text-xs label-large sensitivity-badge status "
+                        [ngClass]="getSensitivityClass(item.sensitivity)">
+                        {{ getSensitivityLabel(item.sensitivity) }}
+                    </span>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-medium"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap actions-col">
+                <span class="text-grey title-small">Actions</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-4 whitespace-nowrap actions-col">
+                <ng-container *ngIf="!isLoading">
+                    <button mat-icon-button [matMenuTriggerFor]="menu" class="more-actions-btn">
+                        <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="editRow(item)" class="text-sm">
+                            <mat-icon class="mat-md-icon text-primary material-symbols-outlined">edit</mat-icon>
+                            <span class="text-gray-700">Edit</span>
+                        </button>
+                        <button mat-menu-item (click)="deleteRow(item)" class="text-sm">
+                            <mat-icon
+                                class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+                            <span class="text-gray-700">Delete</span>
+                        </button>
+                    </mat-menu>
+                </ng-container>
+                <ng-container *ngIf="isLoading">
+                    <div class="shimmer-line shimmer-small"></div>
+                </ng-container>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.shimmer-row]="isLoading"></tr>
+
+        <tr *ngIf="!isLoading && dataSource.data.length === 0" class="no-data-row">
+            <td [attr.colspan]="displayedColumns.length" class="text-center py-16">
+                <div class="flex flex-col items-center">
+                    <mat-icon class="text-6xl text-gray-400 mb-4 material-symbols-outlined">inventory_2</mat-icon>
+                    <p class="text-gray-600 text-lg mb-2">No data found</p>
+                    <p class="text-gray-500">Add data to get started</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+</ng-template>

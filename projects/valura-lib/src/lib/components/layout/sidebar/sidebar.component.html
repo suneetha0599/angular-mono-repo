@@ -1,0 +1,80 @@
+@if (collapsed && hoveredFeature) {
+<div class="sidebar-submenu-tooltip bg-white shadow-lg rounded-md p-2 min-w-[200px]" [style.top]="submenuPosition.top"
+  [style.left]="submenuPosition.left" (mouseenter)="isHoveringCard = true"
+  (mouseleave)="isHoveringCard = false; scheduleClose()" (click)="$event.stopPropagation()">
+  @for (sub of hoveredFeature.subFeatureList; track sub.featureCode) {
+  <div href="javascript:void(0)"
+    class="block px-3 py-2 rounded hover:bg-gray-100 text-sm pointer max-w-[180px] truncate"
+    (click)="onSubFeatureClick($event, sub)">
+    {{ sub.featureName }}
+  </div>
+  }
+</div>
+}
+<mat-sidenav-container class="body-wrapper w-100  box-shadow-md">
+  <mat-sidenav [ngClass]="{'sidebar': true ,'collapsed': collapsed}" mode="side" [opened]="true"
+    class="bg-white border-r border-gray-200 ">
+    <mat-nav-list>
+      @for (mainFeature of featureList; track mainFeature.featureCode) {
+      <div class="relative">
+        <!-- Main Feature -->
+        <div (mouseenter)="isHoveringMain = true; openSubMenu(mainFeature, $event)"
+          (mouseleave)="isHoveringMain = false; scheduleClose()" (click)="onMainMenuClick(mainFeature, $event)"
+          class="flex items-center justify-between cursor-pointer br-md transition p-3 my-1"
+          [ngClass]="{ 'bg-primary-40 text-white font-semibold active' : isActiveMainMenu(mainFeature),'hover:bg-secondary-95 hover deactive': !isActiveMainMenu(mainFeature)}">
+          @if(isActiveMainMenu(mainFeature)){
+          <div
+            class="absolute left-0 top-3 w-1 h-8 bg-[#D7F049] rounded-r-full border-t border-b border-r border-white">
+          </div>
+          }
+          <div class="flex items-center gap-3">
+            <mat-icon class="text-base menu-icon material-symbols-outlined">
+              {{ mainFeature.featureIcon || 'menu' }}
+            </mat-icon>
+            <span class="fs-md-med whitespace-nowrap menu-item max-w-[260px] truncate" [class.d-none]="collapsed">
+              {{ mainFeature.featureName }}
+            </span>
+          </div>
+          @if (mainFeature.subFeatureList?.length && !collapsed) {
+          <mat-icon class="material-symbols-outlined">
+            {{ mainFeature.isOpen ? 'arrow_drop_up' : 'arrow_drop_down' }}
+          </mat-icon>
+          }
+        </div>
+        <!-- Sub Features -->
+        @if (mainFeature.subFeatureList?.length && mainFeature.isOpen && !collapsed) {
+        <div class="ml-4 mt-1 rounded fs-md-med">
+          @for (sub of mainFeature.subFeatureList; track sub.featureCode) {
+          <div class="relative">
+            <a [routerLink]="sub.featureRoute" mat-list-item class="block px-4 py-2 rounded"
+              (click)="onClickSubMenu(sub)">
+              @if (isActiveMainMenu(sub)) {
+              <div
+                class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-[#D7F049] rounded-r-full border-t border-b border-r border-white">
+              </div>
+              }
+              <div class="d-flex">
+                <span class="font-medium font text-sm my-auto max-w-[260px] truncate">{{ sub.featureName }}</span>
+                @if(sub.actionMessage){
+                <mat-icon class="text-base icon-warning info-icn my-auto ms-2 material-symbols-outlined"
+                  [matTooltip]="sub.actionMessage" matTooltipClass="material-tooltip" matTooltipPosition="right">
+                  info
+                </mat-icon>
+                }
+              </div>
+            </a>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content [ngClass]="{ 'expanded': collapsed }" class="flex flex-col min-h-screen">
+    <progress-bar></progress-bar>
+    <router-outlet>
+    </router-outlet>
+    <app-footer-component class="fixed bottom-0 body-small text-gray-600 px-3"></app-footer-component>
+  </mat-sidenav-content>
+</mat-sidenav-container>

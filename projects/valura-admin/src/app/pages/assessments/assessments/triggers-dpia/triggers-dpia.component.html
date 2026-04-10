@@ -1,0 +1,157 @@
+<div class="mx-2">
+    <form [formGroup]="triggerForm">
+        <div>
+            <div class="d-flex align-items-start gap-4 mt-1 mb-3">
+                <div class="flex-grow-1">
+                    <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+                        <mat-label>Applicable Regulation</mat-label>
+                        <mat-select formControlName="regulation"
+                        (selectionChange)="onChangeRegulation()" multiple>
+                            <!-- <div class="sticky-search-container px-2 pb-2">
+                                <mat-form-field appearance="outline" class="w-100 sticky-search-field mat-sm-input">
+                                    <input #regSearch matInput 
+                                        placeholder="Search Regulation..." 
+                                        (input)="onRegulationSearch($any($event.target).value)"
+                                        (keydown)="$event.stopPropagation()">
+                                </mat-form-field>
+                            </div> -->
+                            @if(filteredRegulations.length === 0) {
+                            <div class="text-grey my-2 mx-3 label-large">
+                                No regulation found
+                            </div>
+                            }
+                            @else {
+                            @for (r of filteredRegulations; track r) {
+                            <mat-option [value]="r.id" class="py-2">{{ r.name }}</mat-option>
+                            }
+                            }
+                        </mat-select>
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="regulation.errors" [control]="regulation"
+                                controlActualName="Regulation">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                    <mat-chip-set class="mt-2">
+                        @for(reg of selectedRegulations; track reg.id) {
+                        <mat-chip [removable]="true" (removed)="removeRegulation(reg.id)">
+                            {{ reg.name }}
+                            <button matChipRemove><mat-icon class="material-symbols-outlined">close</mat-icon></button>
+                        </mat-chip>
+                        }
+                    </mat-chip-set>
+                </div>
+                @if(selectedRegulations.length > 0) {
+                <div class="d-flex gap-1 text-primary cursor-pointer pt-2 pb-1 fw-semibold" (click)="openAddTriggerDrawer()">
+                    <mat-icon class="material-symbols-outlined mat-md-icon">add</mat-icon>
+                    <div class="label-large pb-1">Add Triggers</div>
+                </div>
+                }
+            </div>
+            <div class="mb-3">
+                <mat-form-field appearance="outline" class="mat-sm-text-area mat-sm-input mat-mdc-mb-0 w-100">
+                    <mat-label>Add Reason</mat-label>
+                    <textarea matInput formControlName="reason" cdkTextareaAutosize cdkAutosizeMinRows="1"
+                        cdkAutosizeMaxRows="5" class="custom-textarea"></textarea>
+                </mat-form-field>
+            </div>
+            <!-- <div class="title pt-1 mt-2" formArrayName="triggerList">
+                @if(selectedRegulations.length > 0) {
+                <div class="ms-2 d-flex align-items-center justify-start">
+                    <div class="w-50 ps-1 label-large">Trigger Name</div>
+                    <div class="w-50 label-large">Trigger List</div>
+                </div>
+                @if(triggerListArray.length > 0) {
+                @for (item of triggerListArray.controls; let i = $index; track item) {
+                <div [formGroupName]="i">
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center w-50">
+                            <mat-checkbox formControlName="selected"></mat-checkbox>
+                            <div class="trigger-name">{{ item.get('name')?.value }}</div>
+                        </div>
+                        <div class="d-flex align-items-center ms-2">
+                            <div>{{ item.label }}</div>
+                            <div class="pt-2 ps-2 d-flex align-items-center">
+                                <mat-icon
+                                    class="material-symbols-outlined cursor-pointer info-icon text-primary">info</mat-icon>
+                            </div>
+                        </div>
+                    </div> -->
+            <!-- @if(triggerForm.get('triggerList')?.get(i.toString())?.get('selected')?.value) {
+                        <div class="mt-2 ms-2 ps-1 w-25">
+                            @if(!triggerListArray.at(i).get('readonly')?.value) {
+                                <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+                                    <mat-label>Selection Reason</mat-label>
+                                    <input 
+                                        matInput 
+                                        formControlName="reason" 
+                                        (keydown.enter)="markReasonReadonly(i, $event)" />
+                                    <mat-error>
+                                        <custom-mat-error class="inline-block" [errors]="getReasonControl(i).errors"
+                                            [control]="getReasonControl(i)" controlActualName="Reason">
+                                        </custom-mat-error>
+                                    </mat-error>
+                                </mat-form-field>
+                            }
+                            @else {
+                                <div class="px-2 py-1 border rounded bg-light">
+                                    {{ getReasonControl(i).value }}
+                                </div>
+                            }
+                        </div>
+                    } -->
+            <!-- @if(triggerForm.get('triggerList')?.get(i.toString())?.get('selected')?.value) {
+                    <div class="mt-1 mb-2 ms-2 ps-1 w-25">
+                        @if(!triggerListArray.at(i).get('readonly')?.value) {
+                        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+                            <mat-label>Selection Reason</mat-label>
+                            <input matInput formControlName="reason"
+                                (keydown.enter)="markReasonReadonly(i, $event)" />
+                            <mat-error>
+                                <custom-mat-error class="inline-block" [errors]="getReasonControl(i).errors"
+                                    [control]="getReasonControl(i)" controlActualName="Reason">
+                                </custom-mat-error>
+                            </mat-error>
+                        </mat-form-field>
+                        }
+                        @if(triggerListArray.at(i).get('readonly')?.value) {
+                        <div (click)="enableReasonEdit(i)" class="w-100">
+                            @if(!editingReasonIndex[i]) {
+                            <div class="px-2 py-1 border rounded bg-light cursor-pointer">
+                                {{ getReasonControl(i).value || 'Enter reason' }}
+                            </div>
+                            }
+                            @else {
+                            <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+                                <mat-label>Selection Reason</mat-label>
+                                <input matInput formControlName="reason"
+                                    (keydown.enter)="disableReasonEdit(i)" (blur)="disableReasonEdit(i)" />
+                                <mat-error>
+                                    <custom-mat-error class="inline-block" [errors]="getReasonControl(i).errors"
+                                        [control]="getReasonControl(i)" controlActualName="Reason">
+                                    </custom-mat-error>
+                                </mat-error>
+                            </mat-form-field>
+                            }
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+                }
+                }
+            </div> -->
+        </div>
+    </form>
+</div>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+    <mat-drawer #addTriggerDrawer mode="over" position="end" class="w-75 section-mat-drawer" [disableClose]="true">
+        @if(addTriggerDrawer.opened) {
+        <app-add-trigger-drawer (selectedRegulationsChange)="onSelectedRegulationsChange($event)"
+            [triggerForm]="triggerForm" [selectedRegulations]="selectedRegulations"
+            (onCloseDrawer)="closeAddTriggersDrawer()"></app-add-trigger-drawer>
+        }
+    </mat-drawer>
+</mat-drawer-container>

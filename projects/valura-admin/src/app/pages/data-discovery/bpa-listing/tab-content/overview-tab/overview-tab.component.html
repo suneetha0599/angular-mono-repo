@@ -1,0 +1,674 @@
+<div class="d-flex flex-column h-100 overflow-hidden p-3 pb-0 view-wrapper" [formGroup]="formGroup">
+  <!-- Header -->
+  <div class=" mb-3">
+    <div class="title-small">
+      Let’s answer questions about the process and who owns it
+    </div>
+  </div>
+
+  <div class="flex-1 d-flex overflow-hidden">
+
+    <div class="w-[240px] bg-gray-100 border border-white h-100 rounded overflow-auto">
+      <div class="flex flex-col gap-2">
+        <button class="text-start px-3 py-2 rounded hover:bg-gray-100 transition title-small"
+          [ngClass]="activeSection === 'basicDetails' ? 'text-primary' : 'text-[#767676]'"
+          (click)="scrollToSection('basicDetails')">
+          Basic Details
+        </button>
+        <button class="text-start px-3 py-2 rounded hover:bg-gray-100 transition title-small"
+          [ngClass]="activeSection === 'ownership' ? 'text-primary' : 'text-[#767676]'"
+          (click)="scrollToSection('ownership')">
+          Ownership Details
+        </button>
+        <button class="text-start px-3 py-2 rounded hover:bg-gray-100 transition title-small"
+          [ngClass]="activeSection === 'scope' ? 'text-primary' : 'text-[#767676]'" (click)="scrollToSection('scope')">
+          Scope
+        </button>
+        <button class="text-start px-3 py-2 rounded transition title-small"
+          [ngClass]="activeSection === 'people' ? 'text-primary' : 'text-[#767676]'"
+          (click)="scrollToSection('people')">
+          Processing Entity
+        </button>
+
+      </div>
+    </div>
+
+
+    <div #scrollContainer
+      class="d-flex flex-column overflow-auto w-100 h-100 ms-3 rounded mb-2 px-3 py-4 border !border-[#f5f5f5] no-scrollbar"
+      cdkScrollable>
+
+      <!-- BASIC DETAILS -->
+      <div id="basicDetails" class="scroll-section">
+        <div class=" title-small mb-4">Basic Details</div>
+        <div class="grid grid-cols-2 gap-4 items-start">
+          @if( !viewMode){
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input enabled-mat-input mat-mdc-mb-0">
+            <mat-label>Process Name</mat-label>
+            <input matInput formControlName="name" />
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="nameControl.errors" [control]="nameControl"
+                controlActualName="Process Name"></custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+          }
+          @else{
+          <div>
+            <div class="label-small mb-1">Process Name</div>
+            <div class="body-large">{{ formGroup.get('name')?.value || '—' }}</div>
+          </div>
+          }
+
+          <div class="flex items-start">
+            @if( !viewMode){
+            <app-custom-mat-textarea label="Description" [control]="descriptionControl" [minRows]="1" [maxRows]="5">
+            </app-custom-mat-textarea>
+            }@else{
+            <div class="w-full">
+              <div class="label-small mb-1">Description</div>
+              <div class="body-large">{{ formGroup.get('description')?.value || '—' }}</div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+      <mat-divider class="!border-[#F5F5F5] !my-4"></mat-divider>
+
+
+      <!-- BPA OWNERSHIP -->
+      <div id="ownership" class="scroll-section">
+        <div class="mb-4 !mt-0 flex gap-2 items-center">
+          <div class="title-small">Ownership Details</div>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          @if( !viewMode){
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input enabled-mat-input mat-mdc-mb-0">
+            <mat-label class="label-large">Process Owner</mat-label>
+            <input matInput #searchOwner formControlName="owner" [matAutocomplete]="autoOwner"
+              (ngModelChange)="filterOwners($event)" />
+
+            <mat-autocomplete #autoOwner="matAutocomplete" (optionSelected)="onOwnerSelected($event)"
+              [displayWith]="displayOwner">
+
+              @for(user of filteredOwnerList; track user) {
+              <mat-option [value]="user">
+                {{ getDisplayName(user) }}
+              </mat-option>
+              }
+
+              @if(searchOwner.value && !isOwnerExist(searchOwner.value)) {
+              <mat-option [value]="searchOwner.value" (onSelectionChange)="addNewUser(searchOwner.value)">
+                <div><span class="font-bold">+ Add </span> <span>"{{ searchOwner.value }}"</span></div>
+              </mat-option>
+              }
+
+            </mat-autocomplete>
+
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="ownerControl.errors" [control]="ownerControl"
+                controlActualName="Process Owner"></custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input enabled-mat-input mat-mdc-mb-0">
+            <mat-label>Associated Department</mat-label>
+            <input type="text" matInput [formControl]="departmentControl" [matAutocomplete]="autoDepartment"
+              (input)="onSearchDepartment($any($event.target).value)" />
+
+            <button mat-icon-button matSuffix tabindex="-1">
+              <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+            </button>
+            <mat-autocomplete #autoDepartment="matAutocomplete" [displayWith]="displayDepartmentName"
+              (optionSelected)="selectDepartment($event.option.value)">
+              @for(department of filteredDepartmentList; track i; let i = $index) {
+              <mat-option [value]="department">
+                {{ department.name }}
+                <!-- <button mat-icon-button type="button" class="delete-icon"
+                  (click)="$event.stopPropagation(); onDeleteDepartment(department)">
+                  <mat-icon color="warn" fontIcon="delete" class="delete-icn material-icons-outlined"></mat-icon>
+                </button> -->
+              </mat-option>
+              }
+              @if (departmentSearchTerm && !isExistingDepartment(departmentSearchTerm)) {
+              <mat-option (click)="openAddDialog('department', departmentSearchTerm)">
+                Other
+              </mat-option>
+              }
+            </mat-autocomplete>
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="departmentControl.errors" [control]="departmentControl"
+                controlActualName="Associated Department"></custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+          } @else{
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Process Owner</div>
+            <div class="body-large">{{ getOwnerName(formGroup.get('owner')?.value) }}</div>
+          </div>
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Associated Department</div>
+            <div class="body-large">
+              {{ formGroup.get('departmentId')?.value?.name || '—' }}
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      <mat-divider class="!border-[#F5F5F5] !my-4"></mat-divider>
+
+
+      <!-- SCOPE -->
+      <div id="scope" class="scroll-section">
+        <div class="title-small mb-4">Scope</div>
+        @if(!viewMode){
+        <div class="grid grid-cols-2 gap-4 !mb-0">
+
+          <!-- Purpose -->
+
+          <div class="col-span-2 flex flex-col">
+
+            <mat-form-field appearance="outline" class="w-full mat-sm-auto-input mat-mdc-mb-0">
+              <mat-label>Purpose</mat-label>
+
+              <mat-chip-grid #chipGrid aria-label="Purpose selection">
+                @for (purpose of formGroup.get('purposePurpose')?.value; track i; let i = $index) {
+                <mat-chip-row [removable]="editMode" (removed)="removePurpose(purpose)">
+                  {{ purpose.purposeName }}
+                  @if(editMode){
+                  <button matChipRemove>
+                    <mat-icon class="delete-icn material-symbols-outlined">close</mat-icon>
+                  </button>
+                  }
+                </mat-chip-row>
+                }
+              </mat-chip-grid>
+
+              <input matInput [matChipInputFor]="chipGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="false" (matChipInputTokenEnd)="addTypedPurpose($event)"
+                [matAutocomplete]="auto" [(ngModel)]="searchTerm" [ngModelOptions]="{standalone:true}"
+                (ngModelChange)="onSearchPurpose($event)" [disabled]="!editMode" />
+
+              <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectPurpose($event.option.value)">
+                @for(purpose of filteredPurposeList; track $index) {
+                <mat-option [value]="purpose">
+                  {{ purpose.purposeName }}
+                </mat-option>
+                }
+              </mat-autocomplete>
+              <button mat-icon-button matSuffix tabindex="-1">
+                <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+              </button>
+            </mat-form-field>
+
+
+          </div>
+
+          <!-- Regulation-->
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+            <mat-label>Regulation</mat-label>
+            <mat-select formControlName="regulations" (selectionChange)="onRegulationChange($event.value,true)"
+              [compareWith]="compareRegulations">
+              @for (reg of actsWithLegalBasis; track i; let i = $index) {
+              <mat-option [value]="reg">{{ reg.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Legal Ground -->
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+            <mat-label>Legal Ground</mat-label>
+            <mat-select formControlName="legalBasis" (selectionChange)="onLegalBasesChange($event.value)"
+              [compareWith]="compareLegalBasis">
+              @if (currentLegalBases.length > 0) {
+              @for (base of currentLegalBases; track i; let i = $index) {
+              <mat-option [value]="base">{{ base.description }}</mat-option>
+              }
+              } @else {
+              <mat-option disabled>No legal ground found for this regulation</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+
+
+          <!-- Frequency -->
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-enabled-input mat-mdc-mb-0">
+              <mat-label>Frequency of Processing</mat-label>
+              <mat-select formControlName="frequencyOfProcessing">
+                @for(frequency of frequencies; track i; let i = $index){
+                <mat-option [value]="frequency">{{ frequency }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+
+          <div class="col-span-1 flex flex-col">
+            <div class="title-small mb-2">Volume of Data Subjects</div>
+
+            <mat-slider [min]="0" [max]="10" [step]="1" discrete showTickMarks [displayWith]="formatPowerLabel">
+              <input matSliderStartThumb [value]="getIndexFromValue(formGroup.get('minValue')?.value ?? 0)"
+                (valueChange)="onMinSliderChange($event)">
+              <input matSliderEndThumb [value]="getIndexFromValue(formGroup.get('maxValue')?.value ?? 100000)"
+                (valueChange)="onMaxSliderChange($event)">
+            </mat-slider>
+
+
+
+
+
+
+            <div class="flex justify-between mt-3 text-sm font-medium text-gray-700">
+              <div>
+                <span class="text-xs text-gray-500">Min:</span>
+                {{ formGroup.get('minValue')?.value | number }}
+              </div>
+              <div>
+                <span class="text-xs text-gray-500">Max:</span>
+                {{ formGroup.get('maxValue')?.value | number }}
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Data Subject Region -->
+          <!-- <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0 mat-enabled-input">
+              <mat-label>Data Subject Region</mat-label>
+
+              <mat-select formControlName="dataSubjectRegion" multiple [compareWith]="compareDataSubjectRegion">
+                <mat-option *ngFor="let country of countryMasterList" [value]="country">
+                  <mat-checkbox [checked]="isCountrySelected(country)">
+                    {{ country.name }}
+                  </mat-checkbox>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-chip-set>
+              <mat-chip *ngFor="let country of dataSubjectRegion.value" [removable]="editMode"
+                (removed)="removeCountry(country)">
+                {{ country.name }}
+
+                <button matChipRemove *ngIf="editMode">
+                  <mat-icon class="material-symbols-outlined">close</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+          </div> -->
+
+
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0 mat-enabled-input">
+              <mat-label>Data Subject Region</mat-label>
+
+              <mat-select formControlName="dataSubjectRegion" multiple [compareWith]="compareDataSubjectRegion"
+                (openedChange)="onCountryOpened($event, countrySearch)">
+                <div class="sticky-search-container">
+                  <mat-form-field appearance="outline" class="w-full sticky-search-field mat-sm-input">
+
+                    <input #countrySearch matInput placeholder="Search Region..."
+                      (input)="onCountrySearch($any($event.target).value)" (keydown)="$event.stopPropagation()">
+                  </mat-form-field>
+                </div>
+                <mat-option *ngFor="let country of filteredCountryList" [value]="country">
+                  <mat-checkbox [checked]="isCountrySelected(country)" (click)="toggleCountry(country, $event)">
+                    {{ country.name }}
+                  </mat-checkbox>
+                </mat-option>
+
+
+                <mat-option disabled *ngIf="filteredCountryList.length === 0">
+                  No countries found
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-chip-set>
+              <mat-chip *ngFor="let country of dataSubjectRegion.value" [removable]="editMode"
+                (removed)="removeCountry(country)">
+                {{ country.name }}
+                <button matChipRemove *ngIf="editMode">
+                  <mat-icon class="material-symbols-outlined">close</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+
+          <!-- Data Subject Type -->
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0 mat-enabled-input">
+              <mat-label>Data Subject Category</mat-label>
+
+              <mat-select formControlName="dataSubjectList" multiple [compareWith]="msCompareFn"
+                (selectionChange)="onDataSubjectChangeWrapper()">
+                <mat-option *ngFor="let dsType of dataSubjectUserTypesList" [value]="dsType">
+                  <mat-checkbox [checked]="isDataSubjectSelected(dsType)">
+                    {{ dsType.name }}
+                  </mat-checkbox>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-chip-set>
+              <mat-chip *ngFor="let dsType of dataSubjectList.value" [removable]="editMode"
+                (removed)="removeType(dsType)">
+                {{ dsType.name }}
+                <button matChipRemove *ngIf="editMode">
+                  <mat-icon class="material-symbols-outlined">close</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+        }
+        @else{
+        <div class="grid grid-cols-3 gap-4">
+          <!-- pupose,regulation,legal ground -->
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Purpose</div>
+            @for(purpose of formGroup.get('purposePurpose')?.value; track i; let i = $index) {
+            <div class="body-large">{{ purpose.purposeName || '—' }}</div>
+            }
+          </div>
+          <!-- Regulation -->
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Regulation</div>
+            <div class="body-large">
+              {{ formGroup.get('regulations')?.value?.name || '—' }}
+            </div>
+          </div>
+
+          <!-- Legal Ground -->
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Legal Ground</div>
+            <div class="body-large">
+              {{ formGroup.get('legalBasis')?.value?.description || '—' }}
+
+            </div>
+          </div>
+
+
+
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Frequency of Processing</div>
+            <div class="body-large">
+              {{ formGroup.get('frequencyOfProcessing')?.value || '—' }}
+            </div>
+          </div>
+
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Volume of Data Subjects</div>
+            <div class="body-large">
+              {{ formGroup.get('volumeOfPersonalData')?.value || '—' }}
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Data Subject Type</div>
+            <div class="body-large">{{ dataSubjectTypeText }}</div>
+          </div>
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Data Subject Region</div>
+            <div class="body-large">{{ dataSubjectRegionText }}</div>
+          </div>
+
+
+
+
+        </div>
+
+        }
+
+
+      </div>
+
+      <mat-divider class="!border-[#F5F5F5] !my-4"></mat-divider>
+      <!-- PEOPLE INVOLVED -->
+
+
+      <div id="people" class="scroll-section">
+        <div class="title-small mb-4">Processing Entity</div>
+
+        @if(!viewMode){
+        <div class="grid grid-cols-2 gap-4">
+
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full enabled-mat-input  mat-mdc-mb-0 mat-sm-auto-input">
+              <mat-label>Data Controller</mat-label>
+
+              <mat-chip-grid #controllerGrid aria-label="Enter controllers">
+                @for (ctrl of getArray('controller').value; track i; let i = $index) {
+                <mat-chip-row [editable]="editMode" (removed)="removeRole('controller', i)"
+                  (edited)="editRole('controller', i, $event)" [aria-description]="'press enter to edit ' + ctrl">
+                  {{ ctrl }}
+                  @if (editMode) {
+                  <button matChipRemove [attr.aria-label]="'remove ' + ctrl">
+                    <mat-icon class="delete-icn material-symbols-outlined">close</mat-icon>
+                  </button>
+                  }
+                </mat-chip-row>
+                }
+
+                <input [matChipInputFor]="controllerGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addRoleFromChipInput('controller', $event)"
+                  [disabled]="!editMode" />
+
+              </mat-chip-grid>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full enabled-mat-input mat-mdc-mb-0 mat-sm-auto-input">
+              <mat-label>Data Processor</mat-label>
+
+              <mat-chip-grid #processorGrid aria-label="Enter processors">
+                @for (proc of getArray('processor').value; track i; let i = $index) {
+                <mat-chip-row [editable]="true" (removed)="removeRole('processor', i)"
+                  (edited)="editRole('processor', i, $event)" [aria-description]="'press enter to edit ' + proc">
+                  {{ proc }}
+                  @if (editMode) {
+                  <button matChipRemove [attr.aria-label]="'remove ' + proc">
+                    <mat-icon class="delete-icn material-symbols-outlined">close</mat-icon>
+                  </button>
+                  }
+                </mat-chip-row>
+                }
+
+                <input [matChipInputFor]="processorGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addRoleFromChipInput('processor', $event)"
+                  [disabled]="!editMode" />
+
+              </mat-chip-grid>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full enabled-mat-input mat-mdc-mb-0 mat-sm-auto-input">
+              <mat-label>Joint Controller</mat-label>
+
+              <mat-chip-grid #jointControllerGrid aria-label="Enter jointController">
+                @for (jctrl of getArray('jointController').value; track i; let i = $index) {
+                <mat-chip-row [editable]="true" (removed)="removeRole('jointController', i)"
+                  (edited)="editRole('jointController', i, $event)" [aria-description]="'press enter to edit ' + jctrl">
+                  {{ jctrl }}
+                  @if (editMode) {
+                  <button matChipRemove [attr.aria-label]="'remove ' + jctrl">
+                    <mat-icon class="delete-icn material-symbols-outlined">close</mat-icon>
+                  </button>
+                  }
+                </mat-chip-row>
+                }
+
+                <input [matChipInputFor]="jointControllerGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  [matChipInputAddOnBlur]="true"
+                  (matChipInputTokenEnd)="addRoleFromChipInput('jointController', $event)" [disabled]="!editMode" />
+
+              </mat-chip-grid>
+            </mat-form-field>
+          </div>
+
+
+
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full enabled-mat-input mat-sm-auto-input  mat-mdc-mb-0">
+              <mat-label>Sub-processor</mat-label>
+
+              <mat-chip-grid #subProcessorGrid aria-label="Enter subProcessor">
+                @for (ctrl of getArray('subProcessor').value; track i; let i = $index) {
+                <mat-chip-row [editable]="true" (removed)="removeRole('subProcessor', i)"
+                  (edited)="editRole('subProcessor', i, $event)" [aria-description]="'press enter to edit ' + ctrl">
+                  {{ ctrl }}
+                  @if (editMode) {
+                  <button matChipRemove [attr.aria-label]="'remove ' + ctrl">
+                    <mat-icon class="delete-icn material-symbols-outlined">close</mat-icon>
+                  </button>
+                  }
+                </mat-chip-row>
+                }
+
+                <input [matChipInputFor]="subProcessorGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addRoleFromChipInput('subProcessor', $event)"
+                  [disabled]="!editMode" />
+
+              </mat-chip-grid>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full enabled-mat-input mat-sm-auto-input mat-mdc-mb-0">
+              <mat-label>Data Importer</mat-label>
+
+              <mat-chip-grid #importerGrid aria-label="Enter importers">
+                @for (ctrl of getArray('importer').value; track i; let i = $index) {
+                <mat-chip-row [editable]="true" (removed)="removeRole('importer', i)"
+                  (edited)="editRole('importer', i, $event)" [aria-description]="'press enter to edit ' + ctrl">
+                  {{ ctrl }}
+                  @if (editMode) {
+                  <button matChipRemove [attr.aria-label]="'remove ' + ctrl">
+                    <mat-icon class="delete-icn material-symbols-outlined">close</mat-icon>
+                  </button>
+                  }
+                </mat-chip-row>
+                }
+
+                <input [matChipInputFor]="importerGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addRoleFromChipInput('importer', $event)"
+                  [disabled]="!editMode" />
+
+              </mat-chip-grid>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <mat-form-field appearance="outline" class="w-full enabled-mat-input mat-mdc-mb-0 mat-sm-auto-input">
+              <mat-label>Data Exporter</mat-label>
+
+              <mat-chip-grid #exporterGrid aria-label="Enter exporters">
+                @for (ctrl of getArray('exporter').value; track i; let i = $index) {
+                <mat-chip-row [editable]="true" (removed)="removeRole('exporter', i)"
+                  (edited)="editRole('exporter', i, $event)" [aria-description]="'press enter to edit ' + ctrl">
+                  {{ ctrl }}
+                  @if (editMode) {
+                  <button matChipRemove [attr.aria-label]="'remove ' + ctrl">
+                    <mat-icon class="delete-icn material-symbols-outlined">close</mat-icon>
+                  </button>
+                  }
+                </mat-chip-row>
+                }
+
+                <input [matChipInputFor]="exporterGrid" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  [matChipInputAddOnBlur]="true" (matChipInputTokenEnd)="addRoleFromChipInput('exporter', $event)"
+                  [disabled]="!editMode" />
+
+              </mat-chip-grid>
+            </mat-form-field>
+          </div>
+
+        </div>
+
+        }
+
+        @else{
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Data Controller</div>
+            <div class="body-large">
+              {{
+              formGroup.get('controller')?.value?.length
+              ? formGroup.get('controller')?.value.join(', ')
+              : '—'
+              }}
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Data Processor</div>
+            <div class="body-large">
+              {{
+              formGroup.get('processor')?.value?.length
+              ? formGroup.get('processor')?.value.join(', ')
+              : '—'
+              }}
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Joint Controller</div>
+            <div class="body-large">
+              {{
+              formGroup.get('jointController')?.value?.length
+              ? formGroup.get('jointController')?.value.join(', ')
+              : '—'
+              }}
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Sub-processor</div>
+            <div class="body-large">
+              {{
+              formGroup.get('subProcessor')?.value?.length
+              ? formGroup.get('subProcessor')?.value.join(', ')
+              : '—'
+              }}
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Data Importer</div>
+            <div class="body-large">
+              {{
+              formGroup.get('importer')?.value?.length
+              ? formGroup.get('importer')?.value.join(', ')
+              : '—'
+              }}
+            </div>
+          </div>
+
+          <div class="flex flex-col">
+            <div class="label-small mb-1">Data Exporter</div>
+            <div class="body-large">
+              {{
+              formGroup.get('exporter')?.value?.length
+              ? formGroup.get('exporter')?.value.join(', ')
+              : '—'
+              }}
+            </div>
+          </div>
+
+        </div>
+
+
+        }
+      </div>
+
+    </div>
+  </div>
+</div>

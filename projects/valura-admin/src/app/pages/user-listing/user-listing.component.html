@@ -1,0 +1,196 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="flex justify-end gap-2">
+      <!-- <button mat-stroked-button class="bg-primary text-light fw-500 add-user-btn body-small"
+                (click)="assignRole()">
+                Assign Role
+            </button> -->
+      @if(createUser){
+      <button mat-stroked-button class="bg-primary text-light fw-500 add-user-btn body-small" (click)="addUser()">
+        Add User
+      </button>
+      }
+    </div>
+  </div>
+
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100 "
+          [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="applyTabFilter($event.index)">
+          @for(tab of tabHeaderDetails; track $index;) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>{{ tab.name }}</span>
+            </ng-template>
+            <div class="h-full flex flex-col overflow-hidden">
+              <div class="flex-1 flex flex-col overflow-hidden">
+                <div class="overflow-x-auto flex-1 flex flex-col">
+                  @if(showRequestList){
+                  <ng-container *ngTemplateOutlet="userTableTemplate"></ng-container>
+                  }
+                  @else{
+                  @if(!isLoading && hasApiError){
+                  <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+                  }
+                  @else if(!isLoading){
+                  <item-not-found [imgHeight]="'200px'"></item-not-found>
+                  }
+                  }
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+          }
+        </mat-tab-group>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #userTableTemplate>
+  <table mat-table [dataSource]="isLoading ? shimmerDataSource : (filteredUsers.length === 0 ? [] : filteredUsers)"
+    matSort class="mat-elevation-z8 w-100 user-table table">
+
+    <ng-container matColumnDef="sno">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap sno-col">
+        <span class="text-grey title-small">S.No</span>
+      </th>
+      <td mat-cell *matCellDef="let user; let i = index" class="px-4 whitespace-nowrap sno-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{i + 1}}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap email-col">
+        <span class="text-grey title-small">Email</span>
+      </th>
+      <td mat-cell *matCellDef="let user" class="px-4 whitespace-nowrap email-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="truncate-text name-col" [class.label-large]="viewUser" [class.text-black-500]="!viewUser"
+            [class.text-primary]="viewUser" [style.cursor]="viewUser ? 'pointer' : 'default'"
+            [style.pointer-events]="viewUser ? 'auto' : 'none'" (click)="viewUser && viewUserDetails(user)">
+            {{user.email}}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="role">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap role-col">
+        <span class="text-grey title-small">Role</span>
+      </th>
+      <td mat-cell *matCellDef="let user" class="px-4 whitespace-nowrap role-col">
+        <ng-container *ngIf="!isLoading">
+          <div class="flex items-center gap-1">
+            <span class="role-badge">
+              {{user.roles[0]?.name || 'No role'}}
+            </span>
+            <span *ngIf="user.roles.length > 1" class="more-roles-badge cursor-help hover:bg-blue-200 flex-shrink-0"
+              [matTooltip]="getRolesTooltip(user.roles)" matTooltipPosition="above">
+              +{{user.roles.length - 1}}
+            </span>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="department">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap dept-col">
+        <span class="text-grey title-small">Department</span>
+      </th>
+      <td mat-cell *matCellDef="let user" class="px-4 whitespace-nowrap dept-col">
+        <ng-container *ngIf="!isLoading">
+          <div class="flex items-center gap-1">
+            <span *ngIf="user.departments?.length" class="dept-badge">
+              {{ user.departments[0].name }}
+            </span>
+            <span *ngIf="!user.departments?.length" class="dept-badge">
+              No department
+            </span>
+            <span *ngIf="user.departments?.length > 1"
+              class="more-depts-badge cursor-help hover:bg-blue-200 flex-shrink-0"
+              [matTooltip]="getDepartmentsTooltip(user.departments)" matTooltipPosition="above">
+              +{{user.departments.length - 1}}
+            </span>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="created">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap created-col">
+        <span class="text-grey title-small">Created</span>
+      </th>
+      <td mat-cell *matCellDef="let user" class="px-4 whitespace-nowrap created-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{formatDate(user.createdAt)}}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap actions-col">
+        <span class="text-grey title-small">Actions</span>
+      </th>
+      <td mat-cell *matCellDef="let user" class="px-4 whitespace-nowrap actions-col">
+        <ng-container *ngIf="!isLoading">
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn" matTooltip="Actions">
+            <mat-icon class="mat-md-icon material-symbols-outlined text-primary mb-1">more_vert</mat-icon>
+          </button>
+
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item disabled="editUser" (click)="viewUserDetails(user)" class="text-sm">
+              <mat-icon
+                class="material-symbols-outlined mat-md-icon text-primary my-auto">quick_reference_all</mat-icon>
+              <span class="text-gray-700">Details</span>
+            </button>
+            @if(user?.invitationPending){
+            <button mat-menu-item (click)="inviteUserModal(user.applicationUserId)" class="text-sm">
+              <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">outgoing_mail</mat-icon>
+              <span class="text-gray-700">Invite User</span>
+            </button>
+            }
+            <button mat-menu-item disabled="editUser" (click)="deleteUser(user)" class="text-sm">
+              <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+              <span class="text-gray-700">Delete</span>
+            </button>
+          </mat-menu>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.shimmer-row]="isLoading"></tr>
+
+    <tr *ngIf="!isLoading && filteredUsers.length === 0" class="no-data-row">
+      <td [attr.colspan]="displayedColumns.length" class="text-center py-16">
+        <div class="flex flex-col items-center">
+          <mat-icon class="text-6xl text-gray-400 mb-4 material-symbols-outlined">people_outline</mat-icon>
+          <p class="text-gray-600 text-lg mb-2">No users found</p>
+          <p class="text-gray-500">Add users to get started</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</ng-template>

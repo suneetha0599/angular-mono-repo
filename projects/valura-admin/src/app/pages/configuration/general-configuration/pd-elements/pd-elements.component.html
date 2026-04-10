@@ -1,0 +1,65 @@
+<div class="d-flex flex-column h-100 overflow-hidden">
+  <div class="wrapper main px-3 py-2 my-2">
+    <div class="text-primary fs-10 fw-medium">Personal Data Elements</div>
+    <div class="text-grey">Configure the personal data elements here.</div>
+  </div>
+
+  <div class="d-flex main-wrapper overflow-hidden position-relative h-100">
+    <div class="col w-100 rounded overflow-hidden position-relative h-full tab-container">
+      <div class="position-absolute tab-container" style="
+            right: 0;
+            top: 8px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          ">
+        <!-- Search  -->
+        @if(isSearchExpanded) {
+        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 mat-round-input enabled-mat-input search">
+          <mat-icon class="mat-md-icon pe-2 material-symbols-outlined" matPrefix>search</mat-icon>
+          <input matInput placeholder="Search..." [(ngModel)]="searchText" (ngModelChange)="performSearch()" />
+          @if(searchText && searchText.trim()) {
+          <button matSuffix mat-icon-button class="close-btn mat-md-icon me-2" (click)="onSearch()">
+            <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+          </button>
+          }
+        </mat-form-field>
+        }
+        <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="onSearch()">
+          <mat-icon color="primary material-symbols-outlined">search</mat-icon>
+        </button>
+        <!-- Add Button -->
+        @if(addButtonLabel && pdElementFullAcess){
+        <loading-button (onButtonClick)="onAddButtonClick()">
+          <span>
+            <mat-icon class="mat-md-icon me-2 pt-1 material-symbols-outlined">add</mat-icon>
+          </span>
+          <span> {{ addButtonLabel }}</span>
+        </loading-button>
+        }
+      </div>
+
+      <mat-tab-group mat-align-tabs="start" [(selectedIndex)]="selectedTabIndex"
+        (selectedIndexChange)="onTabChange($event)" class="custom-tab-group mat-tab-100">
+        @for (tab of tabs; track tab.key) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            {{ tab.name }}
+          </ng-template>
+
+          <ng-template matTabContent>
+            @switch (tab.key) { @case ('dataElements') {
+            <app-data-element [refreshElements]="refreshElements" [searchText]="searchText" />
+            } @case ('category') {
+            <app-category [refreshElements]="refreshElements" [searchText]="searchText" />
+            } @case ('classification') {
+            <app-classification [refreshElements]="refreshElements" [searchText]="searchText" />
+            } }
+          </ng-template>
+        </mat-tab>
+        }
+      </mat-tab-group>
+    </div>
+  </div>
+</div>

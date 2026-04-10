@@ -1,0 +1,40 @@
+/* Compact datepicker popup - smaller calendar */
+::ng-deep .compact-datepicker {
+  .mat-calendar {
+    width: 280px !important;     /* Default is ~300px+ */
+    height: 320px !important;    /* Reduce overall height */
+  }
+
+  .mat-calendar-table {
+    font-size: 13px;             /* Smaller day numbers */
+  }
+
+  .mat-calendar-body-cell {
+    padding: 6px 0 !important;   /* Less vertical padding */
+  }
+
+  .mat-calendar-header,
+  .mat-calendar-controls {
+    padding: 8px !important;
+  }
+
+  /* Optional: smaller month/year navigation buttons */
+  .mat-calendar-arrow {
+    margin: 0 4px !important;
+  }
+}
+
+/* Make the input field itself shorter and narrower */
+::ng-deep .max-w-xs .mat-mdc-form-field-infix {
+  min-height: 48px !important;   /* Default is ~56px */
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+::ng-deep .max-w-xs .mat-mdc-input-element {
+  font-size: 14px !important;
+}
+
+.custom-textarea{
+  resize: none !important;
+}

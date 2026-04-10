@@ -1,0 +1,53 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+    {{data.type=='assessment'?'Reject Assessment' :'Update Status'}}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="Close dialog">
+    <mat-icon class="text-lg material-symbols-outlined">close</mat-icon>
+</button>
+@if(data.type=='assessment'){
+<div class="body-medium text-[#767676]  px-3">Please provide a reason for rejecting this assesment.</div>
+}
+<div mat-dialog-content class="p-3 m-0">
+    <div class="flex flex-wrap gap-6 ">
+        <div class="flex flex-wrap gap-6 w-full">
+            @if(data.type=='assessment'){
+            <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-text-area">
+                <mat-label>Please add your comment</mat-label>
+                <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
+                    [(ngModel)]="comment">
+                    </textarea>
+            </mat-form-field>
+            }
+            @else {
+            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                <mat-label>Status</mat-label>
+                <mat-select [(ngModel)]="selectedStatus">
+                    @for (s of statusList; track $index) {
+                    <mat-option [value]="s.value"
+                        [disabled]="s.label === data.currentStatus || s.value === data.currentStatus ">
+                        {{ s.label }}
+                        @if (s.value === data.currentStatus) {
+                        (Current)
+                        }
+                    </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+            }
+        </div>
+    </div>
+</div>
+
+<div mat-dialog-actions class="flex justify-end">
+    <div class="w-full p-0 flex gap-3 justify-end ">
+        <loading-button type="secondary" (click)="closeDialog()">
+            Cancel
+        </loading-button>
+
+        <loading-button type="primary" [loading]="loading" (click)="update()" [disabled]="isUpdateDisabled()">
+            {{data.type=='assessment'?'Save': 'Update'}}
+        </loading-button>
+
+    </div>
+</div>

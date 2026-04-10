@@ -1,0 +1,628 @@
+<div>
+    <form [formGroup]="overviewForm">
+        <div>
+            @if(panelType === OVERVIEW) {
+            <div class=" ms-2 content no-scrollbar">
+
+                <div class="">
+                    <div class="title">Assess the Record</div>
+                    <div class="flex-column">
+                        <mat-radio-group class="flex gap-6" formControlName="processingFor"
+                            (change)="onProcessingForChange($event)">
+                            @if (assessmentSource !== AssessemntSource.VENDOR) {
+                            <mat-radio-button [value]="AccessRecord.PROCESSING_ACTIVITY">A processing
+                                activity</mat-radio-button>
+                            <mat-radio-button [value]="AccessRecord.ASSET">An asset</mat-radio-button>
+                            }
+                            @if (assessmentSource === AssessemntSource.VENDOR || processingFor.value ===
+                            AccessRecord.VENDOR) {
+                            <mat-radio-button [value]="AccessRecord.VENDOR">Vendor</mat-radio-button>
+                            }
+                        </mat-radio-group>
+                    </div>
+                </div>
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2 enabled-mat-select"
+                        [floatLabel]="bpaPlaceholder? 'always':'auto'">
+                        <mat-label>
+                            {{ processingFor.value === AccessRecord.VENDOR ? 'Choose vendor' : (processingFor.value ===
+                            AccessRecord.ASSET ? 'Choose asset' : 'Choose processing
+                            activity') }}
+                        </mat-label>
+                        <mat-select formControlName="bpa" panelClass="custom-select-panel" #bpaSelect
+                            [compareWith]="msCompareFnBpa" (openedChange)="onBpaOpenedChange($event)"
+                            [placeholder]="bpaPlaceholder" (selectionChange)="onBpaSelectionChange()">
+                            <div class="search-wrapper px-2 pt-2">
+                                <mat-form-field appearance="outline" class="w-100 mat-sm-input search-field">
+                                    <input matInput
+                                        [placeholder]="processingFor.value === AccessRecord.VENDOR ? 'Find vendor' : (processingFor.value === AccessRecord.ASSET ? 'Find asset' : 'Find process')"
+                                        (keydown)="$event.stopPropagation()" (keydown.enter)="showCreateOption()"
+                                        [formControl]="searchControl">
+                                </mat-form-field>
+                            </div>
+                            <cdk-virtual-scroll-viewport [itemSize]="20" [style.height]="bpaContainerHeight"
+                                (scrolledIndexChange)="loadMoreBpa(bpaSelect)" class="select-cdk-scroll">
+                                @if(filteredBpaMasterList.length === 0) {
+                                <div class="empty-state">
+                                    <div class="empty-text label-medium">
+                                        Unable to find any {{ processingFor.value === AccessRecord.VENDOR ? 'vendors' :
+                                        (processingFor.value === AccessRecord.ASSET ? 'assets'
+                                        :'processes') }}
+                                    </div>
+                                    @if( processingFor.value === AccessRecord.ASSET){
+                                    <div class="create-new primary label-large" (mousedown)="$event.stopPropagation(); createAsset()">
+                                        + Create new
+                                    </div>
+                                    }
+                                    @else if (processingFor.value === AccessRecord.PROCESSING_ACTIVITY) {
+                                    <div class="create-new primary label-large" (mousedown)="$event.stopPropagation(); createBPA()">
+                                        + Create new
+                                    </div>
+                                    }
+                                    @else {
+                                    <div class="create-new primary label-large" (mousedown)="$event.stopPropagation(); createVendor()">
+                                        + Create new
+                                    </div>
+                                    }
+                                </div>
+                                }
+                                @else {
+                                @for (item of filteredBpaMasterList;track i; let i=$index) {
+                                <mat-option [value]="item">
+                                    {{ item.name }}
+                                </mat-option>
+                                }
+                                }
+                            </cdk-virtual-scroll-viewport>
+                        </mat-select>
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="bpa.errors" [control]="bpa"
+                                controlActualName="BPA">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="d-flex row my-4">
+                    <div class="col-6">
+                        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+                            <mat-label>Assessment Type</mat-label>
+                            <input matInput #searchAssessmentType formControlName="type"
+                                (ngModelChange)="filterAssessmentTypes($event)" [matAutocomplete]="auto" />
+                            <mat-autocomplete #auto="matAutocomplete" [displayWith]="assessmentDisplayName"
+                                (optionSelected)="onAssessmentSelected($event.option.value)">
+                                @for (types of filteredAssessmentTypes; track i; let i=$index) {
+                                <mat-option [value]="types">{{ types.name }}</mat-option>
+                                }
+                                @if(searchAssessmentType.value && filteredAssesmentTypeIsEmpty) {
+                                <mat-option [value]="searchAssessmentType.value"
+                                    (onSelectionChange)="addNewAssessmentTypes(searchAssessmentType.value)"
+                                    class="add-option">
+                                    <span class="fw-semibold">+ Add </span>"{{ searchAssessmentType.value }}"
+                                </mat-option>
+                                }
+                            </mat-autocomplete>
+                            <mat-error>
+                                <custom-mat-error class="inline-block" [errors]="type.errors" [control]="type"
+                                    controlActualName="Assessment type">
+                                </custom-mat-error>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-6">
+                        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2"
+                            [floatLabel]="templatePlaceholder? 'always':'auto'">
+                            <mat-label>Choose Template</mat-label>
+                            <mat-select #templateSelect formControlName="template" [compareWith]="compareTemplates"
+                                (selectionChange)="onFormTemplateChange($event)" [placeholder]="templatePlaceholder">
+                                <cdk-virtual-scroll-viewport #templateScroll [itemSize]="templateSize"
+                                    [style.height]="templateContainerHeight" class="select-cdk-scroll"
+                                    (scrolledIndexChange)="loadMoreTemplate(templateSelect)">
+                                    @for (template of templateMasterList; track template.templateId) {
+                                    <mat-option [value]="template">{{ template.name }}</mat-option>
+                                    }
+                                    @if(templatePaginationDetail.loading){
+                                    <div class="md-primary-spinner flex flex-row justify-center">
+                                        <mat-spinner [diameter]="20" class=""></mat-spinner>
+                                    </div>
+                                    }
+                                </cdk-virtual-scroll-viewport>
+                                <!-- @for (template of templateMasterList; track i; let i=$index) {
+                                <mat-option [value]="template">{{ template.name }}</mat-option>
+                                } -->
+                            </mat-select>
+                            <mat-error>
+                                <custom-mat-error class="inline-block" [errors]="template.errors" [control]="template"
+                                    controlActualName="Template">
+                                </custom-mat-error>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-1 enabled-mat-input">
+                        <mat-label>Assessment Title</mat-label>
+                        <input matInput formControlName="title" />
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [control]="title" [errors]="title.errors"
+                                controlActualName="Title">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="my-4 pt-2">
+                    <div class="label-large mb-1">Assessment Description</div>
+                    <app-custom-editor [initialContent]="description.value || ''"
+                        [placeholder]="'Enter assessment description...'" (contentChange)="onDescriptionChange($event)"
+                        (blur)="description.markAsTouched()">
+                    </app-custom-editor>
+
+                    @if (description.invalid && description.touched) {
+                    <mat-error>
+                        <custom-mat-error class="inline-block" [errors]="description.errors" [control]="description"
+                            controlActualName="Description">
+                        </custom-mat-error>
+                    </mat-error>
+                    }
+                </div>
+                <div class="mt-2 pt-2">
+                    <div class="label-large mb-1">Assessment Classification</div>
+                    <div class="flex-column">
+                        <mat-chip-listbox class="chips" formControlName="clarification">
+                            <mat-chip-option class="me-2" value="Class1">Class 1</mat-chip-option>
+                            <mat-chip-option value="Class2">Class 2</mat-chip-option>
+                        </mat-chip-listbox>
+                    </div>
+                </div>
+            </div>
+            }
+            @else if(panelType === RISK) {
+            <div class="mt-2 mx-1 row d-flex">
+                <div class="col-6">
+                    <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+                        <mat-label>Risk Matrix</mat-label>
+                        <mat-select formControlName="risk">
+                            @for (rm of riskMatrix; track i; let i=$index) {
+                            <mat-option [value]="rm.key">{{ rm.label }}</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="risk.errors" [control]="risk"
+                                controlActualName="Risk matrix">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-6">
+                    <mat-form-field appearance="outline" class="mat-sm-input w-100">
+                        <mat-label>Complete By</mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="completeBy" [min]="minToDateFilter" />
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="completeBy.errors" [control]="completeBy"
+                                controlActualName="Complete by">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            }
+            @else if(panelType === ROLE) {
+            <div class="ms-2 mt-1">
+                <div class="me-2">
+                    <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+                        <mat-label>Author</mat-label>
+                        <input matInput #searchAuthor formControlName="author" (ngModelChange)="filterAuthors($event)"
+                            [matAutocomplete]="autoAuthor" />
+                        <mat-autocomplete #autoAuthor="matAutocomplete" (optionSelected)="onAuthorSelected($event)"
+                            [displayWith]="displayOwner">
+                            @for (author of filteredAuthorList; track i; let i=$index) {
+                            <mat-option [value]="author">
+                                {{ author.email }}
+                            </mat-option>
+                            }
+                            <!-- @if(searchAuthor.value && !isAuthorExist(searchAuthor.value)) {
+                     <mat-option [value]="searchAuthor.value"
+                         (onSelectionChange)="addNewUser(searchAuthor.value,'author')" class="add-option">
+                         <span class="fw-semibold">+ Add </span>"{{ searchAuthor.value }}"
+                     </mat-option>
+                     } -->
+                        </mat-autocomplete>
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="author.errors" [control]="author"
+                                controlActualName="Author">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-checkbox formControlName="authorAsRespondent" class="mt-3"
+                        (change)="onCheckboxChange($event.checked)">Author as
+                        Respondent
+                    </mat-checkbox>
+                </div>
+                <div class="mt-4">
+                    <label class="title">Respondent</label>
+                    <div class="flex-column">
+                        <mat-radio-group formControlName="respondentType" class="flex gap-6"
+                            (change)="loadRespondentList($event.value, true)">
+                            <mat-radio-button value="INTERNAL_USER">Internal</mat-radio-button>
+                            <mat-radio-button value="EXTERNAL_USER">External</mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+                </div>
+                <div class="mt-3" [class.me-2]="!(respondent.value &&
+                        isValidEmail(respondent.value) &&
+                        !isRespondentExist(respondent.value))">
+                    <mat-form-field appearance="outline" [class.w-71]="respondent.value &&
+                        isValidEmail(respondent.value) &&
+                        !isRespondentExist(respondent.value)" [class.w-100]="!(respondent.value &&
+                        isValidEmail(respondent.value) &&
+                        !isRespondentExist(respondent.value))" class="mat-sm-input mat-mdc-mb-0">
+                        <mat-label>Choose Respondent</mat-label>
+                        <input matInput #searchRespondent formControlName="respondent"
+                            [matAutocomplete]="autoRespondent" (ngModelChange)="filterRespondents($event)" />
+                        <mat-autocomplete #autoRespondent="matAutocomplete"
+                            (optionSelected)="onRespondentSelected($event)" [displayWith]="displayRespondent">
+                            @for(r of filteredRespondentList;track i; let i=$index) {
+                            <mat-option [value]="r">
+                                {{ r.email }}
+                            </mat-option>
+                            }
+                            <!-- @if(searchRespondent.value && !isRespondentExist(searchRespondent.value)) {
+                            <mat-option [value]="searchRespondent.value"
+                                (onSelectionChange)="addNewUser(searchRespondent.value,'respondent')"
+                                class="add-option">
+                                <span class="fw-semibold">+ Add </span>"{{ searchRespondent.value }}"
+                            </mat-option>
+                            } -->
+                        </mat-autocomplete>
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="respondent.errors" [control]="respondent"
+                                controlActualName="Respondent">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                    @if(
+                    respondent.value &&
+                    isValidEmail(respondent.value) &&
+                    !isRespondentExist(respondent.value)
+                    ) {
+                    <loading-button class="ms-2" (onButtonClick)="addNewUser(searchRespondent.value,'respondent')"
+                        [disabled]="addUserIsLoading">
+                        <mat-icon class="material-symbols-outlined mat-md-icon me-1">person_add</mat-icon>
+                        <span>{{ respondentButtonText}}</span>
+                    </loading-button>
+                    }
+                </div>
+                <div class="mt-4">
+                    <label class="title">Approver</label>
+                    <!-- <div class="d-flex align-items-center w-100 gap-2 mb-3">
+                  <div>
+                      <label class="title pt-2">Level 1</label>
+                  </div>
+                  <div class="mx-2 flex-grow-1">
+                      <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+                          <mat-label>Choose Approver</mat-label>
+                          <input matInput #searchApprover1 formControlName="approver1"
+                              [matAutocomplete]="autoApprover1" (ngModelChange)="filterApprovers($event)" />
+                          <mat-autocomplete #autoApprover1="matAutocomplete"
+                              (optionSelected)="onApproverSelected($event, 'approver1')"
+                              [displayWith]="displayApprover">
+                              @for(ap of filteredApproverList;track ap) {
+                              <mat-option [value]="ap">
+                                  {{ ap.email }}
+                              </mat-option>
+                              }
+                              @if(searchApprover1.value && !isApproverExist(searchApprover1.value)) {
+                              <mat-option [value]="searchApprover1.value"
+                                  (onSelectionChange)="addNewUser(searchApprover1.value,'approver')"
+                                  class="add-option">
+                                  <span class="fw-semibold">+ Add </span>"{{ searchApprover1.value }}"
+                              </mat-option>
+                              }
+                          </mat-autocomplete>
+                          <mat-error>
+                              <custom-mat-error class="inline-block" [errors]="approver1.errors"
+                                  [control]="approver1" controlActualName="Approver">
+                              </custom-mat-error>
+                          </mat-error>
+                      </mat-form-field>
+                  </div>   
+                  </div> -->
+                    <div>
+                        <div class="d-flex align-items-start w-100 gap-2">
+                            <div>
+                                <label class="title pt-2">Level 1</label>
+                            </div>
+                            <div class="mx-2 flex-grow-1">
+                                <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+                                    <mat-label>Choose Approver</mat-label>
+                                    <mat-select formControlName="approver1"
+                                        (selectionChange)="onChangeApprover('approver1')" [compareWith]="compareUsers"
+                                        multiple>
+                                        @if(filteredApproverList.length === 0) {
+                                        <div class="text-grey my-2 mx-3 label-large">
+                                            No approver found
+                                        </div>
+                                        }
+                                        @else {
+                                        @for (ap of filteredApproverList; track i; let i=$index) {
+                                        <mat-option [value]="ap" class="py-2" [class.disabled-option]="isAuthor(ap)">
+                                            {{ ap.email }}
+                                        </mat-option>
+                                        }
+                                        }
+                                    </mat-select>
+                                    <mat-error>
+                                        <custom-mat-error class="inline-block" [errors]="approver1.errors"
+                                            [control]="approver1" controlActualName="Approver">
+                                        </custom-mat-error>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <mat-chip-set class="mt-2">
+                                @for(ap of selectedApprovers1; track i; let i=$index) {
+                                <mat-chip [removable]="true" (removed)="removeApprover(ap, 'approver1')">
+                                    {{ ap.email }}
+                                    @if(isRemovable(ap)) {
+                                    <button matChipRemove>
+                                        <mat-icon class="material-symbols-outlined">close</mat-icon>
+                                    </button>
+                                    }
+                                </mat-chip>
+                                }
+                            </mat-chip-set>
+                        </div>
+                    </div>
+                    <!-- <div class="d-flex align-items-center w-100 gap-2 mb-3">
+                  <div>
+                      <label class="title pt-2">Level 2</label>
+                  </div>
+                  <div class="mx-2 flex-grow-1">
+                      <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+                          <mat-label>Choose Approver</mat-label>
+                          <input matInput #searchApprover2 formControlName="approver2"
+                              [matAutocomplete]="autoApprover2" (ngModelChange)="filterApprovers($event)" />
+                          <mat-autocomplete #autoApprover2="matAutocomplete"
+                              (optionSelected)="onApproverSelected($event, 'approver2')"
+                              [displayWith]="displayApprover">
+                              @for(ap of filteredApproverList;track ap) {
+                              <mat-option [value]="ap">
+                                  {{ ap.email }}
+                              </mat-option>
+                              }
+                              @if(searchApprover2.value && !isApproverExist(searchApprover2.value)) {
+                              <mat-option [value]="searchApprover2.value"
+                                  (onSelectionChange)="addNewUser(searchApprover2.value,'approver')"
+                                  class="add-option">
+                                  <span class="fw-semibold">+ Add </span>"{{ searchApprover2.value }}"
+                              </mat-option>
+                              }
+                          </mat-autocomplete>
+                          <mat-error>
+                              <custom-mat-error class="inline-block" [errors]="approver2.errors"
+                                  [control]="approver2" controlActualName="Approver">
+                              </custom-mat-error>
+                          </mat-error>
+                      </mat-form-field>
+                  </div>   
+                  </div> -->
+                    <div>
+                        <div class="d-flex align-items-start w-100 gap-2">
+                            <div>
+                                <label class="title pt-2">Level 2</label>
+                            </div>
+                            <div class="mx-2 flex-grow-1">
+                                <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+                                    <mat-label>Choose Approver</mat-label>
+                                    <mat-select formControlName="approver2"
+                                        (selectionChange)="onChangeApprover('approver2')" [compareWith]="compareUsers"
+                                        multiple>
+                                        @if(filteredApproverList.length === 0) {
+                                        <div class="text-grey my-2 mx-3 label-large">
+                                            No approver found
+                                        </div>
+                                        }
+                                        @else {
+                                        @for (ap of filteredApproverList; track i; let i=$index) {
+                                        <mat-option [value]="ap" class="py-2">
+                                            {{ ap.email }}
+                                        </mat-option>
+                                        }
+                                        }
+                                    </mat-select>
+                                    <mat-error>
+                                        <custom-mat-error class="inline-block" [errors]="approver2.errors"
+                                            [control]="approver2" controlActualName="Approver">
+                                        </custom-mat-error>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <mat-chip-set class="mt-2">
+                                @for(ap of selectedApprovers2; track i; let i=$index) {
+                                <mat-chip [removable]="true" (removed)="removeApprover(ap, 'approver2')">
+                                    {{ ap.email }}
+                                    <button matChipRemove>
+                                        <mat-icon class="material-symbols-outlined">close</mat-icon>
+                                    </button>
+                                </mat-chip>
+                                }
+                            </mat-chip-set>
+                        </div>
+                    </div>
+                    <!-- <div class="d-flex align-items-center w-100 gap-2 mb-3">
+                  <div>
+                      <label class="title pt-2">Level 3</label>
+                  </div>
+                  <div class="mx-2 flex-grow-1">
+                      <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+                          <mat-label>Choose Approver</mat-label>
+                          <input matInput #searchApprover3 formControlName="approver3"
+                              [matAutocomplete]="autoApprover3" (ngModelChange)="filterApprovers($event)" />
+                          <mat-autocomplete #autoApprover3="matAutocomplete"
+                              (optionSelected)="onApproverSelected($event, 'approver3')"
+                              [displayWith]="displayApprover">
+                              @for(ap of filteredApproverList;track ap) {
+                              <mat-option [value]="ap">
+                                  {{ ap.email }}
+                              </mat-option>
+                              }
+                              @if(searchApprover3.value && !isApproverExist(searchApprover3.value)) {
+                              <mat-option [value]="searchApprover3.value"
+                                  (onSelectionChange)="addNewUser(searchApprover3.value,'approver')"
+                                  class="add-option">
+                                  <span class="fw-semibold">+ Add </span>"{{ searchApprover3.value }}"
+                              </mat-option>
+                              }
+                          </mat-autocomplete>
+                          <mat-error>
+                              <custom-mat-error class="inline-block" [errors]="approver3.errors"
+                                  [control]="approver3" controlActualName="Approver">
+                              </custom-mat-error>
+                          </mat-error>
+                      </mat-form-field>
+                  </div>   
+                  </div> -->
+                    <div>
+                        <div class="d-flex align-items-start w-100 gap-2">
+                            <div>
+                                <label class="title pt-2">Level 3</label>
+                            </div>
+                            <div class="mx-2 flex-grow-1">
+                                <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+                                    <mat-label>Choose Approver</mat-label>
+                                    <mat-select formControlName="approver3"
+                                        (selectionChange)="onChangeApprover('approver3')" [compareWith]="compareUsers"
+                                        multiple>
+                                        @if(filteredApproverList.length === 0) {
+                                        <div class="text-grey my-2 mx-3 label-large">
+                                            No approver found
+                                        </div>
+                                        }
+                                        @else {
+                                        @for (ap of filteredApproverList;track i; let i=$index) {
+                                        <mat-option [value]="ap" class="py-2">
+                                            {{ ap.email }}
+                                        </mat-option>
+                                        }
+                                        }
+                                    </mat-select>
+                                    <mat-error>
+                                        <custom-mat-error class="inline-block" [errors]="approver3.errors"
+                                            [control]="approver3" controlActualName="Approver">
+                                        </custom-mat-error>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <mat-chip-set class="mt-2">
+                                @for(ap of selectedApprovers3; track i; let i=$index) {
+                                <mat-chip [removable]="true" (removed)="removeApprover(ap, 'approver3')">
+                                    {{ ap.email }}
+                                    <button matChipRemove>
+                                        <mat-icon class="material-symbols-outlined">close</mat-icon>
+                                    </button>
+                                </mat-chip>
+                                }
+                            </mat-chip-set>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- <div>
+   <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+       <mat-label>Choose Respondent</mat-label>
+       <input matInput
+               #searchRespondent
+               formControlName="respondent"
+               [matAutocomplete]="autoRespondent"
+               placeholder="Enter respondent"
+               (ngModelChange)="filterRespondents($event)" />
+       <mat-autocomplete #autoRespondent="matAutocomplete">
+           <mat-option class="p-0" *ngFor="let r of filteredRespondentList" [value]="getUser(r)" (click)="$event.stopPropagation();">
+                   <mat-checkbox
+                   [checked]="isRespondentSelected(r)"
+                   (click)="$event.stopPropagation(); toggleRespondent(r)">
+                   {{ getUser(r) }}
+               </mat-checkbox>
+           </mat-option>
+           <mat-option *ngIf="searchRespondent.value && !isRespondentExist(searchRespondent.value)"
+                       [value]="searchRespondent.value"
+                       (onSelectionChange)="addNewUser(searchRespondent.value)"
+                       class="add-option">
+           <span class="fw-semibold">+ Add </span>"{{ searchRespondent.value }}"
+           </mat-option>
+       </mat-autocomplete>
+       <mat-error>
+           <custom-mat-error class="inline-block" [errors]="respondent.errors"
+                           [control]="respondent"
+                           controlActualName="Respondent">
+           </custom-mat-error>
+       </mat-error>
+   </mat-form-field>
+   <div class="mt-1">
+       <mat-chip class="mt-1 ms-1" *ngFor="let r of selectedRespondents"
+                   selectable="false"
+                   removable="true"
+                   (removed)="removeRespondent(r)">
+           {{ getUser(r) }}
+           <mat-icon class="material-symbols-outlined" matChipRemove>cancel</mat-icon>
+       </mat-chip>
+   </div>
+   </div> -->
+<!-- <div class="d-flex flex-column  mx-2">
+   <label class="title">Approver</label>
+   <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+       <input
+       matInput
+       #searchApprover
+       formControlName="approver"
+       [matAutocomplete]="autoApprover"
+       placeholder="Enter approver"
+       (ngModelChange)="filterApprovers($event)" />
+       <mat-autocomplete #autoApprover="matAutocomplete">
+       @for (ap of filteredApproverList; track ap) {
+           <mat-option class="p-0" [value]="getUser(ap)" (click)="$event.stopPropagation();">
+               <mat-checkbox
+                   [checked]="isSelected(ap)"
+                   (click)="$event.stopPropagation(); toggleApprover(ap)">
+                   {{ getUser(ap) }}
+               </mat-checkbox>
+           </mat-option>
+       }
+       @if(searchApprover.value && !isApproverExist(searchApprover.value)) {
+           <mat-option
+           [value]="searchApprover.value"
+           (onSelectionChange)="addNewUser(searchApprover.value)"
+           class="add-option">
+           <span class="fw-semibold">+ Add </span>"{{ searchApprover.value }}"
+           </mat-option>
+       }
+       </mat-autocomplete>
+       <mat-error>
+           <custom-mat-error
+               class="inline-block"
+               [errors]="approver.errors"
+               [control]="approver"
+               controlActualName="Approver">
+           </custom-mat-error>
+       </mat-error>
+   </mat-form-field>
+   <div class="mt-1">
+       <mat-chip class="mt-1 ms-1 w-auto" *ngFor="let ap of selectedApprovers" selectable="false" removable="true" (removed)="removeApprover(ap)">
+           {{ getUser(ap) }}
+           <mat-icon class="material-symbols-outlined" matChipRemove>cancel</mat-icon>
+       </mat-chip>
+   </div>
+   </div> -->
+<ng-template #selectContent></ng-template>

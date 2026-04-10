@@ -1,0 +1,314 @@
+@if (viewType === EXPORT) {
+<app-export-drawer
+    [columns]="columns"
+    (onDownload)="onExportDownload($event)"
+    (onClose)="closeDrawer()">
+</app-export-drawer>
+}
+@else {
+<div class="d-flex flex-column  overflow-hidden view-wrapper p-3">
+    <div class="flex justify-between">
+        <div class="my-auto title-medium">
+            {{pageTitle}}
+        </div>
+        <div class="my-auto">
+            <button mat-icon-button (click)="closeDrawer()">
+                <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <div class="d-flex editor-wrapper overflow-hidden position-relative h-100 pb-0">
+        <div class="col w-100 h-100 overflow-auto overflow-x-hidden main-canvas no-scrollbar">
+            @if(filterConfiguration){
+            <div>
+                @if(!isTemplateContext && selectedTab !== DRAFTS && selectedTab !== OPEN) {
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Status</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedStatus" multiple>
+                            @if(filterConfiguration.tempSelectedStatus.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempSelectedStatus[0]?.name }}
+                                    (+{{(filterConfiguration.tempSelectedStatus.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedStatus.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger> }
+                            @for (status of filterConfiguration.statusList; track status.id;) {
+                            <mat-option [value]="status">{{status.name}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if(!isTemplateContext && showFilter){
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Residency</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedCountry" multiple
+                            panelClass="residency-select-panel" (selectionChange)="onCountryChange($event)"
+                            (openedChange)="clearSearch(searchInput)">
+                            @if(filterConfiguration.tempSelectedCountry.length > 2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempSelectedCountry[0]?.name }}
+                                    (+{{(filterConfiguration.tempSelectedCountry.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedCountry.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger>
+                            }
+                            <div class="opt-container">
+                                <mat-optgroup class="search-optgroup">
+                                    <div class="search-wrapper" (click)="$event.stopPropagation()">
+                                        <input #searchInput type="text" placeholder="Search Residency"
+                                            class="search-input" (keyup)="filterCountries(searchInput.value)" />
+
+                                        @if (searchInput.value) {
+                                        <button type="button" class="clear-btn"
+                                            (click)="clearSearch(searchInput); searchInput.focus(); $event.stopPropagation()">
+                                            <mat-icon fontIcon="close"
+                                                class="material-symbols-outlined close-btn"></mat-icon>
+                                        </button>
+                                        }
+                                    </div>
+                                </mat-optgroup>
+                                <div class="option-container">
+                                    @for (country of filterConfiguration.filteredCountryList; track $index) {
+                                    <mat-option [value]="country">
+                                        {{ country.name }}
+                                    </mat-option>
+                                    }
+                                </div>
+                            </div>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if(!isTemplateContext && showFilter){
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Request Type</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedRequestType" multiple>
+                            @if(filterConfiguration.tempSelectedRequestType.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempSelectedRequestType[0]?.title }}
+                                    (+{{(filterConfiguration.tempSelectedRequestType.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedRequestType.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger>
+                            }
+                            @for (requestType of filterConfiguration.requestTypeList; track i;let i = $index) {
+                            <mat-option [value]="requestType">{{requestType.title}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if(!isTemplateContext && showFilter){
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Data Subject</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedDataSubject" multiple>
+                            @if(filterConfiguration.tempSelectedDataSubject.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempSelectedDataSubject[0]?.name }}
+                                    (+{{(filterConfiguration.tempSelectedDataSubject.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedDataSubject.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger> }
+                            @for (dataSubject of filterConfiguration.dataSubjectList; track i;let i = $index) {
+                            <mat-option [value]="dataSubject">{{dataSubject.name}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if(!isTemplateContext && showAssignedToFilter){
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Assigned To</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedAssignedTo" multiple>
+                            @if(filterConfiguration.tempSelectedAssignedTo.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{getDisplayName(filterConfiguration.tempSelectedAssignedTo[0])}}
+                                    (+{{(filterConfiguration.tempSelectedAssignedTo.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedAssignedTo.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger>
+                            }
+                            @for (assignedTo of filterConfiguration.assignedToList; track i;let i = $index) {
+                            <mat-option [value]="assignedTo">
+                                {{ getDisplayName(assignedTo)}}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (!isTemplateContext && isFromTask && showAssignedToUserFilter) {
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Assignor</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedAssigner" multiple>
+                            @if (filterConfiguration.tempSelectedAssigner.length > 1) {
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{ getDisplayName(filterConfiguration.tempSelectedAssigner[0]) }}
+                                    (+{{ filterConfiguration.tempSelectedAssigner.length - 1 }}
+                                    {{ filterConfiguration.tempSelectedAssigner.length === 2 ? 'other' : 'others' }})
+                                </span>
+                            </mat-select-trigger>
+                            }
+
+                            @for (assiner of filterConfiguration.assignerList; track assiner; let i = $index) {
+                            <mat-option [value]="assiner">
+                                {{ getDisplayName(assiner) }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+
+                @if(!isTemplateContext && showFilter){
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Through</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedThrough" multiple>
+                            @if(filterConfiguration.tempSelectedThrough.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempSelectedThrough[0]?.name}}
+                                    (+{{(filterConfiguration.tempSelectedThrough.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedThrough.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger> }
+                            @for (_through of filterConfiguration.through; track i;let i = $index) {
+                            <mat-option [value]="_through">{{_through.name}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if(!isTemplateContext && showFilter){
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Channel</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedChannel" multiple>
+                            @if(filterConfiguration.tempSelectedChannel.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempSelectedChannel[0]?.name }}
+                                    (+{{(filterConfiguration.tempSelectedChannel.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedChannel.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger> }
+                            @for (channel of filterConfiguration.channelList; track i;let i = $index) {
+                            <mat-option [value]="channel">{{channel.name}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+
+                @if(!isTemplateContext && isFromTask){
+                <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                    <mat-label>Priority</mat-label>
+                    <mat-select [(ngModel)]="filterConfiguration.tempSelectedPriority" multiple>
+                        @if(filterConfiguration.tempSelectedPriority.length>2){
+                        <mat-select-trigger>
+                            <span class="example-additional-selection">
+                                {{getPriorityName(filterConfiguration.tempSelectedPriority[0])}}
+                                (+{{(filterConfiguration.tempSelectedPriority.length || 0) - 1}}
+                                {{filterConfiguration.tempSelectedPriority.length=== 2 ? 'other' :
+                                'others'}})
+                            </span>
+                        </mat-select-trigger>
+                        }
+                        @for (priority of filterConfiguration.priorityOptions; track priority.id) {
+                        <mat-option [value]="priority">
+                            {{ priority.label }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>LOE</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempSelectedLevelofEfforts" multiple>
+                            @if(filterConfiguration.tempSelectedLevelofEfforts.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{getDisplayNameOfLevels(filterConfiguration.tempSelectedLevelofEfforts[0])}}
+                                    (+{{(filterConfiguration.tempSelectedLevelofEfforts.length || 0) - 1}}
+                                    {{filterConfiguration.tempSelectedLevelofEfforts.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger>
+                            }
+                            @for (effortLevels of filterConfiguration.effortlevels; track effortLevels.id) {
+                            <mat-option [value]="effortLevels">
+                                {{ effortLevels.label}}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if(!isTemplateContext){
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>From</mat-label>
+                        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="filterConfiguration.tempFromDate"
+                            #fromDate="ngModel" (dateChange)=" onDateChange(filterConfiguration)" [max]="maxDateFilter">
+                        <mat-datepicker-toggle matIconSuffix [for]="fromPicker">
+                            <mat-icon matDatepickerToggleIcon
+                                class="calendar-md-icon material-symbols-outlined">calendar_month</mat-icon>
+                        </mat-datepicker-toggle>
+                        <mat-datepicker #fromPicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>To</mat-label>
+                        <input matInput [matDatepicker]="toPicker" [(ngModel)]="filterConfiguration.tempToDate"
+                            #toDate="ngModel" (dateChange)=" onDateChange(filterConfiguration,true)"
+                            [min]="minToDateFilter">
+                        <mat-datepicker-toggle matIconSuffix [for]="toPicker">
+                            <mat-icon matDatepickerToggleIcon
+                                class="calendar-md-icon material-symbols-outlined">calendar_month</mat-icon>
+                        </mat-datepicker-toggle>
+                        <mat-datepicker #toPicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex justify-end mt-2 gap-4">
+        <loading-button type="secondary" (onButtonClick)="onClearAll()">
+            Clear All
+        </loading-button>
+        <div>
+            <loading-button (onButtonClick)="onApply()">
+                Apply
+            </loading-button>
+        </div>
+    </div>
+</div>
+}

@@ -1,0 +1,73 @@
+<div class="d-flex flex-column h-100 overflow-hidden">
+    <div class="wrapper main px-3 py-2 my-2">
+        <div class="text-primary fs-10 fw-medium">Data subject rights</div>
+        <div class="text-grey">Configure the details related to data subject rights in accordance with applicable data protection regulations.</div>
+    </div>
+    <div class="d-flex main-wrapper overflow-hidden position-relative h-100">
+        <div class="col w-100 rounded overflow-hidden position-relative h-full tab-container">
+            <mat-tab-group disableRipple animationDuration="300ms" mat-align-tabs="start"
+                class="custom-tab-group mat-tab-100" [(selectedIndex)]="selectedTabIndex"
+                (selectedIndexChange)="onTabChange($event)">
+                @for (tab of tabHeaderDetails; track tab.key; let i = $index) {
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <span>{{ tab.name }}</span>
+                    </ng-template>
+                    <ng-template matTabContent>
+                        <ng-container>
+                            @switch (tab.key) {
+                            @case (RegulationDssr.RIGHTS) {
+
+                            @if(showRightsComponent){
+                            <app-dssr-rights #rightsComponentRef [regulationId]="regulationId"
+                                [refreshTrigger]="rightsUpdated" [searchText]="searchText">
+                            </app-dssr-rights>
+                            }
+
+                            }
+                            @case (RegulationDssr.VALIDATION_QUESTION) {
+                            <app-dssr-validation-question [searchText]="searchText"
+                                [refreshValidationQuestion]="refreshValidationQuestion"></app-dssr-validation-question>
+                            }
+                            @case (RegulationDssr.DECLARATION) {
+                            <app-dssr-declaration #declarationComponentRef [regulationId]="regulationId"
+                                [searchText]="searchText"></app-dssr-declaration>
+                            }
+                            <!-- @case (RegulationDssr.SLA) {
+                  <app-dssr-sla></app-dssr-sla>
+                } -->
+                            }
+                        </ng-container>
+                    </ng-template>
+                </mat-tab>
+                }
+
+            </mat-tab-group>
+
+            <!-- Action buttons-->
+            <div class="absolute actions d-flex align-items-center gap-2 mt-2">
+                @if(isSearchExpanded) {
+                <mat-form-field appearance="outline"
+                    class="mat-sm-input mat-mdc-mb-0 mat-round-input enabled-mat-input search">
+                    <mat-icon class="mat-md-icon pe-2 material-symbols-outlined" matPrefix>search</mat-icon>
+                    <input matInput placeholder="Search..." [(ngModel)]="searchText"
+                        (ngModelChange)="performSearch()" />
+
+                    @if(searchText) {
+                    <button matSuffix mat-icon-button class="close-btn mat-md-icon me-2" (click)="clearSearch()">
+                        <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+                    </button>
+                    }
+                </mat-form-field>
+                }
+                <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="onSearch()">
+                    <mat-icon color="primary" class="material-symbols-outlined">search</mat-icon>
+                </button>
+                <loading-button type="primary" (onButtonClick)="onAddButtonClick()">
+                    <mat-icon class="mat-md-icon material-symbols-outlined">add</mat-icon>
+                    {{ buttonName }}
+                </loading-button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,139 @@
+<div class="d-flex flex-column  overflow-hidden view-wrapper p-3">
+  <div class="flex items-center gap-2 text-xl font-semibold text-gray-800 justify-between py-2">
+    <div class="flex gap-2 p-1">
+      <span class="headline-large">Data Subject Details</span>
+      <button><i
+        class="material-symbols-outlined text-gray-500 rounded hover:bg-gray-200 text-base">chevron_left</i></button>
+      <button><i
+        class="material-symbols-outlined text-gray-500 rounded hover:bg-gray-200 text-base">chevron_right</i></button>
+    </div>
+  </div>
+
+  <div class="flex flex-1 overflow-hidden h-[600px]">
+
+    <!-- Left details panel (hidden in fullscreen) -->
+    @if (!isFullscreen) {
+      <div class="w-[390px] min-w-[390px] bg-white border border-white rounded m-2 overflow-auto"
+           style="scrollbar-width: none;">
+            <div class="p-3  text-sm">
+              <!-- User Info Card -->
+              <span class="title-small fontColor">Details</span>
+              <div class="border rounded-md bg-gray-50 px-2 pt-3 mb-4">
+                <p class="title-medium fontColor">Balla Daniella <span
+                  class="ml-2 px-2 py-1  border rounded-full !border-blue-900 body-small bg-white fontColor">Employee</span>
+                </p>
+                <p class="text-gray-500 body-large">Balla.Daniellaexample.com</p>
+                <p class="text-gray-500 text-sm !p-0">+91 123 456 7890</p>
+              </div>
+
+              <!-- Assignments + Request Meta Info -->
+              <div class="grid grid-cols-1 gap-x-8 gap-y-4 text-xs text-gray-700">
+                <div>
+                  <div class="text-gray-500 mb-1 label-small">Data Subject Id</div>
+                  <div class="body-large text-gray-900">{{ consentDetails?.id }}</div>
+                </div>
+                <div>
+                  <div class="text-gray-500 mb-1 label-small">Name</div>
+                  <div class="flex items-center gap-1 body-large">Darrell Steward <i
+                    class="material-symbols-outlined !text-[21px] cursor-pointer rounded hover:bg-gray-200 fontColor">edit</i>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-gray-500 mb-1 label-small">Email</div>
+                  <div class="flex items-center gap-1 body-large">dareell.com<i
+                    class="material-symbols-outlined !text-[21px] cursor-pointer rounded hover:bg-gray-200 fontColor">edit</i>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="text-gray-500 mb-1 label-small">Phone-number</div>
+                  <div class="body-large text-gray-900">12.05.2025</div>
+                </div>
+
+              </div>
+            </div>
+      </div>
+    }
+
+    <!-- Right table panel -->
+    <div class="flex-1 overflow-auto px-4 pt-2 pb-4 bg-white border border-white rounded m-2 flex flex-col">
+      <!-- Table header with fullscreen toggle -->
+      <div class="flex justify-between items-center mb-3">
+        <div class="label-large font-semibold pt-0">Fulfillment Details</div>
+        <button (click)="isFullscreen = !isFullscreen" class="text-sm fontColor rounded hover:bg-gray-200">
+          <i class="material-symbols-outlined align-middle">
+            {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
+          </i>
+        </button>
+
+      </div>
+
+      <!-- Table -->
+      <div class="flex-1 overflow-x-auto" style="scrollbar-width: none;">
+        <mat-tab-group [(selectedIndex)]="selectedTabIndex"
+                       class="remove-border-bottom custom-tab-group h-full"
+                       mat-stretch-tabs="false"
+                       mat-align-tabs="start">
+
+
+          <mat-tab label="Consent records">
+
+
+            <div class="h-full flex flex-col">
+
+              <div class="flex-1 overflow-auto mt-4 rounded-lg no-scrollbar">
+                <div class="min-w-[1000px]">
+                  <table mat-table [dataSource]="data" matSort class="w-full  bg-white">
+
+                    <ng-container matColumnDef="id">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >ID</th>
+                      <td mat-cell *matCellDef="let row" class="whitespace-nowrap">{{ row.id }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="templateName">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Template</th>
+                      <td mat-cell *matCellDef="let row" class="whitespace-nowrap">{{ row.templateName }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="upstreamSources">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Upstream Sources</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.upstreamSources }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Status</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.status }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="timeStamp">
+                      <th mat-header-cell *matHeaderCellDef  mat-sort-header >Timestamp</th>
+                      <td mat-cell *matCellDef="let row" >{{ row.timeStamp }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayColumns;"></tr>
+                  </table>
+                </div>
+              </div>
+
+
+              <div class="bg-white z-10">
+                <mat-paginator
+                  [pageSize]="10"
+                  [pageSizeOptions]="[ 10,15]"
+                  class="paginator">
+                </mat-paginator>
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+

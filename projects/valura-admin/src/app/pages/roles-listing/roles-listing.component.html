@@ -1,0 +1,148 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="flex justify-end">
+      @if(createRole){
+      <button mat-stroked-button class="bg-primary text-light fw-500 add-role-btn" (click)="addRole()">
+        Add Role
+      </button>
+      }
+    </div>
+  </div>
+
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full  bg-white p-2">
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="overflow-x-auto flex-1 flex flex-col">
+          @if(showRequestList){
+          <ng-container *ngTemplateOutlet="roleTableTemplate"></ng-container>
+          }@else{
+          @if(!isLoading && hasApiError){
+          <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+          }
+          @else if(!isLoading){
+          <item-not-found [imgHeight]="'200px'"></item-not-found>
+          }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #roleTableTemplate>
+  <table mat-table [dataSource]="isLoading ? shimmerDataSource : (roles.length === 0 ? [] : roles)" matSort
+    class="mat-elevation-z8 w-100 role-table table">
+
+    <ng-container matColumnDef="sno">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap sno-col">
+        <span class="text-grey title-small">S.No</span>
+      </th>
+      <td mat-cell *matCellDef="let role; let i = index" class="px-4 whitespace-nowrap sno-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{i + 1}}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="roleName">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap role-name-col">
+        <span class="text-grey title-small">Role Name</span>
+      </th>
+      <td mat-cell *matCellDef="let role" class="px-4 whitespace-nowrap role-name-col">
+        <ng-container *ngIf="!isLoading">
+          <!-- <span class="role-badge">{{role.roleName}}</span> -->
+          <span class="role-badge" [class.label-large]="viewRole" [class.text-black-500]="!viewRole"
+            [class.text-primary]="viewRole" [style.cursor]="viewRole ? 'pointer' : 'default'"
+            [style.pointer-events]="viewRole ? 'auto' : 'none'" (click)="viewRole && viewRoleDetails(role)">
+            {{role.name}}
+          </span>
+
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap description-col">
+        <span class="text-grey title-small">Description</span>
+      </th>
+      <td mat-cell *matCellDef="let role" class="px-4 whitespace-nowrap description-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{role.description || 'No description'}}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-extra-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="created">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap created-col">
+        <span class="text-grey title-small">Created</span>
+      </th>
+      <td mat-cell *matCellDef="let role" class="px-4 whitespace-nowrap created-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{formatDate(role.createdAt)}}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap actions-col">
+        <span class="text-grey title-small">Actions</span>
+      </th>
+      <td mat-cell *matCellDef="let role" class="px-4 whitespace-nowrap actions-col">
+        <ng-container *ngIf="!isLoading">
+
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn" matTooltip="Actions">
+            <mat-icon class="mat-md-icon material-symbols-outlined text-primary mb-1">more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="viewRoleDetails(role)" class="text-sm" disabled="editRole">
+              <mat-icon
+                class="material-symbols-outlined mat-md-icon text-primary my-auto">quick_reference_all</mat-icon>
+              <span class="text-gray-700">Details</span>
+            </button>
+            <button mat-menu-item (click)="deleteRole(role)" class="text-sm" disabled="editRole">
+              <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+              <span class="text-gray-700">Delete</span>
+            </button>
+          </mat-menu>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+
+
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.shimmer-row]="isLoading"></tr>
+
+
+    <tr *ngIf="!isLoading && roles.length === 0" class="no-data-row">
+      <td [attr.colspan]="displayedColumns.length" class="text-center py-16">
+        <div class="flex flex-col items-center">
+          <mat-icon class="text-6xl text-gray-400 mb-4 material-symbols-outlined">security</mat-icon>
+          <p class="text-gray-600 text-lg mb-2">No roles found</p>
+          <p class="text-gray-500">Add roles to get started</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</ng-template>

@@ -1,0 +1,732 @@
+@if (isInitialLoading()) {
+<app-task-dialog-shimmer [dialogType]="getShimmerDialogType()" [showFileUpload]="!shouldHideFileUpload()"
+  [showInfoMessage]="isDataRequestSelected()">
+</app-task-dialog-shimmer>
+} @else {
+@if(dialogType==RequestDialogTypes.DATA_FULFILLMENT_TASK || dialogType==RequestDialogTypes.TASK_MANAGEMENT_TASK){
+<div mat-dialog-title class="flex justify-between items-center px-6 py-2">
+  <p class="text-xl font-medium text-gray-900 m-0">
+    {{ isNotificationStep() ? 'Task Notification' : taskActionText }}
+  </p>
+  <button mat-icon-button (click)="closeDialog()" aria-label="Close dialog"
+    class="w-6 h-4 min-w-6 hover:bg-gray-100 rounded-full transition-colors duration-200">
+    <mat-icon class="text-lg material-symbols-outlined">close</mat-icon>
+  </button>
+</div>
+
+<div mat-dialog-content class="px-6 py-2 overflow-y-auto">
+  <!-- Notification Step -->
+  @if (isNotificationStep()) {
+  <div [@slideInOut] class="notification-step">
+    <!-- Email Template Component -->
+    <div class="mt-4">
+      <app-email-template [emailTemplateForm]="emailTemplateForm" [renderedContent]="renderedContent()"
+        [templateLoading]="templateLoading()" [protectedVariables]="protectedVariables()"
+        [recipientEmail]="recipientEmail.value || ''">
+      </app-email-template>
+    </div>
+  </div>
+  }
+
+  <!-- Task Form Step -->
+  @if (isTaskFormStep()) {
+  <div class="task-form-step">
+    @if(taskForm){
+    <form [formGroup]="taskForm" class="w-full">
+
+      <!-- Task Name and Due Date -->
+      <div class="grid grid-cols-12 gap-4 mt-1" [class]="hasTaskRowErrors() ? 'mb-9' : 'mb-2'">
+        <!-- Task Name Field -->
+        <div class="col-span-6">
+          <div class="mb-2">
+            <mat-form-field appearance="outline" class="w-full mat-sm-input">
+              <mat-label>Task Name</mat-label>
+              <input matInput formControlName="title" maxlength="100">
+              @if(taskForm.get('title')?.hasError('required') && taskForm.get('title')?.touched) {
+              <mat-error class="text-xs mt-1 block">Task name is required</mat-error>
+              }
+              @if(taskForm.get('title')?.hasError('minlength') && taskForm.get('title')?.touched) {
+              <mat-error class="text-xs mt-1 block">Task name must be at least 3 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Due Date Field -->
+        <div class="col-span-6">
+          <div class="mb-2">
+            <mat-form-field appearance="outline" class="w-full  mat-sm-input">
+              <mat-label>Due Date</mat-label>
+              <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" [min]="minToDateFilter"
+                readonly>
+              <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker">
+                <mat-icon matDatepickerToggleIcon class="calendar-md-icon !text-[#1C2B70] material-symbols-outlined">
+                  calendar_month
+                </mat-icon>
+              </mat-datepicker-toggle>
+              <mat-datepicker #dueDatePicker></mat-datepicker>
+              @if(taskForm.get('dueDate')?.hasError('pastDate') && taskForm.get('dueDate')?.touched) {
+              <mat-error class="text-xs mt-1 block">Due date cannot be in the past</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      <!-- Description and Type -->
+      <div class="grid grid-cols-12 gap-2 mb-4">
+        <!-- Description Field -->
+        <div class="col-span-15">
+          <div>
+            <mat-form-field appearance="outline" class="mat-sm-text-area w-full  mat-sm-input mat-mdc-mb-0">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" maxlength="500" cdkTextareaAutosize
+                cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5" #autosize="cdkTextareaAutosize">
+      </textarea>
+              @if(taskForm.get('description')?.hasError('required') && taskForm.get('description')?.touched) {
+              <mat-error>Description is required</mat-error>
+              }
+              @if(taskForm.get('description')?.hasError('minlength') && taskForm.get('description')?.touched) {
+              <mat-error>Description must be at least 10 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Priority Selection -->
+      <div class="grid grid-cols-12 gap-2 mb-3">
+        <div class="col-span-12">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+          <div class="flex gap-2 w-full max-w-2xl">
+            @for(priority of priorityOptions; track priority.value) {
+            <button type="button"
+              class="flex-1 px-4 py-0 border-[0.1px] rounded text-gray-700 text-sm font-medium transition-colors duration-200 max-w-32 min-h-[36px] hover:bg-gray-100"
+              [ngClass]="
+    taskForm.get('priority')?.value === priority.value
+      ? 'bg-white border-[0.1px] border-[#1C2B70] text-gray-900 font-semibold  ring-[#1C2B70]'
+      : 'bg-white border-[0.1px] border-gray-300 text-gray-700'
+  " (click)="selectPriority(priority.value)">
+              {{ priority.label }}
+            </button>
+
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Measure Selection for Risk Mitigation -->
+      @if (isRiskMitigation && !isQuestionTask && !isMeasureTask) {
+      <div class="grid grid-cols-12 gap-2 mb-3">
+        <div class="col-span-12">
+          <mat-form-field appearance="outline" class="w-full  mat-sm-input">
+            <mat-label>Select Measure</mat-label>
+            <mat-select formControlName="measureId">
+              <mat-option [value]="null">Select a measure</mat-option>
+              @for (measure of measures; track measure.id) {
+              <mat-option [value]="measure.id">{{ measure.description }} ({{ measure.status }})</mat-option>
+              }
+            </mat-select>
+            @if (taskForm.get('measureId')?.hasError('required') && taskForm.get('measureId')?.touched) {
+            <mat-error>Select a measure</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+      }
+
+      <!-- Measure Information for Measure Task -->
+      @if (isMeasureTask && measureData) {
+      <div class="grid grid-cols-12 gap-2 mb-3">
+        <div class="col-span-12">
+          <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Measure</label>
+              <div class="text-sm text-gray-900">{{ measureData.description }}</div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <div class="text-sm text-gray-900">{{ measureData.status }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Question Information for Question Task -->
+      @if (isQuestionTask && questionData) {
+      <div class="grid grid-cols-12 gap-2 mb-3">
+        <div class="col-span-12">
+          <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="mb-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
+              <div class="text-sm text-gray-900">{{ questionData.text }}</div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Response</label>
+              <div class="text-sm text-gray-900">{{ questionData.response }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Assignee Section -->
+      <div class="grid grid-cols-12 gap-2 mb-3">
+        <div class="col-span-12">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
+
+          <!-- Assignee Type Radio Buttons  -->
+          <div class="flex gap-4 mb-3">
+            <mat-radio-group formControlName="assigneeType" class="flex gap-4">
+              <mat-radio-button value="INTERNAL" class="text-sm">Internal</mat-radio-button>
+              <mat-radio-button value="EXTERNAL" class="text-sm">External</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <!-- Internal Assignee with Search and Create -->
+          @if(showSubAssigneeDropdown()) {
+          <div class="mb-2">
+            @if(!hasValidUserMasterList() && !internalUserCreated()) {
+            <div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2 mb-2">
+              <div class="flex items-center">
+                <mat-icon class="text-red-600 mr-1 text-sm material-symbols-outlined">error</mat-icon>
+                Unable to load user list. Please refresh and try again.
+              </div>
+            </div>
+            }
+
+            <div class="flex gap-2 items-start">
+              <mat-form-field appearance="outline" class="flex-1 max-w-sm   mat-sm-input mat-mdc-mb-0">
+                <mat-label>Search or Create Internal User</mat-label>
+                <input matInput [formControl]="internalUserControl" [matAutocomplete]="internalAuto"
+                  [disabled]="internalUserLoading()">
+
+                @if(internalUserControl.value && taskForm.get('assignee')?.value) {
+                <button type="button" matSuffix mat-icon-button (click)="clearInternalUser()">
+                  <mat-icon class="material-symbols-outlined">clear</mat-icon>
+                </button>
+                }
+
+                <mat-autocomplete #internalAuto="matAutocomplete" [displayWith]="displayInternalUser"
+                  (optionSelected)="onInternalUserSelected($event)">
+
+                  @for(user of filteredInternalUsersExcludingCurrent(); track user.applicationUserId) {
+                  <mat-option [value]="user">
+                    <div class="flex items-center justify-between w-full">
+                      <div>
+                        <span class="font-medium">
+                          @if(user.displayName) {
+                          {{ user.displayName}}
+                          } @else if(user.email) {
+                          {{ user.email }}
+                          } @else {
+                          User {{ user.applicationUserId }}
+                          }
+                        </span>
+                        @if((user.displayName) && user.email) {
+                        <span class="text-xs text-gray-500 ml-2">{{ user.email }}</span>
+                        }
+                      </div>
+                    </div>
+                  </mat-option>
+                  }
+
+                  @if(filteredInternalUsersExcludingCurrent().length === 0 && internalUserSearchTerm()) {
+                  <mat-option disabled>
+                    <span class="text-gray-500">No users found</span>
+                  </mat-option>
+                  }
+                </mat-autocomplete>
+
+                @if(taskForm.get('assignee')?.hasError('required') && taskForm.get('assignee')?.touched) {
+                <mat-error>Please select an assignee</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Create Internal User Button -->
+              @if(showCreateInternalUser() && !internalUserCreated()) {
+
+              <loading-button [loading]="internalUserLoading()" [disabled]="internalUserLoading()"
+                [loadingText]="'Creating...'" [type]="'primary'" [isFullWidth]="false"
+                (onButtonClick)="onCreateInternalUser()">
+                @if (!internalUserLoading()) {
+                <mat-icon class="mr-1 material-symbols-outlined ">person_add</mat-icon>
+                }
+                Create Internal User
+              </loading-button>
+              }
+            </div>
+
+            <!-- Error Message -->
+            @if(internalUserError()) {
+            <div class="mt-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+              <div class="flex items-start gap-2">
+                <mat-icon class="text-red-600 text-sm flex-shrink-0 material-symbols-outlined">error</mat-icon>
+                <span class="flex-1">{{ internalUserError() }}</span>
+              </div>
+            </div>
+            }
+
+            <!-- Success Message for Created User -->
+            @if(internalUserCreated()) {
+            <div class="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
+              <div class="flex items-center">
+                <mat-icon class="text-green-400 mr-2 material-symbols-outlined">check_circle</mat-icon>
+                <div>
+                  <div class="text-sm font-medium text-green-600">
+                    Internal User Created & Assigned
+                  </div>
+                  <div class="text-xs text-green-700">
+                    {{ internalUserCreated()?.displayName }}
+                    ({{ internalUserCreated()?.email }})
+                  </div>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          }
+          <!-- Data Subject Auto-Assignment-->
+          @if(showDataSubjectAssignment()) {
+          <div class="mb-2">
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div class="flex items-center">
+                <mat-icon class="text-blue-600 mr-2 text-sm material-symbols-outlined">person</mat-icon>
+                <div>
+                  <div class="text-sm font-medium text-blue-900">
+                    @if(isExternalEmailDataSubject()) {
+                    Email matched Data Subject - Auto-assigned
+                    } @else if(isExternalEmailThirdParty()) {
+                    Email matched Third party - Auto-assigned
+                    } @else {
+                    Auto-assigned to Third party
+                    }
+                  </div>
+                  <div class="text-xs text-blue-700">
+                    {{ assignedDataSubjectUser }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- External User Email Input -->
+          @if(showExternalUserInput()) {
+          <div [class]="hasExternalEmailErrors() ? 'mb-9' : 'mb-2'">
+            @if(!externalUser()) {
+            <div class="flex gap-2 items-start">
+              <mat-form-field appearance="outline" class="flex-1 max-w-sm  mat-sm-input mat-mdc-mb-0">
+                <mat-label>External User Email</mat-label>
+                <input matInput formControlName="externalEmail" type="email" [disabled]="externalUserLoading()">
+                @if(taskForm.get('externalEmail')?.hasError('email') && taskForm.get('externalEmail')?.touched) {
+                <mat-error class="text-xs mt-1 block">Please enter a valid email address</mat-error>
+                }
+              </mat-form-field>
+
+              <loading-button [loading]="externalUserLoading()" [disabled]="!taskForm.get('externalEmail')?.value ||
+                           taskForm.get('externalEmail')?.hasError('email') ||
+                           externalUserLoading()" [loadingText]="'Processing...'" [type]="'primary'"
+                [showSpinnerOnly]="true" (onButtonClick)="onSubmitExternalEmail()">
+                @if (!externalUserLoading()) {
+                <mat-icon class="mr-1 material-symbols-outlined">person_add</mat-icon>
+                }
+                Create External User
+              </loading-button>
+            </div>
+
+            <!-- Error Message -->
+            @if(externalUserError()) {
+            <div class="mt-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+              <div class="flex items-start gap-2">
+                <mat-icon class="text-red-600 text-sm flex-shrink-0 material-symbols-outlined">error</mat-icon>
+                <span class="flex-1">{{ externalUserError() }}</span>
+              </div>
+            </div>
+            }
+            } @else {
+            <!--  External User Display -->
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <mat-icon class="text-blue-600 mr-2 text-sm material-symbols-outlined">person</mat-icon>
+                  <div>
+                    <div class="text-sm font-medium text-blue-900">
+                      @if(showThirdPartyMatchMessage()) {
+                      Email matched Third party - Auto-assigned
+                      } @else {
+                      External User Created & Assigned
+                      }
+                    </div>
+                    <div class="text-xs text-blue-700">
+                      {{ externalUser()?.email }}
+                    </div>
+                    @if(externalUser()?.name && externalUser()?.name !== externalUser()?.email) {
+                    <div class="text-xs text-blue-600 mt-1">
+                      {{ externalUser()?.name }}
+                    </div>
+                    }
+                  </div>
+                </div>
+                <button type="button" mat-icon-button class="text-blue-600 hover:bg-blue-100"
+                  (click)="clearExternalUser()" matTooltip="Clear selection and enter new email">
+                  <mat-icon class="text-lg material-symbols-outlined">edit</mat-icon>
+                </button>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Information Banner for External User -->
+      @if(isExternalUserSelected() && !isExternalEmailDataSubject()) {
+      <div class="grid grid-cols-12 gap-2 mb-4">
+        <div class="col-span-12">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 animate-in fade-in duration-200">
+            <div class="flex items-center">
+              <mat-icon class="text-blue-600 mr-1 text-sm material-symbols-outlined">info</mat-icon>
+              <span class="text-xs text-blue-800">
+                This task will be assigned to an external user.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+
+      <!-- Documents Section -->
+      @if(!shouldHideFileUpload() && !isRiskMitigation && !isQuestionTask && !isMeasureTask) {
+      <div class="grid grid-cols-12 gap-2 mb-3">
+        <div class="col-span-12">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Documents</label>
+          <div class="flex items-center gap-3 mb-3">
+            <div class="relative flex-1 max-w-sm">
+              <div class="relative">
+                <div
+                  class="w-full px-3 py-2.5 border border-gray-300 rounded text-sm bg-white cursor-pointer min-h-[44px] transition-all duration-200 ease-in-out focus:outline-none hover:border-blue-500 flex items-center justify-between"
+                  [class]="isDocumentAutocompleteOpen() ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-300'"
+                  (click)="toggleDocumentDropdown()" tabindex="0">
+
+                  <div class="flex-1 min-w-0">
+                    <span class="text-gray-500">Select documents...</span>
+                  </div>
+
+                  <div class="flex items-center gap-1 ml-2">
+
+                    <mat-icon class="text-gray-600 text-sm transition-transform duration-200 material-symbols-outlined"
+                      [class]="isDocumentAutocompleteOpen() ? 'transform rotate-180' : ''">
+                      keyboard_arrow_down
+                    </mat-icon>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Documents Dropdown Panel -->
+              <div
+                class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg transition-all duration-200"
+                [class]="isDocumentAutocompleteOpen() ? 'block animate-in fade-in slide-in-from-top-1 duration-150 max-h-80' : 'hidden'"
+                (click)="$event.stopPropagation()">
+
+                <!-- Documents List with Scroll Pagination -->
+                <div
+                  class="max-h-60 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 no-scrollbar"
+                  (scroll)="onDocumentScroll($event)" #documentScrollContainer>
+
+                  @if (availableDocuments().length === 0) {
+                  <div class="px-3 py-4 text-sm text-gray-500 italic text-center">
+                    No documents available
+                  </div>
+                  } @else {
+                  <!-- Document Options -->
+                  @for (document of availableDocuments(); track document.id) {
+                  <div
+                    class="px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors duration-150 border-b border-gray-50 last:border-b-0"
+                    [class]="isDocumentSelected(document.id) ? 'bg-blue-50' : ''"
+                    (click)="toggleDocumentSelection(document.id)">
+
+                    <div class="flex items-center space-x-3">
+                      <div class="flex items-center min-w-[24px]">
+                        <mat-checkbox [checked]="isDocumentSelected(document.id)"
+                          (change)="onDocumentSelectionChange(document.id, $event.checked)"
+                          (click)="$event.stopPropagation()" color="primary" class="transform scale-90">
+                        </mat-checkbox>
+                      </div>
+
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                          <mat-icon class="material-symbols-outlined file-icon text-primary">description</mat-icon>
+                          <span class="text-sm text-gray-900 truncate flex-1" [title]="document.name">
+                            {{ document.fullPath }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  }
+                  }
+
+                  @if(documentPaginationLoading()) {
+                  <div class="flex justify-center py-4">
+                    <mat-spinner diameter="24"></mat-spinner>
+                  </div>
+                  }
+                </div>
+
+                <!-- Actions Footer -->
+                @if (selectedDocumentCount() > 0) {
+                <div class="border-t border-gray-200 px-3 py-2 bg-gray-50">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">
+                      {{ selectedDocumentCount() }} selected
+                    </span>
+                    <div class="flex gap-2">
+                      <button type="button"
+                        class="text-sm text-red-600 hover:text-red-800 font-medium transition-colors duration-150 px-2 py-1 rounded hover:bg-red-50"
+                        (click)="clearAllSelectedDocuments($event)">
+                        Clear all
+                      </button>
+                      <button type="button"
+                        class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-150 px-2 py-1 rounded hover:bg-blue-50"
+                        (click)="closeDocumentDropdown()">
+                        Done
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                }
+              </div>
+
+              <div class="fixed inset-0 z-40 bg-transparent" [class]="isDocumentAutocompleteOpen() ? 'block' : 'hidden'"
+                (click)="closeDocumentDropdown()">
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              @if (selectedDocumentCount() > 0) {
+              <span class="text-sm text-gray-600">
+                {{ selectedDocumentCount() }} selected
+              </span>
+              } @else {
+              <span class="text-sm text-gray-500 whitespace-nowrap">
+                No documents selected
+              </span>
+              }
+            </div>
+          </div>
+
+          <div class="mt-2 p-2 bg-gray-50 rounded border min-h-[60px]">
+            @if (selectedDocumentCount() > 0 && !isDocumentAutocompleteOpen()) {
+            <div class="text-xs text-gray-600 mb-1">Selected documents:</div>
+            <div class="flex flex-wrap gap-1">
+              @for (document of selectedDocuments().slice(0, 5); track document.id) {
+              <span
+                class="inline-flex items-center px-2 py-1 rounded text-xs bg-white border border-gray-200 max-w-full">
+                <mat-icon
+                  class="material-symbols-outlined file-icon text-primary mr-1 flex-shrink-0">description</mat-icon>
+                <span [title]="document.fullPath" class="truncate min-w-0 flex-1">
+                  {{ document.fullPath || document.name }}
+                </span>
+                <button type="button" class="ml-1 p-0.5 pt-[6.5px] hover:bg-gray-100 rounded-full flex-shrink-0"
+                  (click)="removeDocumentSelection(document.id)" title="Remove">
+                  <mat-icon class="text-[12px] !text-[#1C2B70] material-symbols-outlined">close</mat-icon>
+                </button>
+              </span>
+              }
+              @if (selectedDocumentCount() > 5) {
+              <span
+                class="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-50 text-blue-700 border border-blue-200 flex-shrink-0">
+                +{{ selectedDocumentCount() - 5 }} more
+              </span>
+              }
+            </div>
+            } @else {
+            <div class="flex items-center justify-center h-full">
+              <span class="text-xs text-gray-400 italic">No documents selected</span>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- File Upload Section -->
+      @if(!shouldHideFileUpload()) {
+      <div class="grid grid-cols-12 gap-2 mb-4">
+        <div class="col-span-12">
+          <label class="block text-sm font-medium text-gray-700 mb-2">File Attachments</label>
+
+          @if (!task || uploadedFiles().length === 0) {
+          <div
+            class="w-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1C2B70] transition mt-1 py-3"
+            [class.border-blue-500]="isDragOver()" [class.bg-blue-50]="isDragOver()" fileDrop
+            (fileDropped)="onFileDropped($event)" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)">
+
+            <label class="w-full">
+              <div class="flex flex-col items-center justify-center p-2 cursor-pointer">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 mb-2 cursor-pointer
+         hover:border-[#1C2B70] hover:bg-[#E6E9F5] transition-colors duration-200">
+                  <mat-icon class="text-2xl text-gray-500 material-symbols-outlined">
+                    folder
+                  </mat-icon>
+                </div>
+
+                <p class="text-sm leading-tight mb-1">
+                  <span class="text-black font-medium">Click here</span> or drag files to upload
+                </p>
+                <p class="text-xs text-gray-600 leading-snug">
+                  Supported: PDF, DOC, DOCX, JPG, JPEG, PNG (max 5MB)
+                </p>
+              </div>
+              <input type="file" class="hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                (change)="onFileBrowse($event)" (click)="onclick($event)" />
+            </label>
+          </div>
+          }
+
+          @if (task && uploadedFiles().length > 0 && !isQuestionTask && !isMeasureTask) {
+          <div class="mb-3">
+            <button type="button" mat-stroked-button (click)="triggerFileUpload()" class="w-full">
+              <mat-icon class="mr-2 material-symbols-outlined">add</mat-icon>
+              Add More Files
+            </button>
+            <input title="File Upload" #fileInput type="file" class="hidden" multiple
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" (change)="onFileBrowse($event)" />
+          </div>
+          }
+
+          <!-- File Upload Progress Indicator -->
+          @if (fileUploadInProgress()) {
+          <div class="w-full px-4 my-3 flex items-center justify-center">
+            <div class="flex items-center gap-2 text-[#1C2B70]">
+              <mat-icon class="animate-spin material-symbols-outlined">refresh</mat-icon>
+              <span class="text-sm">Uploading files...</span>
+            </div>
+          </div>
+          }
+
+          <!-- Uploaded Files List -->
+          @if (uploadedFiles().length > 0) {
+          <div class="w-full px-4 my-3">
+            <p class="text-sm font-medium text-gray-900 mb-2">
+              {{ task ? 'Attached Files:' : 'Uploaded Files:' }}
+            </p>
+            @for (file of uploadedFiles(); track file.fileName; let i = $index) {
+            <div
+              class="grid grid-cols-[auto_1fr_auto_auto] items-center gap-2 py-2 border-b border-gray-200 last:border-b-0">
+              <mat-icon class="material-symbols-outlined file-icon text-primary">description</mat-icon>
+              <div class="flex-1 min-w-0">
+                <span class="text-sm truncate block" [matTooltip]="file.fileName" matTooltipClass="material-tooltip"
+                  matTooltipPosition="right">
+                  {{ file.fileName }}
+                </span>
+                <div class="flex items-center gap-2 mt-1">
+                  @if (file.file.size) {
+                  <span class="text-xs text-gray-500">{{ formatFileSize(file.file.size) }}</span>
+                  }
+                  @if (file.isExisting) {
+                  <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Existing</span>
+                  }
+                </div>
+              </div>
+              <button type="button" (click)="removeFile(i)"
+                class="flex items-center justify-center w-6 h-6 rounded-full hover:bg-red-50 transition-colors duration-200"
+                [disabled]="fileUploadInProgress()">
+                <mat-icon class="text-primary hover:text-red-500 delete-icon text-sm material-symbols-outlined"
+                  [class.text-gray-400]="fileUploadInProgress()">
+                  delete
+                </mat-icon>
+              </button>
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- Document Required Checkbox Section - Only visible in Edit mode -->
+      <!-- @if(task) {
+      <div class="grid grid-cols-12 gap-2 mb-4">
+        <div class="col-span-12">
+          <div class="flex items-center">
+            <mat-checkbox formControlName="documentRequired" color="primary" class="mr-2">
+            </mat-checkbox>
+            <label class="text-sm font-medium text-gray-700 cursor-pointer select-none"
+              (click)="toggleDocumentRequired()">
+              Document attachments are required for this task
+            </label>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-6">
+            Check this box if the assignee must provide documents during request verification
+          </p>
+        </div>
+      </div>
+      } -->
+
+
+      <!-- Information Banner for Data Request -->
+      <!-- @if(isDataRequestSelected()) {
+      <div class="grid grid-cols-12 gap-2 mb-4">
+        <div class="col-span-12">
+          <div
+            class="bg-custom-primary-50 border border-custom-primary-200 rounded-lg p-2 animate-in fade-in duration-200">
+            <div class="flex items-center">
+              <mat-icon class="text-custom-primary-600 mr-2 text-xs">info</mat-icon>
+              <span class="text-xs text-custom-primary-800">Documents and File attachments are not available for
+                data subject tasks.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      } -->
+
+    </form>
+    }
+  </div>
+  }
+</div>
+<div mat-dialog-actions class="flex justify-end items-center gap-3 px-6 py-4">
+  <div class="flex gap-3">
+
+    <!-- Data Subject Assignee - (Task Form) -->
+    @if (effectiveAssigneeType() === 'DATA_SUBJECT' && currentStep() === 0) {
+    <loading-button type="secondary" (onButtonClick)="closeDialog()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" [disabled]="!canProceedToNotification()" (onButtonClick)="handlePrimaryAction()">
+      Next
+    </loading-button>
+    }
+
+    <!-- Data Subject Assignee - (Notification Step) -->
+    @else if (effectiveAssigneeType() === 'DATA_SUBJECT' && currentStep() === 1) {
+    <loading-button type="secondary" (onButtonClick)="onPreviousStep()">
+      Back
+    </loading-button>
+    <loading-button type="primary" [loading]="submitLoading()" [disabled]="!canCreateTask()"
+      (onButtonClick)="onSubmit()">
+      {{ task ? 'Update Task' : 'Create Task' }}
+    </loading-button>
+    }
+
+    <!-- Internal/External Assignee - Direct Submit -->
+    @else {
+    <loading-button type="secondary" (onButtonClick)="closeDialog()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" [loading]="submitLoading()" [disabled]="!canCreateTask()"
+      (onButtonClick)="onSubmit()">
+      {{ task ? 'Update Task' : 'Create Task' }}
+    </loading-button>
+    }
+
+  </div>
+</div>
+}
+}

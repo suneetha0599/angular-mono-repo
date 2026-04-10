@@ -1,0 +1,171 @@
+<div class="d-flex flex-column h-100 overflow-hidden view-wrapper ">
+  <!-- Tab Navigation -->
+  <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100 " mat-align-tabs="start"
+    (selectedTabChange)="onTabChange($event)" [selectedIndex]="selectedTabIndex">
+    <!-- Risk Summary Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="text-sm font-medium">Risk Summary</span>
+      </ng-template>
+      <ng-container *ngTemplateOutlet="riskSummaryTemplate"></ng-container>
+    </mat-tab>
+
+    <!-- Assessment Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="text-sm font-medium">Assessment</span>
+      </ng-template>
+      <ng-container *ngTemplateOutlet="assessmentTemplate"></ng-container>
+    </mat-tab>
+
+
+    <!-- Risk and Mitigation Tab -->
+    <!-- <mat-tab>
+      <ng-template mat-tab-label>
+        <span class="text-sm font-medium">Risk and Measures</span>
+      </ng-template>
+      <ng-container *ngTemplateOutlet="riskMitigationTemplate"></ng-container>
+    </mat-tab> -->
+  </mat-tab-group>
+
+  <!-- Tab Content Templates -->
+  <ng-template #riskSummaryTemplate>
+    <div class="space-y-6">
+      <!-- Header Section -->
+      <div class="flex justify-end items-center mb-4">
+        <loading-button [loadingText]="'Raising...'" [type]="'primary'" [isFullWidth]="false"
+          (onButtonClick)="openRiskDialog()" aria-label="Raise risk">
+          <mat-icon class="mr-2 material-symbols-outlined">add</mat-icon>
+          Raise Risk
+        </loading-button>
+      </div>
+
+      <!-- Loading State -->
+      @if (isLoadingRisks()) {
+      <!-- Risk Table Shimmer -->
+      <div class="bg-white rounded-lg shadow">
+        <app-risk-table-shimmer></app-risk-table-shimmer>
+      </div>
+      } @else {
+      <!-- Risk Table -->
+      <div class="bg-white rounded-lg shadow">
+        <app-risk-table [risks]="risks()" [overallSummary]="overallRiskSummary()"
+          (riskDeleted)="onRiskDeleted($event)"></app-risk-table>
+      </div>
+
+      <!-- Empty State -->
+      @if (risks().length === 0) {
+      <div class="text-center py-12 bg-white rounded-lg shadow">
+        <div class="mx-auto max-w-md">
+          <mat-icon class="mx-auto h-12 w-12 text-gray-400 text-6xl material-symbols-outlined">assessment</mat-icon>
+          <h2 class="mt-4 text-lg font-medium text-gray-900">No Risks Identified</h2>
+          <p class="mt-2 text-gray-600">Start by raising your first risk to begin the risk assessment process.</p>
+          <button mat-raised-button color="primary" (click)="openRiskDialog()" class="mt-6">
+            <mat-icon class="mr-2 material-symbols-outlined">add</mat-icon>
+            Raise Risk
+          </button>
+        </div>
+      </div>
+      }
+      }
+    </div>
+  </ng-template>
+
+  <ng-template #assessmentTemplate>
+    @if(bpaId){
+    <app-assessments [bpaId]="bpaId" (onCreateNewAssessment)="onCreateAssessment()"></app-assessments>
+    }
+  </ng-template>
+
+
+  <ng-template #riskMitigationTemplate>
+    <app-risk-mitigation-tab-screen (openDrawer)="openDrawers()"></app-risk-mitigation-tab-screen>
+  </ng-template>
+
+</div>
+
+
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="requestLoading ? shimmerDataSource : dataSource" matSort
+    class="mat-elevation-z8 w-100 custom-table table" (matSortChange)="onSortChange($event)">
+    @for (header of tableHeaders; track header) {
+    <ng-container [matColumnDef]="header.columnDef" [stickyEnd]="header.stickyEnd ?? false">
+      <th mat-header-cell *matHeaderCellDef disableClear="true" class="title-small !text-center"
+        [class.sticky-cell]="header.stickyEnd"
+        [mat-sort-header]="!requestLoading && header.sortable ? header.columnDef : null">
+        <span class="text-grey title-small !text-center whitespace-nowrap">{{ header.headerName }}</span>
+      </th>
+      <td mat-cell *matCellDef="let row" class="whitespace-nowrap" [class.sticky-cell]="header.stickyEnd">
+        <ng-container *ngIf="requestLoading">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+        <ng-container *ngIf="!requestLoading">
+          @switch (header.key) {
+          @case (HEADER_STATUS) {
+          <div class="status p-2 d-flex align-items-center justify-content-center label-large"
+            [ngStyle]="{'background-color': getStatusColors(row.status), 'color': getStatusTextColors(row.status)}">
+            {{ getStatusText(row.status) }}
+          </div>
+          }
+          @case (HEADER_NAME) {
+          <span class="label-large text-primary pointer text-ellipsis" (click)="onClickName(row)">
+            {{ row[header.columnDef] }}
+          </span>
+          }
+          @case (HEADER_TRIGGER) {
+          @if (row.trigger?.length > 0) {
+          <button mat-button [matMenuTriggerFor]="detailMenu" class="p-0 m-0 text-left">
+            {{ row.trigger[0] }}
+            @if (row.trigger.length > 1) {
+            <ng-container>
+              ({{ row.trigger.length }})
+            </ng-container>
+            }
+          </button>
+
+          <mat-menu #detailMenu="matMenu" class="!bg-white">
+            <ul class="px-2 ms-3 mb-0 menu-more-detail">
+              @for (name of row.trigger; track name) {
+              <li class="mb-1 body-large">{{ name }}</li>
+              }
+            </ul>
+          </mat-menu>
+          } @else {
+          <span>-</span>
+          }
+          }
+
+          @case (HEADER_DATE) {
+          <span class="body-large">{{ row[header.columnDef] | date:'dd.MM.yyyy' }}</span>
+          }
+          @case (HEADER_ACTION) {
+          <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn" matTooltip="Actions">
+            <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+          </button>
+          <mat-menu class="action-panel" #actionMenu="matMenu">
+            <button mat-menu-item class="d-flex">
+              <mat-icon class="mat-md-icon text-primary my-auto material-symbols-outlined">edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item class="d-flex">
+              <mat-icon class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+          }
+          @default {
+          <span class="body-large text-ellipsis" [matTooltip]="row[header.columnDef]">
+            {{ row[header.columnDef] ? row[header.columnDef] : '-' }}
+          </span>
+          }
+          }
+        </ng-container>
+
+      </td>
+    </ng-container>
+    }
+    <!-- Rows -->
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true" class="bg-gray-100 title-small"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+  </table>
+</ng-template>

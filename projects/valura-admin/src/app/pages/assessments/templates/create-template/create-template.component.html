@@ -1,0 +1,102 @@
+<!-- <div class="d-flex flex-column h-100 overflow-hidden">
+  <div class="flex-1 overflow-auto p-3 scroll-w-0">
+    <form [formGroup]="templateForm">
+      <div class="flex flex-col gap-4 mb-2">
+        <div>
+          <p class="label-large mb-2">Template Name</p>
+          <mat-form-field appearance="outline" class="w-[400px] mat-sm-xl-input enabled-mat-input">
+            <input matInput formControlName="templateName" />
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="templateName.errors" [control]="templateName"
+                controlActualName="Template name">
+              </custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="w-[400px] ">
+          <p class="label-large mb-2">Description</p>
+           <app-custom-mat-textarea [minRows]="1" [maxRows]="5"
+              [control]="description">
+            </app-custom-mat-textarea>
+        </div>
+        <div>
+          <p class="label-large mb-2">Assessment Type</p>
+          <mat-form-field appearance="outline" class="w-[400px] mat-sm-xl-input mat-mdc-mb-0 enabled-mat-input">
+            <input matInput #searchAssessmentType formControlName="templateType"
+              (ngModelChange)="filterAssessmentTypes($event)" [matAutocomplete]="auto" />
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="assessmentDisplayName"
+              (optionSelected)="onAssessmentSelected($event)">
+              @for (types of filteredAssessmentTypes; track types) {
+              <mat-option [value]="types">{{ types.name }}</mat-option>
+              }
+              @if(searchAssessmentType.value && filteredAssesmentTypeIsEmpty) {
+              <mat-option [value]="searchAssessmentType.value"
+                (onSelectionChange)="addNewAssessmentTypes(searchAssessmentType.value)" class="add-option">
+                <span class="fw-semibold">+ Add </span>"{{ searchAssessmentType.value }}"
+              </mat-option>
+              }
+            </mat-autocomplete>
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="assessmentType.errors" [control]="assessmentType"
+                controlActualName="Assessment type">
+              </custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </div>
+</div> -->
+
+<div class="d-flex flex-column h-100 w-100 overflow-hidden pb-3">
+  <div class="flex-1 overflow-hidden p-3 bg-white border border-white w-100 scroll-w-0 d-flex flex-column">
+    <form [formGroup]="templateForm" class="d-flex flex-column flex-1 overflow-hidden">
+      <div class="grid grid-cols-12 mb-3 mt-2 flex-shrink-0">
+        <div class="flex-column col-span-4  me-2">
+          <mat-form-field appearance="outline" class="w-100 mat-sm-xl-input mat-mdc-mb-0 enabled-mat-input">
+            <mat-label class="label-large mb-2">Template Name</mat-label>
+            <input matInput formControlName="templateName" />
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="templateName.errors" [control]="templateName"
+                controlActualName="Template name">
+              </custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-span-4  flex-column">
+          <mat-form-field appearance="outline" class="w-100 mat-sm-xl-input mat-mdc-mb-0 enabled-mat-input">
+            <mat-label class="label-large mb-2">Template Type</mat-label>
+            <input matInput #searchAssessmentType formControlName="templateType"
+              (ngModelChange)="filterAssessmentTypes($event)" [matAutocomplete]="auto" />
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="assessmentDisplayName"
+              (optionSelected)="onAssessmentSelected($event)">
+              @for (types of filteredAssessmentTypes; track types) {
+              <mat-option [value]="types">{{ types.name }}</mat-option>
+              }
+              @if(searchAssessmentType.value && filteredAssesmentTypeIsEmpty) {
+              <mat-option [value]="searchAssessmentType.value"
+                (onSelectionChange)="addNewAssessmentTypes(searchAssessmentType.value)" class="add-option">
+                <span class="fw-semibold">+ Add </span>"{{ searchAssessmentType.value }}"
+              </mat-option>
+              }
+            </mat-autocomplete>
+            <mat-error>
+              <custom-mat-error class="inline-block" [errors]="templateType.errors" [control]="templateType"
+                controlActualName="Template type">
+              </custom-mat-error>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="grid grid-cols-12 min-h-0 overflow-hidden flex-1">
+        <div class="col-span-8 d-flex flex-column min-h-0">
+          <p class="label-large pb-2 flex-shrink-0">Description</p>
+          <app-custom-editor class="flex-1 d-flex flex-column "
+            [initialContent]="templateForm.get('description')?.value" [showInsertVariable]="false"
+            (contentChange)="onDescriptionChange($event)">
+          </app-custom-editor>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

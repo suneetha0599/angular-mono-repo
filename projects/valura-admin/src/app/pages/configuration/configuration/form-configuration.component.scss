@@ -1,0 +1,23 @@
+.fs-12 {
+  font-size: 12px !important;
+}
+
+
+
+::ng-deep .custom-square-icon-btn .mdc-icon-button__ripple,
+::ng-deep .custom-square-icon-btn .mat-mdc-button-persistent-ripple,
+::ng-deep .custom-square-icon-btn .mdc-icon-button__focus-ring,
+::ng-deep .custom-square-icon-btn .mdc-icon-button__touch {
+  border-radius: 12px !important;
+}
+
+::ng-deep .custom-square-icon-btn .mdc-evolution-icon-button__ripple {
+  border-radius: 12px !important;
+}
+
+.edit-wrapper {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  z-index: 1;
+}

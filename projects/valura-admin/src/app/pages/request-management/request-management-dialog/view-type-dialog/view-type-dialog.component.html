@@ -1,0 +1,196 @@
+<!-- Dialog Header -->
+<div class="flex justify-between items-center px-3 py-2">
+  <h3 mat-dialog-title class="my-0 p-0">
+    {{ dialogTitle }}
+  </h3>
+  <button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+    <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+  </button>
+</div>
+
+<!-- VERIFY IDENTITY / VERIFY THIRD PARTY -->
+@if (dialogType == RequestDialogTypes.VERIFY_DS_IDENTITY || dialogType == RequestDialogTypes.VERIFY_THIRD_PARTY) {
+@if (form) {
+<div mat-dialog-content class="m-0 p-3" [formGroup]="form">
+
+  @if (showVerificationStep) {
+  <div class="mt-2">
+    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0 body-medium">
+      <mat-label>Mode of Verification</mat-label>
+      <input title="modeOfVerification" matInput formControlName="modeOfVerification" />
+    </mat-form-field>
+  </div>
+
+  <div class="mt-3">
+    <app-custom-mat-textarea label="Reason" [control]="reasonControl" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+
+  }
+
+  <ng-container *ngTemplateOutlet="ngTemplateEmailTemplate"></ng-container>
+</div>
+}
+}
+
+<!-- CANCEL VALIDATION -->
+@if (dialogType === RequestDialogTypes.REQUEST_VALIDATION_CANCEL) {
+<div mat-dialog-content class="m-0 p-3">
+  @if (form) {
+
+  @if (showVerificationStep) {
+  <div class="grid gap-2" [formGroup]="form">
+    <app-custom-mat-textarea label="Reason" [control]="reasonControl" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+  }
+
+  <ng-container *ngTemplateOutlet="ngTemplateEmailTemplate"></ng-container>
+  }
+</div>
+}
+
+<!-- VALIDATE REQUEST -->
+@if (dialogType === RequestDialogTypes.VALIDATE_REQUEST) {
+<div mat-dialog-content class="m-0 p-3">
+  <ng-container *ngTemplateOutlet="ngTemplateEmailTemplate"></ng-container>
+</div>
+}
+
+<!-- ESCALATE REQUEST -->
+@if (dialogType === RequestDialogTypes.ESCALATE_REQUEST) {
+<div mat-dialog-content class="m-0 p-3">
+  @if (form) {
+
+  @if (showVerificationStep) {
+  <form [formGroup]="form" class="w-full">
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="w-full mat-md-input mat-mdc-mb-0">
+        <mat-label>User</mat-label>
+        <mat-select formControlName="toUserId">
+          @for (user of userMasterList; track user) {
+          <mat-option [value]="user.applicationUserId">
+            {{ user.displayName }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div>
+      <app-custom-mat-textarea label="Reason" [control]="reasonControl" [minRows]="1" [maxRows]="5">
+      </app-custom-mat-textarea>
+    </div>
+
+  </form>
+  }
+
+  <ng-container *ngTemplateOutlet="ngTemplateEmailTemplate"></ng-container>
+  }
+</div>
+}
+
+<!-- EXTEND PERIOD -->
+@if (dialogType === RequestDialogTypes.EXTEND_PERIOD) {
+<div mat-dialog-content class="m-0 p-3">
+  @if (form && showVerificationStep) {
+  <form [formGroup]="form" class="w-full">
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+        <mat-label>New Resolution Date</mat-label>
+        <input title="extensionDate" matInput [matDatepicker]="picker" formControlName="extensionDate"
+          [matDatepickerFilter]="dateFilter" readonly>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error>
+          <custom-mat-error class="inline-block" [errors]="extensionDateControl.errors" [control]="extensionDateControl"
+            controlActualName="New Resolution Date"></custom-mat-error>
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div>
+      <app-custom-mat-textarea label="Reason" [control]="reasonControl" [minRows]="1" [maxRows]="5">
+      </app-custom-mat-textarea>
+    </div>
+
+  </form>
+  }
+
+  <ng-container *ngTemplateOutlet="ngTemplateEmailTemplate"></ng-container>
+</div>
+}
+
+<!-- REOPEN REQUEST -->
+@if (dialogType === RequestDialogTypes.REOPEN_REQUEST) {
+<div mat-dialog-content class="m-0 p-3">
+  @if (form) {
+  <form [formGroup]="form" class="w-full">
+
+    <div class="mb-4">
+      <mat-checkbox formControlName="reopenFromInitial" class="!text-sm accent-blue-900 enabled-mat-checkbox">
+        Reopen from initial state
+      </mat-checkbox>
+    </div>
+
+    <div>
+      <app-custom-mat-textarea label="Reason" [control]="reasonControl" [minRows]="1" [maxRows]="5">
+      </app-custom-mat-textarea>
+    </div>
+
+  </form>
+
+  <ng-container *ngTemplateOutlet="ngTemplateEmailTemplate"></ng-container>
+  }
+</div>
+}
+
+<!--TASK REOPEN REQUEST -->
+@if (dialogType === RequestDialogTypes.TASK_REOPEN_REQUEST) {
+<div mat-dialog-content class="m-0 p-3">
+  @if (form) {
+  <form [formGroup]="form" class="w-full">
+    <div>
+      <app-custom-mat-textarea label="Reason" [control]="reasonControl" [minRows]="1" [maxRows]="5">
+      </app-custom-mat-textarea>
+    </div>
+  </form>
+
+  <ng-container *ngTemplateOutlet="ngTemplateEmailTemplate"></ng-container>
+  }
+</div>
+}
+
+<!-- FOOTER -->
+<div mat-dialog-actions class="flex justify-center">
+  <div class="flex w-full justify-end gap-2">
+
+    <loading-button type="secondary" (onButtonClick)="onNegativeButtonClick()">
+      {{ showNegativeButtonLabel }}
+    </loading-button>
+
+    @if (isFirstStep) {
+    <loading-button type="primary" (onButtonClick)="nextStep()" [disabled]="!canProceedToNext">
+      Next
+    </loading-button>
+    }
+    @else {
+    <loading-button type="primary" [loading]="submitLoading" (onButtonClick)="onSave()" [loadingText]="'Save'">
+      <span class="px-2">{{ positiveButtonLabel }}</span>
+    </loading-button>
+    }
+
+  </div>
+</div>
+
+<!-- EMAIL TEMPLATE -->
+<ng-template #ngTemplateEmailTemplate>
+  @if (showEmailStep) {
+  <app-email-template [emailTemplateForm]="emailTemplateForm" [renderedContent]="renderedContent"
+    [templateLoading]="templateLoading" [protectedVariables]="protectedVariables"
+    [recipientEmail]="recipientEmail.value">
+  </app-email-template>
+  }
+</ng-template>

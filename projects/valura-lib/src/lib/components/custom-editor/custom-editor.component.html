@@ -1,0 +1,178 @@
+<div class="editor-wrapper flex-1">
+  <div class="tiptap-toolbar">
+
+    <div class="toolbar-group">
+      <button type="button" class="toolbar-button" [disabled]="!canUndo()" (click)="undo()" title="Undo">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">undo</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" [disabled]="!canRedo()" (click)="redo()" title="Redo">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">redo</mat-icon>
+      </button>
+    </div>
+
+    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+    <div class="toolbar-group">
+      <mat-select class="toolbar-select font-select" [(value)]="selectedFontFamily"
+        (selectionChange)="onFontFamilyChange($event.value)" placeholder="Font" panelClass="custom-font-select-panel">
+        <mat-select-trigger [style.font-family]="selectedFontFamily">
+          {{ getFontFamilyLabel(selectedFontFamily) }}
+        </mat-select-trigger>
+        <mat-option *ngFor="let font of fontFamilies" [value]="font.value" [style.font-family]="font.value"
+          class="custom-font-option">
+          <div class="option-content">
+            <span class="option-text">{{ font.label }}</span>
+            <mat-icon *ngIf="selectedFontFamily === font.value"
+              class="checkmark-icon material-symbols-outlined">check</mat-icon>
+          </div>
+        </mat-option>
+      </mat-select>
+    </div>
+
+    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+    <div class="toolbar-group">
+      <mat-select class="toolbar-select size-select" [(value)]="selectedFontSize"
+        (selectionChange)="onFontSizeChange($event.value)" placeholder="Size" panelClass="custom-font-select-panel">
+        <mat-select-trigger>
+          {{ getFontSizeLabel(selectedFontSize) }}
+        </mat-select-trigger>
+        <mat-option *ngFor="let size of fontSizes" [value]="size.value" class="custom-font-option">
+          <div class="option-content">
+            <span class="option-text">{{ size.label }}</span>
+            <mat-icon *ngIf="selectedFontSize === size.value"
+              class="checkmark-icon material-symbols-outlined">check</mat-icon>
+          </div>
+        </mat-option>
+      </mat-select>
+    </div>
+
+    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+    <div class="toolbar-group">
+      <button type="button" class="toolbar-button" [class.is-active]="isActive('bold')" (click)="toggleBold()"
+        title="Bold">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_bold</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" [class.is-active]="isActive('italic')" (click)="toggleItalic()"
+        title="Italic">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_italic</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" [class.is-active]="isActive('underline')" (click)="toggleUnderline()"
+        title="Underline">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_underlined</mat-icon>
+      </button>
+    </div>
+
+    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+    <div class="toolbar-group">
+      <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('left')"
+        (click)="setTextAlign('left')" title="Align Left">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_left</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('center')"
+        (click)="setTextAlign('center')" title="Align Center">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_center</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('right')"
+        (click)="setTextAlign('right')" title="Align Right">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_right</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('justify')"
+        (click)="setTextAlign('justify')" title="Justify">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_justify</mat-icon>
+      </button>
+    </div>
+
+    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+    <div class="toolbar-group">
+      <button type="button" class="toolbar-button" [class.is-active]="isActive('bulletList')"
+        (click)="toggleBulletList()" title="Bullet List">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_list_bulleted</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" [class.is-active]="isActive('orderedList')"
+        (click)="toggleOrderedList()" title="Numbered List">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_list_numbered</mat-icon>
+      </button>
+    </div>
+
+    <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+    <div class="toolbar-group">
+      <button type="button" class="toolbar-button" (click)="outdent()" title="Decrease Indent">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_indent_decrease</mat-icon>
+      </button>
+      <button type="button" class="toolbar-button" (click)="indent()" title="Increase Indent">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_indent_increase</mat-icon>
+      </button>
+    </div>
+
+    <div class="toolbar-group" *ngIf="showLinkInsert || showImageUpload">
+      <button type="button" class="toolbar-button" [matMenuTriggerFor]="insertMenu" title="Insert">
+        <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">attach_file</mat-icon>
+      </button>
+      <mat-menu #insertMenu="matMenu" class="insert-menu">
+        <button mat-menu-item *ngIf="showLinkInsert" (click)="showLinkInputMenu()">
+          <mat-icon class="material-symbols-outlined">link</mat-icon>
+          <span>Link</span>
+        </button>
+        <button mat-menu-item *ngIf="showImageUpload" (click)="insertImage()">
+          <mat-icon class="material-symbols-outlined">image</mat-icon>
+          <span>Image</span>
+        </button>
+      </mat-menu>
+    </div>
+
+
+    <div class="toolbar-group" *ngIf="showInsertVariable">
+      <button type="button" class="toolbar-button variable-btn mt-1" [matMenuTriggerFor]="variableMenu"
+        title="Insert Variable">
+        <span class="variable-icon">&#123;X&#125;</span>
+      </button>
+      <mat-menu #variableMenu="matMenu" class="variable-menu">
+        <button mat-menu-item *ngFor="let variable of variables" (click)="insertVariableFromMenu(variable)">
+          {{ formatVariableName(variable) }}
+        </button>
+        <div *ngIf="variables.length === 0" class="no-variables">
+          No variables available
+        </div>
+      </mat-menu>
+    </div>
+  </div>
+
+
+<div class="editor-container-wrapper" style="position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column;">
+    <div #editorContainer class="tiptap-editor-container"></div>
+
+
+    <div *ngIf="showLinkInput" class="link-input-inline" [style.top]="linkInputPosition.top"
+      [style.left]="linkInputPosition.left">
+      <span class="link-input-label">Enter link:</span>
+      <input type="text" [(ngModel)]="linkInputUrl" placeholder="https://example.com"
+        (keydown.enter)="saveLinkFromInput()" (keydown.escape)="cancelLinkInput()">
+      <button class="link-input-btn" (click)="saveLinkFromInput()">Save</button>
+    </div>
+
+
+    <div *ngIf="showLinkBubble" #linkBubbleMenu class="link-bubble-menu" [style.top]="linkBubblePosition.top"
+      [style.left]="linkBubblePosition.left">
+      <div class="link-bubble-content">
+        <span class="link-bubble-label">Visit URL:</span>
+        <a [href]="linkBubbleUrl" target="_blank" class="link-bubble-url" (click)="$event.stopPropagation()">
+          {{ linkBubbleUrl }}
+        </a>
+        <button class="link-bubble-btn" (click)="editLink()">Edit</button>
+        <span class="link-bubble-divider">|</span>
+        <button class="link-bubble-btn" (click)="removeLink()">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>

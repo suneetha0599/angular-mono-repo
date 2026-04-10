@@ -1,0 +1,20 @@
+<h2 mat-dialog-title class="mb-0">Template Name Already Exists</h2>
+
+<div mat-dialog-content>
+    <p>Template name already exists. Do you want to rename it to '<b>{{data.suggestedName}}</b>'?</p>
+    <p>You can also manually change the template name below.</p>
+
+    <mat-form-field appearance="outline" class="w-100 mt-2 mat-md-input mat-mdc-mb-0">
+        <mat-label>Template Name</mat-label>
+        <input matInput [(ngModel)]="editedName" placeholder="Template Name" />
+    </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+    <loading-button type="secondary" class="me-2" (onButtonClick)="onCancel()">
+        No
+    </loading-button>
+    <loading-button (onButtonClick)="onRename()" [disabled]="!editedName">
+        Yes
+    </loading-button>
+</div>

@@ -1,0 +1,702 @@
+<div class="d-flex flex-column overflow-hidden create-task-drawer-wrapper">
+  <!-- Header -->
+  <div class="flex justify-between items-center px-6 py-2">
+    <div class="text-xl font-medium text-gray-900">{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</div>
+    <button mat-icon-button (click)="closeDrawer()" aria-label="Close drawer"
+      class="w-6 h-6 min-w-6 hover:bg-gray-100 rounded-full transition-colors duration-200">
+      <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+    </button>
+  </div>
+  <div class="border-t border-gray-200 "></div>
+
+  <!-- Form Body -->
+  <div #drawerScrollContainer class="flex-1 overflow-auto px-6 pt-3 pb-2">
+    @if(taskForm) {
+    <form [formGroup]="taskForm" class="w-full">
+
+      <!-- Choose Parameter Section (Risk context only, non-ASSESSMENT_TASK, non-ASSESSMENT_TASK_EDIT) -->
+      @if (isRiskContext && source !== 'ASSESSMENT_TASK' && source !== 'ASSESSMENT_TASK_EDIT' && !hideParameterFields) {
+      @if (!isEditMode || source === 'ASSESSMENT_TASK_EDIT') {
+      <div class="mb-1">
+        <mat-checkbox formControlName="chooseParameter" color="primary">Related Parameter</mat-checkbox>
+      </div>
+      }
+      @if (taskForm.get('chooseParameter')?.value) {
+      <div class="mb-3">
+        <label class="block text-sm font-medium text-gray-700 mb-lg-2">Choose parameter</label>
+        <div class="grid grid-cols-2 gap-4">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Select section</mat-label>
+            <mat-select #sectionSelect formControlName="sectionId" (selectionChange)="onRiskSectionChange($event.value)"
+              (openedChange)="onSectionDropdownOpened($event)">
+              @if (editFallbackSection) {
+              <mat-option [value]="editFallbackSection.id">{{ editFallbackSection.sectionName }}</mat-option>
+              }
+              @for (section of sections; track section.id) {
+              <mat-option [value]="section.id">
+                {{ section.sectionName || section.title }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Choose question</mat-label>
+            <mat-select #questionSelect formControlName="questionId"
+              (openedChange)="onQuestionDropdownOpened($event)">
+              @for (question of selectedSectionQuestions; track question.id) {
+              <mat-option [value]="question.id">
+                {{ getQuestionText(question.text) }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      }
+      }
+
+      <!-- ASSESSMENT_TASK / ASSESSMENT_TASK_EDIT controls -->
+      @if (isRiskContext && (source === 'ASSESSMENT_TASK' || source === 'ASSESSMENT_TASK_EDIT')) {
+      <div class="mb-3">
+        <mat-checkbox formControlName="chooseParameter" color="primary">Related Parameter</mat-checkbox>
+      </div>
+      @if (taskForm.get('chooseParameter')?.value) {
+                <label class="block text-sm font-medium text-gray-700 mb-2">Choose Parameter</label>
+      <div class="grid grid-cols-2 gap-3 mb-1">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Select Section</mat-label>
+          <mat-select #sectionSelect formControlName="sectionId" (selectionChange)="onTaskSectionChange($event.value)"
+            (openedChange)="onSectionDropdownOpened($event)">
+            @for (section of drawerTaskSections; track section.id) {
+            <mat-option [value]="section.id">{{ section.sectionName }}</mat-option>
+            }
+            @if (isLoadingTaskSections || isLoadingMoreSections) {
+            <mat-option disabled>Loading...</mat-option>
+            }
+          </mat-select>
+          @if (taskForm.get('sectionId')?.hasError('required') && taskForm.get('sectionId')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Choose Question</mat-label>
+          <mat-select #questionSelect formControlName="questionId"
+            (openedChange)="onQuestionDropdownOpened($event)">
+            @if (isLoadingTaskQuestions) {
+            <mat-option disabled>Loading...</mat-option>
+            } @else {
+            @for (question of taskAvailableQuestions; track question.id) {
+            <mat-option [value]="question.id">{{ getQuestionText(question.text) }}</mat-option>
+            }
+            }
+          </mat-select>
+          @if (taskForm.get('questionId')?.hasError('required') && taskForm.get('questionId')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      }
+
+      }
+
+      <!-- Title Field -->
+      <div class="pt-1" [class.mb-3]="taskForm.get('title')?.hasError('required') && taskForm.get('title')?.touched"
+        [class.mb-1]="!(taskForm.get('title')?.hasError('required') && taskForm.get('title')?.touched)">
+        <mat-form-field
+          appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Task Title</mat-label>
+          <input matInput formControlName="title" maxlength="100">
+          @if(taskForm.get('title')?.hasError('required') && taskForm.get('title')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Description Field -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description*</label>
+
+        <app-custom-editor [initialContent]="editorInitialContent" [showInsertVariable]="false"
+          placeholder="Enter task description..." (contentChange)="onDescriptionChange($event)"
+          (blur)="descriptionControl.markAsTouched()">
+        </app-custom-editor>
+
+        @if(taskForm.get('description')?.hasError('required') && taskForm.get('description')?.touched) {
+                  <mat-error class="text-xs mt-1">This field is mandatory</mat-error>
+
+        }
+      </div>
+
+      <!-- Due Date and Type Row -->
+      <div class="grid grid-cols-2 gap-4 mb-1">
+        <!-- Due Date -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Due Date</mat-label>
+            <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" [min]="isEditMode ? null : minToDateFilter"
+              placeholder="DD/MM/YYYY" readonly>
+            <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker">
+              <mat-icon matDatepickerToggleIcon class="material-symbols-outlined mat-md-icon">
+                calendar_month
+              </mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #dueDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+
+
+      @if (isRiskContext && (!hideParameterFields || source === 'ASSESSMENT_TASK_EDIT')) {
+      <div class="mb-3">
+        <mat-checkbox formControlName="linkToExistingRisk" color="primary">Create task for existing risk</mat-checkbox>
+      </div>
+      @if (taskForm.get('linkToExistingRisk')?.value) {
+      <div class="mb-3">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+          <mat-label>Risk ID</mat-label>
+          <mat-select #riskSelect formControlName="riskIdField"
+            (openedChange)="onRiskDropdownOpened($event)">
+            @if (effectiveRisks.length === 0 && !isLoadingMoreRisks) {
+            <mat-option disabled>No risks available</mat-option>
+            } @else {
+            @for (risk of effectiveRisks; track risk.riskId) {
+            <mat-option [value]="risk.riskId">R-{{ risk.riskId }} - {{ risk.riskTitle }}</mat-option>
+            }
+            @if (isLoadingMoreRisks) {
+            <mat-option disabled>Loading...</mat-option>
+            }
+            }
+          </mat-select>
+          @if (taskForm.get('riskIdField')?.hasError('required') && taskForm.get('riskIdField')?.touched) {
+          <mat-error>This field is mandatory</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      }
+      }
+
+
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <!-- Priority Selection -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+          <div class="flex gap-2">
+            @for(priority of priorityOptions; track i; let i = $index) {
+            <button type="button"
+              class="priority-chip px-4 py-2 border rounded text-base font-medium min-h-[40px] flex items-center justify-center label-large"
+              [ngClass]="
+                taskForm.get('priority')?.value === priority.value
+                  ? 'selected'
+                  : 'unselected'
+              " (click)="selectPriority(priority.value)">
+              <span class="checkmark-wrapper" [class.visible]="taskForm.get('priority')?.value === priority.value">
+                <mat-icon class="checkmark-icon material-symbols-outlined mat-md-icon">check</mat-icon>
+              </span>
+              <span class="label-large">{{ priority.label }}</span>
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- Level of Effort -->
+        <div class="pl-0">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Level Of Effort*</label>
+          <div class="flex flex-wrap gap-2">
+            @for(effort of effortLevels; track i; let i = $index) {
+            <button type="button"
+              class="effort-chip px-4 py-2 border rounded text-base font-medium min-h-[40px] flex items-center justify-center label-large"
+              [ngClass]="
+          (taskForm.get('effortLevel')?.value && taskForm.get('effortLevel')?.value === effort.value)
+            ? 'selected'
+            : 'unselected'
+        " (click)="selectEffortLevel(effort.value)">
+              <span class="checkmark-wrapper"
+                [class.visible]="taskForm.get('effortLevel')?.value && taskForm.get('effortLevel')?.value === effort.value">
+                <mat-icon class="checkmark-icon material-symbols-outlined mat-md-icon">check</mat-icon>
+              </span>
+              {{ effort.label }}
+            </button>
+            }
+          </div>
+          @if (taskForm.get('effortLevel')?.hasError('required') && taskForm.get('effortLevel')?.touched) {
+          <mat-error class="text-xs mt-1">This field is mandatory</mat-error>
+          }
+        </div>
+      </div>
+
+      <!-- Add Labels -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Add Labels</label>
+
+        <mat-form-field appearance="outline" class="w-full mat-sm-auto-input mat-mdc-mb-0">
+          <mat-chip-grid #labelChipGrid aria-label="Label selection">
+            @for (label of taskForm.get('labels')?.value || []; track $index; let i = $index) {
+            <mat-chip-row [removable]="true" (removed)="removeLabel(i)">
+              {{ getLabelName(label) }}
+              <button type="button" matChipRemove aria-label="Remove label">
+                <mat-icon class="delete-icn material-symbols-outlined mat-md-icon">close</mat-icon>
+              </button>
+            </mat-chip-row>
+            }
+          </mat-chip-grid>
+
+          <input #labelInput matInput [matChipInputFor]="labelChipGrid"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="false"
+            (matChipInputTokenEnd)="addTypedLabel($event)" [matAutocomplete]="autoLabels" [(ngModel)]="labelSearchTerm"
+            [ngModelOptions]="{standalone: true}" (ngModelChange)="onSearchLabels($event)"
+            placeholder="{{ (taskForm.get('labels')?.value?.length > 0) ? '' : 'Type to add new or select from list' }}"
+            autocomplete="off" />
+
+          <mat-autocomplete #autoLabels="matAutocomplete" (optionSelected)="selectLabel($event.option.value)"
+            (opened)="onLabelsDropdownOpened()" (closed)="onLabelsDropdownClosed()" class="labels-autocomplete-panel">
+            <!-- Loading State -->
+            @if (labelsLoading()) {
+            <mat-option disabled class="py-4">
+              <div class="flex items-center justify-center gap-2">
+                <mat-spinner diameter="20"></mat-spinner>
+                <span>Loading labels...</span>
+              </div>
+            </mat-option>
+            }
+
+            @else if (!labelsLoading() && filteredLabelsList.length === 0 && labelSearchTerm.trim()) {
+            <mat-option disabled>
+              <span class="text-gray-500 italic">No matching labels found</span>
+            </mat-option>
+            }
+
+            @else if (!labelsLoading() && filteredLabelsList.length === 0) {
+            <mat-option disabled>
+              <span class="text-gray-500 italic">No labels available</span>
+            </mat-option>
+            }
+
+            @else {
+            @for (label of filteredLabelsList; track label.id) {
+            <mat-option [value]="label">
+              <div class="flex items-center justify-between w-full">
+                <span>{{ label.name }}</span>
+                <!-- Optional: Show check if already selected -->
+                @if (isLabelSelected(label)) {
+                <mat-icon class="text-primary text-sm material-symbols-outlined">check</mat-icon>
+                }
+              </div>
+            </mat-option>
+            }
+            }
+          </mat-autocomplete>
+
+          <button mat-icon-button matSuffix tabindex="-1" type="button" (click)="openLabelsDropdown()"
+            matTooltip="Open labels list" [disabled]="labelsLoading()">
+            <mat-icon class="material-symbols-outlined mat-md-icon">
+              arrow_drop_down
+            </mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+      <!-- Assignee Section -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Assignee</label>
+
+        <!-- Assignee Type Radio Buttons -->
+        <div class="flex gap-4 mb-2">
+          <mat-radio-group formControlName="assigneeType" class="flex gap-4">
+            <mat-radio-button value="INTERNAL" class="text-sm">{{ isRiskContext ? 'Application user' : 'Internal'
+              }}</mat-radio-button>
+            <mat-radio-button value="EXTERNAL" class="text-sm">{{ isRiskContext ? 'External user' : 'External'
+              }}</mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Internal User Selection -->
+        @if(showInternalUserDropdown()) {
+        <div class="mb-2">
+          @if(!hasValidUserMasterList() && !internalUserCreated()) {
+          <div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2 mb-2">
+            <div class="flex items-center">
+              <mat-icon class="text-red-600 mr-1 text-sm material-symbols-outlined mat-md-icon">error</mat-icon>
+              Unable to load user list. Please refresh and try again.
+            </div>
+          </div>
+          }
+
+          <div class="flex gap-2 items-start w-full">
+            <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0"
+              [class.flex-1]="!showCreateInternalUser() || internalUserCreated()"
+              [style.flex]="showCreateInternalUser() && !internalUserCreated() ? '1 1 auto' : null"
+              [style.min-width]="showCreateInternalUser() && !internalUserCreated() ? '0' : null">
+              <mat-label>Search or Create Internal User</mat-label>
+              <input #internalUserInput matInput [formControl]="internalUserControl" [matAutocomplete]="internalAuto"
+                placeholder="Click to select or  search internal user" (keydown)="onInternalUserInputKeydown($event)"
+                (focus)="openInternalUserDropdown()" [attr.aria-label]="getDropdownAriaLabel()" autocomplete="off">
+
+              @if(internalUserControl.value && taskForm.get('assignee')?.value) {
+              <button type="button" matSuffix mat-icon-button (click)="clearInternalUser()">
+                <mat-icon class="material-symbols-outlined mat-md-icon">clear</mat-icon>
+              </button>
+              }
+              <mat-autocomplete #internalAuto="matAutocomplete" [displayWith]="displayInternalUser.bind(this)"
+                (optionSelected)="onInternalUserSelectedEnhanced($event)" (opened)="onInternalUserDropdownOpened()"
+                (closed)="onInternalUserDropdownClosed()">
+
+                @for(user of filteredInternalUsers(); track user.applicationUserId) {
+                <mat-option [value]="user">
+                  <div class="flex items-center justify-between w-full">
+                    <div>
+                      <span class="font-medium">
+                        @if(user.displayName) {
+                        {{ user.displayName }}
+                        } @else if(user.email) {
+                        {{ user.email }}
+                        } @else {
+                        User {{ user.applicationUserId }}
+                        }
+                      </span>
+                      @if(user.displayName && user.email) {
+                      <span class="text-sm text-gray-500 ml-2">{{ user.email }}</span>
+                      }
+                    </div>
+                  </div>
+                </mat-option>
+                }
+                @if(filteredInternalUsers().length === 0 && internalUserSearchTerm()) {
+                <mat-option disabled>
+                  <span class="text-gray-500">No users found</span>
+                </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <!-- Create Internal User Button -->
+            @if(showCreateInternalUser() && !internalUserCreated()) {
+            <loading-button [loading]="internalUserLoading()" [disabled]="internalUserLoading()" [type]="'primary'"
+              class="whitespace-nowrap flex-shrink-0" (onButtonClick)="onCreateInternalUser()">
+              @if (!internalUserLoading()) {
+              <mat-icon class="mr-1 material-symbols-outlined mat-md-icon">person_add</mat-icon>
+              }
+              Create Internal User
+            </loading-button>
+            }
+          </div>
+
+
+
+          <!-- Error Message -->
+          @if(internalUserError()) {
+          <div class="mt-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+            <div class="flex items-start gap-2">
+              <mat-icon
+                class="text-red-600 text-sm flex-shrink-0 material-symbols-outlined mat-md-icon">error</mat-icon>
+              <span class="flex-1">{{ internalUserError() }}</span>
+            </div>
+          </div>
+          }
+
+          <!-- Success Message for Created User -->
+          @if(internalUserCreated()) {
+          <div class="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
+            <div class="flex items-center">
+              <mat-icon class="text-green-600 mr-2 material-symbols-outlined mat-md-icon">check_circle</mat-icon>
+              <div>
+                <div class="text-sm font-medium text-green-900">
+                  Internal User Created & Assigned
+                </div>
+                <div class="text-xs text-green-700">
+                  {{ internalUserCreated()?.displayName }}
+                  ({{ internalUserCreated()?.email }})
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+
+          @if(taskForm.get('assignee')?.hasError('required') && taskForm.get('assignee')?.touched) {
+          <mat-error>
+            <custom-mat-error [errors]="assigneeControl.errors" [control]="assigneeControl"
+              controlActualName="Search or Select Internal User">
+            </custom-mat-error>
+          </mat-error>
+          }
+        </div>
+        }
+        <!-- Data Subject Auto-Assignment -->
+        @if(showDataSubjectAssignment()) {
+        <div class="mb-2">
+          <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center">
+              <mat-icon class="text-blue-600 mr-2 text-sm material-symbols-outlined">person</mat-icon>
+              <div>
+                <div class="text-sm font-medium text-blue-900">
+                  @if(isExternalEmailDataSubject()) {
+                  Email matched Data Subject - Auto-assigned
+                  } @else if(isExternalEmailThirdParty()) {
+                  Email matched Third party - Auto-assigned
+                  } @else {
+                  Auto-assigned to Third party
+                  }
+                </div>
+                <div class="text-xs text-blue-700">
+                  {{ assignedDataSubjectUser }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+
+        <!-- External User Selection -->
+        @if(showExternalUserInput()) {
+        <div class="mb-2">
+          <div class="flex gap-2 items-start w-full">
+            <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0"
+              [class.flex-1]="!showCreateExternalUser() || externalUserCreated()"
+              [style.flex]="showCreateExternalUser() && !externalUserCreated() ? '1 1 auto' : null"
+              [style.min-width]="showCreateExternalUser() && !externalUserCreated() ? '0' : null">
+              <mat-label>Search or Create External User</mat-label>
+              <input #externalUserInput matInput [formControl]="externalUserControl" [matAutocomplete]="externalAuto"
+                placeholder="Click to select or search external user" (keydown)="onExternalUserInputKeydown($event)"
+                autocomplete="off">
+
+              @if(externalUserControl.value && taskForm.get('assignee')?.value) {
+              <button type="button" matSuffix mat-icon-button (click)="clearExternalUser()">
+                <mat-icon class="material-symbols-outlined mat-md-icon">clear</mat-icon>
+              </button>
+              }
+              <mat-autocomplete #externalAuto="matAutocomplete" [displayWith]="displayExternalUser.bind(this)"
+                (optionSelected)="onExternalUserSelected($event)" (opened)="onExternalUserDropdownOpened()"
+                (closed)="onExternalUserDropdownClosed()">
+
+                @for(user of filteredExternalUsers(); track user.applicationUserId) {
+                <mat-option [value]="user">
+                  <div class="flex items-center justify-between w-full">
+                    <div>
+                      <span class="font-medium">
+                        @if(user.displayName) {
+                        {{ user.displayName }}
+                        } @else if(user.email) {
+                        {{ user.email }}
+                        } @else {
+                        User {{ user.applicationUserId }}
+                        }
+                      </span>
+                      @if(user.displayName && user.email) {
+                      <span class="text-sm text-gray-500 ml-2">{{ user.email }}</span>
+                      }
+                    </div>
+                  </div>
+                </mat-option>
+                }
+                @if(filteredExternalUsers().length === 0 && externalUserSearchTerm()) {
+                <mat-option disabled>
+                  <span class="text-gray-500">No users found</span>
+                </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <!-- Create External User Button -->
+            @if(showCreateExternalUser() && !externalUserCreated()) {
+            <loading-button [loading]="externalUserLoading()" [disabled]="externalUserLoading()" [type]="'primary'"
+              class="whitespace-nowrap flex-shrink-0" (onButtonClick)="onCreateExternalUser()">
+              @if (!externalUserLoading()) {
+              <mat-icon class="mr-1 material-symbols-outlined mat-md-icon">person_add</mat-icon>
+              }
+              Create External User
+            </loading-button>
+            }
+          </div>
+
+          <!-- Error Message -->
+          @if(externalUserError()) {
+          <div class="mt-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+            <div class="flex items-start gap-2">
+              <mat-icon
+                class="text-red-600 text-sm flex-shrink-0 material-symbols-outlined mat-md-icon">error</mat-icon>
+              <span class="flex-1">{{ externalUserError() }}</span>
+            </div>
+          </div>
+          }
+
+          <!-- Success Message for Created User -->
+          @if(externalUserCreated()) {
+          <div class="mt-2 bg-green-50 border border-green-200 rounded-lg p-3">
+            <div class="flex items-center">
+              <mat-icon class="text-green-600 mr-2 material-symbols-outlined mat-md-icon">check_circle</mat-icon>
+              <div>
+                <div class="text-sm font-medium text-green-900">
+                  External User Created & Assigned
+                </div>
+                <div class="text-xs text-green-700">
+                  {{ externalUserCreated()?.displayName }}
+                  ({{ externalUserCreated()?.email }})
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+
+          @if(taskForm.get('assignee')?.hasError('required') && taskForm.get('assignee')?.touched) {
+          <mat-error>
+            <custom-mat-error [errors]="assigneeControl.errors" [control]="assigneeControl"
+              controlActualName="Search or Select External User">
+            </custom-mat-error>
+          </mat-error>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Choose Information to Display (DSR context only) -->
+      @if (!isRiskContext) {
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Choose Information To Display</label>
+        <mat-form-field appearance="outline" class="w-full mat-sm-auto-input mat-mdc-mb-0">
+          <mat-chip-grid #displayInfoChipGrid aria-label="Display info selection">
+            @for (info of taskForm.get('displayInfo')?.value; track i; let i = $index) {
+            <mat-chip-row [removable]="true" (removed)="removeDisplayInfo(info)">
+              {{ getDisplayInfoName(info) }}
+              <button type="button" matChipRemove>
+                <mat-icon class="delete-icn material-symbols-outlined mat-md-icon">close</mat-icon>
+              </button>
+            </mat-chip-row>
+            }
+          </mat-chip-grid>
+
+          <!-- Hidden input for autocomplete trigger only -->
+          <input #displayInfoInput matInput [matChipInputFor]="displayInfoChipGrid"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="false"
+            [matAutocomplete]="autoDisplayInfo" [(ngModel)]="displayInfoSearchTerm"
+            [ngModelOptions]="{standalone: true}" style="position: absolute; left: -9999px; width: 1px; height: 1px;" />
+
+          <mat-autocomplete #autoDisplayInfo="matAutocomplete" class="display-info-autocomplete-panel"
+            panelClass="display-info-autocomplete-panel" (optionSelected)="onDisplayInfoOptionSelected($event)"
+            [autoActiveFirstOption]="false" (opened)="onDisplayInfoDropdownOpened()"
+            (closed)="onDisplayInfoDropdownClosed()">
+            @for (item of flattenedDisplayInfoOptions; track i; let i = $index) {
+            <mat-option [value]="item" [class.group-header-option]="item.isGroup"
+              [class.child-item-option]="!item.isGroup"
+              (click)="$event.stopPropagation(); handleDisplayInfoClick(item, $event)">
+              <div class="flex items-center w-full" [class.pl-6]="!item.isGroup">
+                @if(!item.isGroup) {
+                <mat-checkbox [checked]="isItemSelected(item.value)" (click)="$event.stopPropagation()"
+                  (change)="onDisplayInfoCheckboxChange(item, $event)" class="mr-2"></mat-checkbox>
+                }
+                <span [class.font-medium]="item.isGroup">{{ item.label }}</span>
+              </div>
+            </mat-option>
+            }
+          </mat-autocomplete>
+
+          <button mat-icon-button matSuffix tabindex="-1" type="button" (click)="openDisplayInfoDropdown($event)">
+            <mat-icon class="material-symbols-outlined mat-md-icon">arrow_drop_down</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+      }
+
+      <!-- File Upload Section -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">{{ isRiskContext ? 'Add Attachment' : 'Add
+          Attachments' }}</label>
+
+        <div
+          class="w-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#1C2B70] transition mt-1 py-3"
+          [class.border-blue-500]="isDragOver()" [class.bg-blue-50]="isDragOver()" (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)" (drop)="onFileDrop($event)">
+
+          <label class="w-full">
+            <div class="flex flex-col items-center justify-center p-2 cursor-pointer">
+              <div
+                class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 mb-2 cursor-pointer hover:border-[#1C2B70] hover:bg-[#E6E9F5] transition-colors duration-200">
+                <mat-icon class="text-2xl text-gray-500 material-symbols-outlined mat-md-icon">folder</mat-icon>
+              </div>
+              <p class="text-sm leading-tight mb-1">
+                <span class="text-black font-medium">Click here</span> or drag files to upload
+              </p>
+              <p class="text-sm text-gray-600 leading-snug">
+                @if (isRiskContext) {
+                Supported Format: SVG, JPG, PNG (30mb each)
+                } @else {
+                Supported: PDF, DOC, DOCX, JPG, JPEG, PNG (max 5MB)
+                }
+              </p>
+            </div>
+            <input type="file" class="hidden" multiple
+              [accept]="isRiskContext ? '.svg,.jpg,.png' : '.pdf,.doc,.docx,.jpg,.jpeg,.png'"
+              (change)="onFileSelect($event)" />
+          </label>
+        </div>
+
+        <!-- File Upload Progress Indicator -->
+        @if (fileUploadInProgress()) {
+        <div class="w-full px-4 my-3 flex items-center justify-center">
+          <div class="flex items-center gap-2 text-[#1C2B70]">
+            <mat-icon class="animate-spin material-symbols-outlined mat-md-icon">refresh</mat-icon>
+            <span class="text-sm">Uploading files...</span>
+          </div>
+        </div>
+        }
+
+        <!-- Uploaded Files List -->
+        @if (uploadedFiles().length > 0) {
+        <div class="w-full px-4 my-2 mt-3">
+          <p class="text-sm font-medium text-gray-900 mb-2">
+            Uploaded Files:
+          </p>
+
+          @for (file of uploadedFiles(); track i; let i = $index) {
+          <div class="grid grid-cols-[auto_1fr_auto] items-center gap-2 py-2 border-b border-gray-200 last:border-b-0">
+            <mat-icon class="material-symbols-outlined file-icon text-primary mat-md-icon">
+              description
+            </mat-icon>
+
+            <div class="flex-1 min-w-0">
+              <span class="text-sm truncate block" [matTooltip]="file.fileName" matTooltipClass="material-tooltip"
+                matTooltipPosition="right">
+                {{ file.fileName }}
+              </span>
+
+              @if (file.fileSize) {
+              <span class="text-sm text-gray-500">
+                {{ formatFileSize(file.fileSize) }}
+              </span>
+              }
+            </div>
+
+            <button type="button" (click)="removeFile($index)"
+              class="flex items-center justify-center w-6 h-6 rounded-full hover:bg-red-50 transition-colors duration-200"
+              [disabled]="fileUploadInProgress()">
+              <mat-icon
+                class="text-primary hover:text-red-500 delete-icon text-sm material-symbols-outlined mat-md-icon"
+                [class.text-gray-400]="fileUploadInProgress()">
+                delete
+              </mat-icon>
+            </button>
+          </div>
+          }
+        </div>
+        }
+
+      </div>
+
+    </form>
+    }
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="px-6 py-2 bg-white">
+    <div class="flex justify-end gap-3">
+      <loading-button type="secondary" (onButtonClick)="closeDrawer()">
+        Cancel
+      </loading-button>
+      <loading-button type="primary" [loading]="submitLoading()"
+        [disabled]="!taskForm.valid || fileUploadInProgress() || (isEditMode && !hasFormChanges)"
+        (onButtonClick)="onSave()">
+        {{ isEditMode ? 'Update' : 'Save' }}
+      </loading-button>
+    </div>
+  </div>
+</div>

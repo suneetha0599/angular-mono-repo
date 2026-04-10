@@ -1,0 +1,62 @@
+@if (!loading && dataSource.data.length === 0) {
+<item-not-found [imgHeight]="'80px'"></item-not-found>
+} @else {
+<div class="table-wrapper">
+  <table class="mat-elevation-z8 w-100 custom-table table table-layout-fixed" mat-table
+    [dataSource]="loading ? shimmerRows : dataSource" matSort (matSortChange)="onSortChange($event)">
+    @for (col of columns; track col.columnDef) {
+    <ng-container [matColumnDef]="col.columnDef">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header [ngClass]="{
+          'action-header': col.columnDef === 'action'
+        }" class="px-4 title-small whitespace-nowrap role-name-col" [style.width]="getColumnWidth(col)">
+        <span class="text-grey title-small">
+          {{ col.headerName ? col.headerName : "-" }}
+        </span>
+      </th>
+      <td mat-cell *matCellDef="let row" [ngClass]="{ 'action-cell': col.columnDef === 'action' }"
+        class="px-4 whitespace-nowrap role-name-col" [style.width]="getColumnWidth(col)">
+        @if (col.columnDef === 'action') {
+        <ng-container *ngIf="!loading">
+          <button mat-icon-button class="more-actions-btn me-1" [disabled]="!formElementFullAcess"
+            (click)="onEdit(row, key)">
+            <mat-icon class="mat-md-icon material-symbols-outlined">edit</mat-icon>
+          </button>
+          <button *ngIf="key === FormElementsConfig.THIRD_PARTY_ROLE || key === FormElementsConfig.CHANNEL"
+            mat-icon-button class="more-actions-btn" [disabled]="!formElementFullAcess" (click)="onDelete(row, key)">
+            <mat-icon class="mat-md-icon material-symbols-outlined">
+              delete
+            </mat-icon>
+          </button>
+          @if (key !== FormElementsConfig.REQUESTER_INFO && key !==
+          FormElementsConfig.THIRD_PARTY_ROLE && key !== FormElementsConfig.CHANNEL) {
+          <button mat-icon-button class="more-actions-btn" [disabled]="!formElementFullAcess"
+            (click)="onToggleView(row, key)">
+            <mat-icon class="mat-md-icon material-symbols-outlined">
+              {{row.displayInForm ? "visibility" : "visibility_off"}}
+            </mat-icon>
+          </button>
+          }
+        </ng-container>
+        <ng-container *ngIf="loading">
+          <div class="shimmer-line shimmer-small"></div>
+        </ng-container>
+        } @else {
+        <ng-container *ngIf="!loading">
+          <div class="d-flex">
+            <span [appEllipsisTooltip]="row[col.columnDef]" [colorType]="'default'" [matTooltip]="row[col.columnDef]"
+              matTooltipPosition="below" matTooltipClass="material-tooltip">
+            </span>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="loading">
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+        }
+      </td>
+    </ng-container>
+    }
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</div>
+}

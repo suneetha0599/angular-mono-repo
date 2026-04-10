@@ -1,0 +1,102 @@
+<div class="discussion-log-tab d-flex flex-column w-100 h-100">
+  <div class="filter-tabs-wrapper">
+    <div class="filter-tabs-group">
+      <button class="filter-tab" [class.filter-tab--active]="activeFilter === 'ALL'" (click)="setFilter('ALL')">
+        <mat-icon *ngIf="activeFilter === 'ALL'" class="material-symbols-outlined">check</mat-icon>
+        All
+      </button>
+      <button class="filter-tab" [class.filter-tab--active]="activeFilter === 'REMARK'" (click)="setFilter('REMARK')">
+        <mat-icon *ngIf="activeFilter === 'REMARK'" class="material-symbols-outlined">check</mat-icon>
+        Remarks
+      </button>
+      <button class="filter-tab" [class.filter-tab--active]="activeFilter === 'RESPONSE'"
+        (click)="setFilter('RESPONSE')">
+        <mat-icon *ngIf="activeFilter === 'RESPONSE'" class="material-symbols-outlined">check</mat-icon>
+        Responses
+      </button>
+    </div>
+  </div>
+  <div #scrollContainer
+    class="messages-scroll-container flex-1 overflow-y-auto p-1 bg-white m-3 mt-1 mb-0 custom-scrollbar"
+    (scroll)="onScroll($event)">
+
+
+    @if (isLoadingConversation && conversationMessages.length === 0) {
+    <div class="space-y-4 p-3">
+      <div *ngFor="let item of [1,2,3,4]" class="shimmer-message-card">
+        <div class="shimmer-message-header">
+          <div class="shimmer-circle"></div>
+          <div class="shimmer-text shimmer-text-short"></div>
+          <div class="shimmer-text shimmer-text-badge"></div>
+          <div class="shimmer-text shimmer-text-tiny ml-auto"></div>
+        </div>
+        <div class="shimmer-message-body">
+          <div class="shimmer-text shimmer-text-long"></div>
+          <div class="shimmer-text shimmer-text-medium"></div>
+        </div>
+      </div>
+    </div>
+    }
+
+
+    @else if (conversationMessages.length === 0 && !isLoadingConversation) {
+    <div class="flex items-center justify-center h-full">
+      <p class="text-gray-400 text-sm">No threads added yet</p>
+    </div>
+    }
+
+
+    @else {
+    <div class="messages-list">
+      @for (message of conversationMessages; track message.id) {
+      <div class="msg-card" [class.msg-card--remark]="message.discussionType === 'REMARK'"
+        [class.msg-card--response]="message.discussionType === 'RESPONSE'" [class.msg-card--clickable]="!isNavigating"
+        (click)="onMessageClick(message)">
+
+        <div class="msg-header">
+          <span class="msg-sender">{{ message.senderName }}</span>
+          <span class="msg-badge" [class.msg-badge--remark]="message.discussionType === 'REMARK'"
+            [class.msg-badge--response]="message.discussionType === 'RESPONSE'">
+            {{ message.discussionType === 'REMARK' ? 'Remark' : 'Response' }}
+          </span>
+          <span *ngIf="message.sourceType" class="msg-badge msg-badge--source">
+
+            <ng-container
+              *ngIf="message.sourceType === AssessmentAttachedTo.ASSESSMENT_QUESTION|| message.sourceType === AssessmentAttachedTo.ASSESSMENT_VENDOR_QUESTION">
+              Section {{ message.sectionDisplayOrder }} | Q {{ message.questionDisplayOrder }}
+            </ng-container>
+            <ng-container
+              *ngIf="message.sourceType === AssessmentAttachedTo.ASSESSMENT_RISK || message.sourceType ===AssessmentAttachedTo.ASSESSMENT_VENDOR_RISK">
+              R - {{ message.sourceId }}
+            </ng-container>
+            <ng-container
+              *ngIf="message.sourceType === AssessmentAttachedTo.ASSESSMENT_TASK || message.sourceType === AssessmentAttachedTo.ASSESSMENT_VENDOR_TASK">
+              T - {{message.sourceId }}
+            </ng-container>
+          </span>
+          <span class="msg-time">{{ message.createdAt | date: 'dd MMM yyyy, hh:mm a' }}</span>
+        </div>
+
+        <div *ngIf="message.message" class="msg-body message-content" [innerHTML]="message.message"></div>
+        <div *ngIf="message.attachments && message.attachments.length > 0" class="msg-attachments">
+          <div *ngFor="let attachment of message.attachments" class="msg-attachment"
+            (click)="downloadAttachment($event, attachment)">
+            <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+            <span>{{ attachment.fileName }}</span>
+          </div>
+        </div>
+
+      </div>
+      }
+
+
+      @if (isLoadingMore) {
+      <div class="flex justify-center py-4">
+        <mat-spinner diameter="24"></mat-spinner>
+      </div>
+      }
+    </div>
+    }
+
+  </div>
+</div>

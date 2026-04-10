@@ -1,0 +1,270 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3">
+    @if(hasApiError){
+    <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+    }
+    @else{
+    <div>
+        <div class="grid grid-cols-12 mb-3">
+            @if(loading) {
+            <div class="col-span-6 animate-pulse me-2">
+                <div class="h-5 w-100 shimmer rounded"></div>
+            </div>
+            <div class="col-span-6 animate-pulse">
+                <div class="h-5 w-100 shimmer rounded"></div>
+            </div>
+            }
+            @if(!loading && templateDetails){
+            <div class="col-span-6">
+                <div class="my-auto flex items-center gap-2">
+                    @if(routeSource){
+                    <button (click)="goBack()"
+                        class="w-6 h-6 flex !rounded-lg items-center justify-center me-1 text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+                        <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+                    </button>
+                    }
+                    <span class="headline-medium truncate whitespace-nowrap overflow-hidden"
+                        [appEllipsisTooltip]="templateDetails.template.name" [maxWidth]="0"
+                        [matTooltip]="templateDetails.template.name" matTooltipPosition="below"
+                        matTooltipClass="material-tooltip">
+                    </span>
+                    <div class=" border border-primary  text-primary rounded-full p-1 body-small">{{publishText}}</div>
+                    <div class="flex items-center">
+                        <button [disabled]="disablePrevBtn" mat-icon-button color="primary"
+                            class="medium-icon d-flex my-auto" (click)="goToPrevRequest()"
+                            [ngClass]="disablePrevBtn ? 'text-gray-400' : 'text-primary'">
+                            <mat-icon class=" material-symbols-outlined">chevron_left</mat-icon>
+                        </button>
+                    </div>
+                    <div class="flex items-center">
+                        <button [disabled]="disableNextBtn" mat-icon-button color="primary"
+                            class="medium-icon d-flex my-auto" (click)="goToNextRequest()"
+                            [ngClass]="disableNextBtn ? 'text-gray-400' : 'text-primary'">
+                            <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-6">
+                <div class="d-flex gap-2 justify-end align-items-center">
+                    @if(editAssessmentTemplate){
+                    @if(isDraft) {
+                    <loading-button type="secondary" (onButtonClick)="onSave()" [loading]="isSubmitLoading"
+                        [loadingText]="'Saving...'">
+                        Publish
+                    </loading-button>
+                    <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn pt-1" (click)="openEdit()">
+                        <mat-icon color="primary" class="text-primary material-symbols-outlined">edit</mat-icon>
+                    </button>
+                    }
+                    <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn pt-1"
+                        (click)="deleteTemplate()">
+                        <mat-icon color="pimary" class="text-primary material-symbols-outlined">delete</mat-icon>
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    <div class="flex main-wrapper overflow-hidden position-relative border border-[#EEEEEE] rounded h-100 ">
+        <div class="col w-100 h-100 overflow-hidden bg-white border border-white   ">
+            <div class="relative  h-full ">
+                @if(loading){
+                <div class="p-3 animate-pulse">
+                    <div class="border rounded-md bg-gray-50 p-3 mb-3">
+                        <div class="grid grid-cols-12">
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-3 gap-y-2">
+                                    <div class="h-4 w-20 shimmer rounded"></div>
+                                    <div class="h-4 w-24 shimmer rounded"></div>
+                                    <div class="h-4 w-24 shimmer rounded"></div>
+                                    <div class="h-5 w-24 shimmer rounded"></div>
+                                    <div class="h-5 w-28 shimmer rounded"></div>
+                                    <div class="h-5 w-32 shimmer rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-4 w-24 shimmer rounded mb-2"></div>
+                        <div class="h-4 w-full shimmer rounded mb-1"></div>
+                        <div class="h-4 w-5/6 shimmer rounded"></div>
+                    </div>
+                    <div class="grid grid-cols-4 mt-4">
+                        <div class="col-span-6">
+                            <div class="grid grid-cols-2 gap-x-10.5 gap-y-2">
+                                <div class="h-4 w-20 shimmer rounded"></div>
+                                <div class="h-4 w-20 shimmer rounded"></div>
+                                <div class="h-5 w-32 shimmer rounded"></div>
+                                <div class="h-5 w-28 shimmer rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-4 w-16 shimmer rounded mb-2"></div>
+                        <div class="flex gap-2">
+                            <div class="h-7 w-20 shimmer rounded-full"></div>
+                            <div class="h-7 w-24 shimmer rounded-full"></div>
+                            <div class="h-7 w-16 shimmer rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+                }
+                @else {
+                <div class="p-3 col w-100 h-100 overflow-auto scroll-w-0">
+                    <div class="border rounded-md bg-gray-50 p-3 mb-3">
+                        <div class="grid grid-cols-12">
+                            <div class="col-span-2 label-small text-[#767676]">Template ID</div>
+                            <div class="col-span-2 label-small text-[#767676]">Created On</div>
+                            <div class="col-span-3 label-small text-[#767676]">Created By</div>
+                        </div>
+                        <div class="grid grid-cols-12">
+                            <div class="col-span-2 body-large">
+                                @if(isDraft){
+                                <p class="body-large !mb-0">-</p>
+                                }
+                                @else{
+                                <p class="body-large !mb-0"
+                                    [appEllipsisTooltip]="templateDetails?.template?.templateId  ?? '' "
+                                    [matTooltip]="templateDetails?.template?.templateId" matTooltipPosition="below"
+                                    matTooltipClass="material-tooltip" [maxWidth]="150">
+                                </p>
+                                }
+                            </div>
+                            <div class="col-span-2 body-large">
+                                {{ templateDetails?.createdDate }}
+                            </div>
+                            <div class="col-span-3">
+                                <div class="d-flex pe-2">
+                                    <p class="body-large !mb-0 body-large"
+                                        [appEllipsisTooltip]="templateDetails?.createdByUserName ?? '' "
+                                        [matTooltip]="templateDetails?.createdByUserName" matTooltipPosition="below"
+                                        matTooltipClass="material-tooltip">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 label-small text-[#767676] mb-1">
+                        Template Description
+                    </div>
+                    <div class="body-large" [innerHTML]="(templateDetails?.template?.description || 'N/A') | safeHtml">
+                    </div>
+                    @if(!isDraft && editAssessmentTemplate){
+                    <div class="mt-4 label-small text-[#767676]">
+                        Status
+                    </div>
+                    <div class="body-large d-flex align-items-center gap-2">
+                        <span>{{ templateDetails?.status || 'N/A' }}</span>
+                        <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn"
+                            (click)="openEditStatus()">
+                            <mat-icon color="primary" class="text-primary material-symbols-outlined mat-md-icon">
+                                edit
+                            </mat-icon>
+                        </button>
+                    </div>
+                    }
+                    <div class="mt-4 label-small text-[#767676]">
+                        Template Type
+                    </div>
+                    <button class="!bg-[#E5F6FD] label-small !rounded p-2 mt-2">
+                        Type : {{templateDetails?.typeName || 'N/A'}}
+                    </button>
+                </div>
+                }
+            </div>
+        </div>
+        <div class="w-[380px] h-100 overflow-auto scroll-w-0">
+            @if (loading) {
+            <div class="flex flex-col h-full overflow-hidden bg-white">
+                <div class="flex-[55] flex flex-col p-3 animate-pulse">
+                    <div class="h-5 w-40 shimmer rounded mb-4"></div>
+                    <div class="border rounded-md bg-gray-50 p-3 mb-3">
+                        <div class="h-5 w-32 shimmer rounded mb-2"></div>
+                        <div class="h-4 w-40 shimmer rounded mb-1"></div>
+                        <div class="h-4 w-28 shimmer rounded"></div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="h-3 w-20 shimmer rounded mb-1"></div>
+                            <div class="h-4 w-24 shimmer rounded"></div>
+                        </div>
+                        <div>
+                            <div class="h-3 w-24 shimmer rounded mb-1"></div>
+                            <div class="h-4 w-28 shimmer rounded"></div>
+                        </div>
+                        <div>
+                            <div class="h-3 w-24 shimmer rounded mb-1"></div>
+                            <div class="h-4 w-full shimmer rounded mb-1"></div>
+                            <div class="h-4 w-5/6 shimmer rounded"></div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-3 w-24 shimmer rounded mb-2"></div>
+                        @for (i of [1,2,3]; track i) {
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <div class="flex items-center gap-2">
+                                <div class="h-5 w-5 shimmer rounded"></div>
+                                <div class="h-4 w-32 shimmer rounded"></div>
+                            </div>
+                            <div class="h-3 w-16 shimmer rounded"></div>
+                        </div>
+                        }
+                    </div>
+                </div>
+                <div class="flex-[45] flex flex-col p-3">
+                    <div class="h-5 w-36 shimmer rounded mb-4"></div>
+                    @for (i of [1,2,3]; track i) {
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="h-5 w-5 shimmer rounded"></div>
+                            <div class="h-4 w-40 shimmer rounded"></div>
+                        </div>
+                        <div class="h-3 w-16 shimmer rounded"></div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+            @else {
+            <div class="flex justify-between">
+                <div class="label-large m-3">Form Information</div>
+                <button class="shadow-none bg-transparent mat-button" (click)="onPreview()">
+                    <div class="label-large m-3 text-primary">Preview</div>
+                </button>
+            </div>
+            <div class="flex flex-column bg-white border border-white rounded overflow-hidden p-3 m-3 my-0 scroll-w-0">
+                <div class="label-medium">
+                    Section
+                </div>
+                <div class="headline-large">
+                    {{templateDetails.totalSection || 0}}
+                </div>
+            </div>
+            <div
+                class="flex flex-column bg-white border border-white rounded overflow-hidden p-3 m-3 mt-2 my-0 scroll-w-0">
+                <div class="label-medium">
+                    Questions
+                </div>
+                <div class="headline-large">
+                    {{templateDetails.totalQuestion || 0}}
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    }
+</div>
+
+<ng-template #errorLoading>
+    <div class="d-flex flex-column rounded overflow-hidden h-screen bg-white p-2 mt-3 justify-center">
+        <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    </div>
+</ng-template>
+
+<mat-drawer-container class="drawer-container" [hasBackdrop]="true" autosize>
+    <mat-drawer #templateTriggerDrawer mode="over" position="end" class="task-edit-drawer" [disableClose]="true">
+        <app-trigger-drawer [editData]="selectedEditPayload" [assessmentSource]="assessmentSource"
+            (onClose)="templateTriggerDrawer.close()"></app-trigger-drawer>
+    </mat-drawer>
+</mat-drawer-container>

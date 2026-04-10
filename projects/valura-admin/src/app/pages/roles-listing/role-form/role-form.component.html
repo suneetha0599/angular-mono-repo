@@ -1,0 +1,124 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+    <div class="p-4 pb-0">
+        <div class="flex justify-between">
+            <div class="flex">
+                <button (click)="goBack() "
+                    class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200 ">
+                    <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+                </button>
+                <div class="headline-medium -mt-1 ml-1.5">{{ pageTitle }}</div>
+                <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                    (click)="goToPrevRequest()">
+                    <mat-icon class="material-symbols-outlined"
+                        [ngClass]="disablePrevBtn ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+                </button>
+                <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                    (click)="goToNextRequest()" [ngClass]="disableNextBtn ? '!text-gray-400' : 'text-primary'">
+                    <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isDataLoading || initialDataLoading" class="p-4 flex-1 min-h-0">
+        <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden">
+            <div class="p-6">
+                <div class="mb-3">
+                    <div class="shimmer shimmer-section-title mb-2"></div>
+                    <div class="w-[30%]">
+                        <div class="shimmer shimmer-input"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="shimmer shimmer-section-title mb-2"></div>
+                    <div class="w-[45%]">
+                        <div class="shimmer shimmer-textarea"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="shimmer shimmer-section-title mb-4"></div>
+                    <div *ngFor="let module of shimmerModules" class="mb-6">
+                        <div class="shimmer shimmer-module-title mb-2"></div>
+                        <div class="flex flex-col space-y-3 ml-4">
+                            <div *ngFor="let perm of module.permissions" class="shimmer shimmer-permission-item"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if(!isDataLoading && hasApiError){
+    <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+    }@else{
+    <div *ngIf="!isDataLoading && !initialDataLoading && (!isEditMode || roleData)" class="p-4 flex-1 min-h-0">
+        <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden">
+            <form [formGroup]="form" class="flex flex-col h-full overflow-auto">
+                <div class="p-6">
+
+                    <div class="mb-3">
+                        <p class="label-large mb-2">Role</p>
+                        <div class="w-[30%]">
+                            <mat-form-field appearance="outline" class="w-full chip-input-field">
+
+                                <input matInput formControlName="roleName">
+                                <mat-error>
+                                    <custom-mat-error class="inline-block" [errors]="roleNameControl.errors"
+                                        [control]="roleNameControl" controlActualName="Role"></custom-mat-error>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p class="label-large mb-2">Role Description</p>
+                        <div class="w-[45%]">
+                            <app-custom-mat-textarea [control]="descriptionControl" [minRows]="1" [maxRows]="5">
+                            </app-custom-mat-textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p class="font-semibold text-gray-800 mb-4">Module Permissions</p>
+                        <div *ngFor="let module of objectKeys(permissionsData)" class="mb-6">
+                            <p class="label-large mb-2">
+                                {{ module }}
+                            </p>
+                            <div class="flex flex-col space-y-3 ml-4">
+                                <div *ngFor="let permission of permissionsData[module]"
+                                    class="flex items-center justify-between max-w-2xl p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex-1">
+                                        <span class="label-large block">{{ permission.name }}</span>
+                                        <span class="text-sm text-gray-600">{{ permission.description }}</span>
+                                    </div>
+                                    <mat-slide-toggle [checked]="permission.enabled"
+                                        (change)="onPermissionToggle(permission, module)" color="primary">
+                                    </mat-slide-toggle>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="form.get('permissions')?.invalid && form.get('permissions')?.touched"
+                        class="text-red-500 text-sm mb-2 ml-4">
+                        Please select at least one permission
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 p-3 bg-white sticky bottom-0">
+                    <loading-button type="primary" [loading]="submitLoading" [disabled]="!isFormValid"
+                        (onButtonClick)="onSubmit()">
+                        <span class="label-large">{{ submitButtonText }}</span>
+                    </loading-button>
+
+                    <loading-button *ngIf="showCancelButton" type="light" [basicButton]="true"
+                        (onButtonClick)="resetForm()">
+                        <span class="label-large">Clear</span>
+                    </loading-button>
+                </div>
+            </form>
+        </div>
+    </div>}
+</div>
+
+<ng-template #errorLoading>
+    <div class="p-4 flex-1 min-h-0">
+        <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden justify-center">
+            <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+        </div>
+    </div>
+</ng-template>

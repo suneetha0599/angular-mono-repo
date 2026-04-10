@@ -1,0 +1,103 @@
+<div class="item-selector-wrapper">
+
+  <div class="selector-trigger" [class.open]="isOpen" (click)="toggleDropdown()">
+    <div class="selected-chips-container" *ngIf="selectedCount > 0">
+      <div class="chip" *ngFor="let item of getSelectedChips().slice(0, 3)">
+        {{ item.name }}
+        <button mat-icon-button class="chip-remove" (click)="removeChip(item); $event.stopPropagation()">
+          <mat-icon class="small-icon material-symbols-outlined">close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <span class="chips-count" *ngIf="selectedCount > 3">
+      +{{ selectedCount - 3 }}
+    </span>
+
+    <span class="placeholder" *ngIf="selectedCount === 0">{{ getPlaceholder() }}</span>
+    <mat-icon class="dropdown-icon material-symbols-outlined">arrow_drop_down</mat-icon>
+  </div>
+
+
+
+  <div class="dropdown-panel" #dropdownPanel *ngIf="isOpen">
+
+    <div class="search-section">
+      <mat-form-field appearance="outline" class="search-field mat-sm-input">
+
+        <input matInput [(ngModel)]="searchValue" (ngModelChange)="onSearch()" [placeholder]="getSearchPlaceholder()" />
+        <mat-icon class="material-symbols-outlined  mat-md-icon" matPrefix>search</mat-icon>
+        <button matSuffix mat-icon-button *ngIf="searchValue" (click)="clearSearch()">
+          <mat-icon class="material-symbols-outlined mat-md-icon">close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+
+
+    <div class="items-list" (scroll)="onScroll($event)">
+
+      <div class="item-row" *ngFor="let item of filteredItems">
+        <mat-checkbox [checked]="isItemSelected(item)" [disabled]="isItemDisabled(item)"
+          (change)="toggleItem(item, $event)" class="item-checkbox">
+        </mat-checkbox>
+
+        <div class="item-details">
+          <div class="item-name">{{ item.name }}</div>
+          @if(config.type === CreatItemType.DATA_ELEMENTS){
+          @if(item.categoryNames?.length){
+          <div class="item-meta">
+            <span class="meta-label m-1" *ngFor="let cat of item.categoryNames; let last = last">
+              {{ formatCategory(cat) }}
+            </span>
+          </div>
+          }
+          }
+          @else{
+          @if(item.category || item.categoryName){
+          <div class="item-meta">
+            <span class="meta-label">{{formatDisplayText(item)}}</span>
+          </div>
+          }
+          }
+
+        </div>
+      </div>
+
+
+
+      <div class="loading-more" *ngIf="isLoadingMore || isLoadingMoreRecipients || isLoadingMoreSources ">
+        <mat-icon class="spinning material-symbols-outlined">refresh</mat-icon>
+        <span>Loading more...</span>
+      </div>
+
+
+      <div class="empty-state" *ngIf="filteredItems.length === 0 && !isLoading">
+        <mat-icon class="material-symbols-outlined">search_off</mat-icon>
+        <p>No items found</p>
+      </div>
+
+
+      <div class="loading-state" *ngIf="isLoading">
+        <mat-icon class="spinning material-symbols-outlined">refresh</mat-icon>
+        <p>Loading...</p>
+      </div>
+    </div>
+
+
+    <div class="dropdown-footer">
+      <button mat-button class="create-new-btn me-2" (click)="onCreateNewClick()">
+        <mat-icon class="material-symbols-outlined">add</mat-icon>
+        Create New
+      </button>
+
+      <loading-button type="primary" [basicButton]="true" [isFullWidth]="true" class="me-2"
+        (onButtonClick)="onSaveClick()" [disabled]="selectedCount === 0">
+        Save
+      </loading-button>
+    </div>
+  </div>
+
+
+  <div class="dropdown-backdrop" *ngIf="isOpen" (click)="closeDropdown()"></div>
+</div>

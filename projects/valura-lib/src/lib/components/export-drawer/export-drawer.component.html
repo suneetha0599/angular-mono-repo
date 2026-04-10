@@ -1,0 +1,38 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3">
+    <div class="flex justify-between">
+        <div class="my-auto title-medium">Report</div>
+        <div class="my-auto">
+            <button mat-icon-button (click)="close()">
+                <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+        </div>
+    </div>
+    <div class="d-flex editor-wrapper overflow-hidden position-relative h-100 pb-0">
+        <div class="col w-100 h-100 overflow-auto overflow-x-hidden main-canvas no-scrollbar">
+            <mat-radio-group [value]="downloadType" (change)="onDownloadTypeChange($event.value)"
+                class="d-flex flex-column gap-2">
+                <mat-radio-button value="NORMAL">Default</mat-radio-button>
+                <mat-radio-button value="CUSTOM">Customized</mat-radio-button>
+            </mat-radio-group>
+            @if (downloadType === 'CUSTOM') {
+            <div class="mt-4">
+                @for (col of columns; track col.key) {
+                <div class="mb-2">
+                    <mat-checkbox [checked]="col.selected" (change)="onColumnToggle(col, $event.checked)">
+                        {{ col.label }}
+                    </mat-checkbox>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+    <div class="d-flex justify-end mt-2 gap-4">
+        <loading-button type="secondary" (onButtonClick)="close()">
+            Cancel
+        </loading-button>
+        <loading-button (onButtonClick)="applyDownload()">
+            Download
+        </loading-button>
+    </div>
+</div>

@@ -1,0 +1,276 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper w-75 vendor-scroll">
+    <div class="mb-2">
+        <div class="flex justify-between">
+            <div class="flex items-center gap-2">
+                <!-- <button (click)="goBack()" 
+                    class="w-6 h-6 flex !rounded-lg items-center justify-center me-3 text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+                    <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+                </button> -->
+                <div class="headline-medium my-auto">
+                    {{ isDraftMode ? 'Edit Vendor Record' : (vendorId ? 'Edit Vendor Record' : 'Create Vendor Record')
+                    }}
+                </div>
+                <!-- @if(vendorId){
+                <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                    (click)="goToPrevRequest()">
+                    <mat-icon class=" material-symbols-outlined"
+                        [ngClass]="disablePrevBtn ? 'text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+                </button>
+                <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                    (click)="goToNextRequest()">
+                    <mat-icon class=" material-symbols-outlined"
+                        [ngClass]="disableNextBtn ? 'text-gray-400' : 'text-primary'">chevron_right</mat-icon>
+                </button>
+                } -->
+            </div>
+        </div>
+    </div>
+    @if(hasApiError){
+    <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+    }@else{
+    <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative bg-white rounded">
+        <div class="d-flex h-100 w-100 flex-column main-canvas bg-white">
+            <div class="relative flex-1 overflow-hidden">
+                <ng-container *ngTemplateOutlet="ngtemplateForm"></ng-container>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+<ng-template #ngtemplateForm>
+    <div class="h-full flex flex-col overflow-hidden rounded-lg relative h-fit max-h-full bg-white">
+        <div class="flex-1 overflow-auto no-scrollbar p-3">
+            <form [formGroup]="vendorForm" class="d-flex flex-column h-100 w-100">
+                <div class="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar">
+                    <div class="gap-4">
+                        <div class="col-span-8">
+                            <div class="label-large mt-2 mb-3">Basic Details</div>
+                            <div class="gap-4 mb-2 mt-2">
+                                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                    <mat-label>Vendor Name</mat-label>
+                                    <input matInput formControlName="name" />
+                                    <mat-error>
+                                        <custom-mat-error class="inline-block" [errors]="name.errors" [control]="name">
+                                        </custom-mat-error>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="label-large mt-4 mb-2">Description</div>
+                    <div class="gap-4">
+                        <div class="col-span-8">
+                            <div class="gap-4">
+                                <app-custom-editor class="flex-1 d-flex flex-column "
+                                    [initialContent]="vendorForm.get('description')?.value" [showInsertVariable]="false"
+                                    (contentChange)="onDescriptionChange($event)">
+                                </app-custom-editor>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row d-flex mt-4">
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="mat-sm-input w-100">
+                                <mat-label>Service Type</mat-label>
+                                <input type="text" matInput formControlName="serviceType"
+                                    [matAutocomplete]="autoServiceType"
+                                    (input)="onSearchServiceType($any($event.target).value)" />
+                                <mat-autocomplete #autoServiceType="matAutocomplete" [displayWith]="displayType"
+                                    (optionSelected)="selectServiceType($event.option.value)">
+                                    <mat-option *ngFor="let type of filteredServiceTypes" [value]="type">
+                                        {{ type.name }}
+                                    </mat-option>
+                                    @if(searchServiceTypeText) {
+                                    <mat-option [value]="{ id: 0, name: searchServiceTypeText }"
+                                        (onSelectionChange)="addNewServiceType($event)">
+                                        <span class="fw-semibold">+ Add </span>"{{ searchServiceTypeText }}"
+                                    </mat-option>
+                                    }
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="mat-sm-input w-100">
+                                <mat-label>Third Party Type</mat-label>
+                                <input type="text" matInput formControlName="vendorType"
+                                    [matAutocomplete]="autoThirdPartyType"
+                                    (input)="onSearchThirdPartyType($any($event.target).value)" />
+                                <mat-autocomplete #autoThirdPartyType="matAutocomplete" [displayWith]="displayType"
+                                    (optionSelected)="selectThirdPartyType($event.option.value)">
+                                    <mat-option *ngFor="let type of filteredThirdPartyTypes" [value]="type">
+                                        {{ type.name }}
+                                    </mat-option>
+                                    @if(searchThirdPartyTypeText) {
+                                    <mat-option [value]="{ id: 0, name: searchThirdPartyTypeText }"
+                                        (onSelectionChange)="addNewThirdPartyType($event)">
+                                        <span class="fw-semibold">+ Add </span>"{{ searchThirdPartyTypeText }}"
+                                    </mat-option>
+                                    }
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="label-large mb-3 mt-2">
+                        Vendor Contact (External)
+                    </div>
+                    <div class="d-flex row">
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label>Vendor POC Name</mat-label>
+                                <input matInput formControlName="pointOfContact" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label>Email</mat-label>
+                                <input matInput type="email" formControlName="externalEmail" />
+                            </mat-form-field>
+                            <mat-error>
+                                <custom-mat-error class="inline-block" [errors]="externalEmail.errors"
+                                    [control]="externalEmail">
+                                </custom-mat-error>
+                            </mat-error>
+                        </div>
+                    </div>
+                    <div class="d-flex row mb-4">
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label>Address</mat-label>
+                                <input matInput formControlName="address" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label>Location</mat-label>
+                                <mat-select formControlName="location" class="body-medium"
+                                    panelClass="search-select-panel" (selectionChange)="onCountryChange()"
+                                    (openedChange)="clearLocationSearch(searchInputLoction)">
+                                    <mat-optgroup class="sticky-searchbar">
+                                        <input type="text" placeholder="Search Location" #searchInputLoction
+                                            (keyup)="filterLocation(searchInputLoction.value)"
+                                            class="w-full p-2 border rounded-lg outline-none body-medium" />
+                                        @if(searchInputLoction.value){
+                                        <button type="button"
+                                            class="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
+                                            (click)="clearLocationSearch(searchInputLoction); searchInputLoction.focus(); $event.stopPropagation()">
+                                            <mat-icon fontIcon="close"
+                                                class="mt-2 mat-md-icon material-symbols-outlined"></mat-icon>
+                                        </button>
+                                        }
+                                    </mat-optgroup>
+                                    @for (country of filteredLocationList; track $index) {
+                                    <mat-option [value]="country.id">{{ country.name }}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="d-flex row mt-3 mb-4">
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-input">
+                                <mat-label>Phone Number</mat-label>
+                                <mat-select #phoneSelect matPrefix [(value)]="selectedCountry" class="w-24"
+                                    panelClass="search-select-panel" (openedChange)="onSelectOpen($event, phoneSelect); clearSearch(searchInput)">
+                                    <mat-select-trigger class="p-2">
+                                        {{ selectedCountry?.countryPhoneCode }}
+                                    </mat-select-trigger>
+                                    <mat-optgroup class="sticky-searchbar">
+                                        <input type="text" #searchInput placeholder="Search Phone Number"
+                                            (click)="$event.stopPropagation()"
+                                            (keyup)="filterCountries(searchInput.value)"
+                                            class="w-full p-2 border rounded-lg outline-none" />
+                                        @if(searchInput.value){
+                                        <button type="button"
+                                            class="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
+                                            (click)="clearSearch(searchInput); searchInput.focus(); $event.stopPropagation()">
+                                            <mat-icon fontIcon="close"
+                                                class="mt-2 mat-md-icon text-sm material-symbols-outlined"></mat-icon>
+                                        </button>
+                                        }
+                                    </mat-optgroup>
+                                    @for (country of filteredCountryList; track country) {
+                                    <mat-option [value]="country">
+                                        {{ country.name }} ({{ country.countryPhoneCode }})
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                <input matInput (click)="$event.stopPropagation()" formControlName="phone"
+                                    (keypress)="allowNumbersOnly($event)" maxlength="10" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="label-large mt-4 mb-3">Vendor Contact (Internal)</div>
+                    <div class="d-flex row">
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label>Business SPOC Name</mat-label>
+                                <input matInput formControlName="businessSpocName" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-6">
+                            <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                                <mat-label>Email</mat-label>
+                                <input matInput type="email" formControlName="internalEmail" />
+                            </mat-form-field>
+                            <mat-error>
+                                <custom-mat-error class="inline-block" [errors]="internalEmail.errors"
+                                    [control]="internalEmail">
+                                </custom-mat-error>
+                            </mat-error>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="bg-white p-3">
+            <div class="flex justify-between gap-3">
+                <loading-button type="secondary" (onButtonClick)="goBack()">
+                    <span class="label-large">Cancel</span>
+                </loading-button>
+                <div class="flex justify-end gap-3">
+                    @if(isCreateMode && canCreateVendor) {
+                    <ng-container
+                        *ngTemplateOutlet="buttonSection;context: { showDelete: false, showDraft: true, showSave: true }">
+                    </ng-container>
+                    }
+                    @if(isEditMode && canEditVendor) {
+                    <ng-container
+                        *ngTemplateOutlet="buttonSection;context: { showDelete: false, showDraft: false, showSave: true }">
+                    </ng-container>
+                    }
+                    @if(isDraftMode && canCreateVendor) {
+                    <ng-container
+                        *ngTemplateOutlet="buttonSection;context: { showDelete: true, showDraft: true, showSave: true }">
+                    </ng-container>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #buttonSection let-showDelete="showDelete" let-showDraft="showDraft" let-showSave="showSave">
+    @if(showDelete){
+    <loading-button type="secondary" [loading]="deleteDraftLoading" (onButtonClick)="onDeleteDraft()">
+        <span class="label-large">Delete Draft</span>
+    </loading-button>
+    }
+    @if(showDraft){
+    <loading-button type="secondary" [loading]="isDraftLoading" (onButtonClick)="saveAsDraft()"
+        [disabled]="isFinalSaved" [disabled]="isFinalSaved">
+        <span class="label-large">Save Draft</span>
+    </loading-button>
+    }
+    @if(showSave){
+    <loading-button type="primary" [loading]="isloading" (onButtonClick)="saveChanges()">
+        <span class="label-large">Save</span>
+    </loading-button>
+    }
+</ng-template>
+
+<ng-template #errorLoading>
+    <div class="d-flex flex-column rounded overflow-hidden h-screen bg-white p-2 mt-3 justify-content-center">
+        <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    </div>
+</ng-template>

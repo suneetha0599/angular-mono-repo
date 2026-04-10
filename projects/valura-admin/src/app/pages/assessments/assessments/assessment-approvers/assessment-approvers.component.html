@@ -1,0 +1,143 @@
+<div class="d-flex flex-column h-full overflow-hidden">
+  <div class="h-full flex flex-col overflow-hidden bg-white">
+    <div class="flex-1 overflow-auto rounded-lg no-scrollbar m-3">
+      <ng-container *ngTemplateOutlet="ngTemplateTable"></ng-container>
+    </div>
+  </div>
+  @if(canDoAssessementAction){
+  <div class="d-flex justify-end p-3 pt-0">
+    <div>
+      <loading-button type="secondary" class="me-2" (onButtonClick)="onRejectAssessment()" [loading]="rejectLoading"
+        [loadingText]="'Reject'" [disabled]="rejectLoading || approveIsLoading">
+        <span>Reject</span>
+      </loading-button>
+      <loading-button class="ms-2" (onButtonClick)="onApproveAssessment()" [loading]="approveIsLoading"
+        [disabled]="rejectLoading || approveIsLoading" [loadingText]="'Complete'">
+        <span>Complete</span>
+      </loading-button>
+    </div>
+  </div>
+  }
+
+</div>
+<mat-drawer-container class="drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #createDetailsDrawer mode="over" position="end" class="approver-details-mat-drawer">
+    <app-assessment-approvers-details [approverData]="selectedApprover">
+    </app-assessment-approvers-details>
+  </mat-drawer>
+</mat-drawer-container>
+<ng-template #ngTemplateTable>
+  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-3" *ngFor="let levelNumber of levels">
+    @let level = getLevelData(levelNumber);
+    <div class="flex items-center justify-between px-3 py-3 bg-[#F3F4F6]">
+      <div class="font-semibold text-sm ">
+        Level {{ level.level }} Approver
+        <span class="ml-2 text-gray-500 text-xs">
+          {{ countApproved(level?.approvers) }}/{{ level?.approvers?.length || 0 }} Approved
+        </span>
+      </div>
+      @if(canAddApprover){
+      <loading-button type="light" [basicButton]="true" (onButtonClick)="onAddClick(level.level)">
+        <mat-icon class="mat-md-icon material-symbols-outlined primary mr-1">add</mat-icon>
+        Add Approver
+      </loading-button>
+      }
+    </div>
+    @if(level.approvers.length > 0 ){
+    <table mat-table [dataSource]="level.approvers" class="mat-elevation-z8 w-100 custom-table table table-md-row mx-3"
+      matSort (matSortChange)="onSortChange($event)">
+      <ng-container matColumnDef="name">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef [style.max-width]="columnWidthMap['name']"> Approver Name
+        </th>
+        <td mat-cell *matCellDef="let row" [style.max-width]="columnWidthMap['name']"> {{ row.name }} </td>
+      </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef [style.maxWidth]="columnWidthMap['status']"> Status </th>
+        <td mat-cell *matCellDef="let row" [style.max-width]="columnWidthMap['status']">
+          <div class="rounded-[8px] px-1 py-2 d-flex align-items-center justify-content-center label-large" [ngStyle]="{
+                  'background-color': getStatusColors(row.status),
+                  color: getStatusTextColors(row.status)
+                }">
+            {{ row.status }}
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="dateOfApproval">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef [style.maxWidth]="columnWidthMap['dateOfApproval']"> Date
+          of Approval
+        </th>
+        <td mat-cell *matCellDef="let row" [style.max-width]="columnWidthMap['dateOfApproval']">
+          {{ row.dateOfApproval }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="comment">
+        <th mat-sort-header mat-header-cell *matHeaderCellDef [style.maxWidth]="columnWidthMap['comment']"> Comments
+        </th>
+        <td mat-cell *matCellDef="let row" class="comment-cell">
+          <span class="body-large truncate whitespace-nowrap overflow-hidden" [appEllipsisTooltip]="row.comment ?? ''"
+            [maxWidth]="180" [matTooltip]="row.comment ??''" matTooltipPosition="below"
+            matTooltipClass="material-tooltip"></span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef [style.maxWidth]="columnWidthMap['actions']"> Actions </th>
+        <td mat-cell *matCellDef="let row" [style.max-width]="columnWidthMap['actions']">
+          <div class="flex items-center"
+            [ngClass]="{'gap-0.5': row.status !== 'Pending','gap-3.5': row.status === 'Pending'}">
+            @if(row.status !== 'Pending' ){
+            <button mat-button class="detail-btn" (click)="onopenDetailsDrawer(row)">
+              View details
+            </button>
+            }@else {
+            @if(row.isCurrentUser && isApprover) {
+            <button mat-mini-fab class="shadow-none mat-md-fab-btn"
+              [ngClass]="loadingRowId === row.id ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary cursor-pointer'"
+              (click)="approveRequest(row)" [disabled]="loadingRowId === row.id">
+              <mat-icon class="mat-md-icon material-symbols-outlined"
+                [ngClass]="loadingRowId === row.id ? 'text-gray-500' : 'text-white'">
+                check
+              </mat-icon>
+            </button>
+            <button mat-stroked-button class="close-btn" (click)="rejectRequest(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined-gray " style="color: gray;">close</mat-icon>
+            </button>
+            }
+            @else{
+            <button mat-mini-fab class="shadow-none mat-md-fab-btn bg-gray-300 cursor-not-allowed" disabled>
+              <mat-icon class="mat-md-icon material-symbols-outlined text-gray-500">
+                check
+              </mat-icon>
+            </button>
+            <button mat-stroked-button class="close-btn cursor-not-allowed" disabled>
+              <mat-icon class="mat-md-icon material-symbols-outlined-gray text-gray-500">
+                close
+              </mat-icon>
+            </button>
+            }
+            }
+            @if(
+            isAuthor &&
+            !(row.level === 1 && row.userId === loggedInUserId)
+            ){
+            <button mat-mini-fab class="shadow-none no-bg-btn mat-md-fab-btn" (click)="onDelete(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined">
+                delete
+              </mat-icon>
+            </button>
+            }
+            @else{
+            <button mat-mini-fab class="no-bg-btn shadow-none cursor-not-allowed" disabled>
+              <mat-icon class="mat-md-icon material-symbols-outlined text-gray-300">
+                delete
+              </mat-icon>
+            </button>
+            }
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    }
+  </div>
+</ng-template>

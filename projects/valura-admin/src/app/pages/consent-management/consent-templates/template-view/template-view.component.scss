@@ -1,0 +1,22 @@
+@use "../../../../../styles/custom/colors.scss" as us;
+
+::ng-deep .dialog-panel .mat-mdc-dialog-surface {
+    border-radius: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+}
+
+.btnColor {
+    background-color: us.$primary;
+}
+
+.fontColor {
+    color: us.$primary;
+    ;
+}
+
+::ng-deep .mat-mdc-checkbox .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background {
+    background-color: us.$primary !important;
+    border-color: us.$primary !important;
+}

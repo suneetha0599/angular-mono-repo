@@ -1,0 +1,32 @@
+::ng-deep .custom-checkbox .mat-pseudo-checkbox,
+::ng-deep .custom-checkbox .mat-pseudo-checkbox-minimal,
+::ng-deep .custom-checkbox .mat-mdc-option .mat-pseudo-checkbox {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.tiny-icon-btn {
+  --mdc-icon-button-state-layer-size: 30px;
+  --mdc-icon-button-icon-size: 18px;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+}
+
+.tiny-icon-btn .edit-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.single-line-option {
+  white-space: nowrap;
+}
+
+.single-line-option span ::ng-deep p {
+  display: inline;
+  margin: 0;
+}

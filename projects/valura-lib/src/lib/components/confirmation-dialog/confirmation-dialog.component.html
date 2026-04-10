@@ -1,0 +1,31 @@
+@if (data?.title) {
+  <h6 mat-dialog-title>
+    {{ data.title }}
+  </h6>
+
+  <button mat-icon-button tabindex="-1" class="close" (click)="closeIcon($event)"
+    aria-label="confirm dialog close button">
+    <mat-icon class="fs-5 material-symbols-outlined">cancel</mat-icon>
+  </button>
+}
+<div mat-dialog-content class="py-2 d-flex">
+  <p class="mb-0 fs-14 body-large">
+    {{ data.message }}
+  </p>
+
+  @if (data?.innerHtml) {
+  <span [innerHTML]="data.innerHtml"></span>
+  }
+</div>
+
+<div mat-dialog-actions align="end" class="p-2">
+  @if (data?.cancelText) {
+  <button mat-button class="px-4" (click)="cancel($event)">
+    {{ data.cancelText }}
+  </button>
+  }
+
+  <button mat-flat-button class="px-4" color="primary" cdkFocusInitial (click)="confirm($event)">
+    {{ data.confirmText }}
+  </button>
+</div>

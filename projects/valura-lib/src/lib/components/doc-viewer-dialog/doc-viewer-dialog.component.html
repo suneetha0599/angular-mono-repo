@@ -1,0 +1,77 @@
+<!-- Dialog Header -->
+<h3 mat-dialog-title class="flex justify-between items-center px-4 py-2">
+  <span class="p-1 headline-small truncate max-w-[35%]" [title]="fileName">{{ fileName }}</span>
+
+  <div class="flex items-center gap-2">
+    <button (click)="downloadFile(doc, fileName)" mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn">
+      <span class="material-symbols-outlined">download</span>
+    </button>
+
+    <button class="p-0" mat-icon-button mat-dialog-close aria-label="Close dialog" matTooltip="Close"
+      (click)="closeDialog()">
+      <mat-icon class="material-symbols-outlined">close</mat-icon>
+    </button>
+  </div>
+</h3>
+
+@if(type !== 'image') {
+<div class="flex justify-center">
+  <div class="absolute top-2 justify-center flex gap-2 p-1">
+    <button class="mat-md-fab-btn bg-transparent shadow-none" mat-mini-fab (click)="zoomIn()">
+      <mat-icon class="material-symbols-outlined">add</mat-icon>
+    </button>
+
+    <input title="zoomValue" type="number" [(ngModel)]="zoomValue" class="w-16 text-center border rounded" />
+
+    <button class="mat-md-fab-btn bg-transparent shadow-none" mat-mini-fab (click)="zoomOut()">
+      <mat-icon class="material-symbols-outlined">remove</mat-icon>
+    </button>
+  </div>
+</div>
+}
+
+@if(type == 'image') {
+<app-image-viewer class="overflow-hidden" [src]="doc"
+  [config]="{ wheelZoom: true, allowFullscreen: true, zoomFactor: 0.25 }">
+</app-image-viewer>
+}
+
+@else if(type == 'pdf') {
+<div class="p-0 h-full w-full">
+  <div class="flex justify-center items-center w-full h-full bg-gray-100">
+    <div class="doc-viewer-wrapper max-w-full max-h-full">
+      <ngx-extended-pdf-viewer class="h-full w-full" [src]="doc" [zoom]="zoomValue" (zoomChange)="onZoomChange($event)">
+      </ngx-extended-pdf-viewer>
+    </div>
+  </div>
+</div>
+}
+
+@else {
+<div class="flex flex-col items-center justify-center h-[80vh] p-4">
+  <mat-icon class="fontColor material-symbols-outlined">insert_drive_file</mat-icon>
+  <p class="text-gray-700 text-center">This file type cannot be previewed here.</p>
+  <loading-button type="secondary" (onButtonClick)="downloadFile(doc, fileName)">
+    Download to view
+  </loading-button>
+</div>
+}
+
+@if(!isTaskView) {
+<div mat-dialog-actions class="px-3 pt-2 pb-3 flex justify-between items-center border-t">
+  <div class="w-full flex justify-between items-center">
+    <mat-checkbox [(ngModel)]="checkboxChecked" class="text-sm">
+      Use this document as verification for data subject
+    </mat-checkbox>
+
+    <div class="m-2">
+      <loading-button type="secondary" (onButtonClick)="confirm()" [loading]="isDoneLoading"
+        [disabled]="confirmBtnDisabled">
+        Confirm
+      </loading-button>
+    </div>
+  </div>
+</div>
+} @else {
+<div class="m-2"></div>
+}

@@ -1,0 +1,370 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+    <div class="p-3">
+        <div class="d-flex mb-2 justify-between">
+            <div class="flex items-center gap-2">
+                <div class="headline-medium my-auto">{{collectionPoint.name}}</div>
+                <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                    (click)="goToPrevRequest()">
+                    <mat-icon class=" material-symbols-outlined"
+                        [ngClass]="disablePrevBtn ? 'text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+                </button>
+                <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+                    (click)="goToNextRequest()">
+                    <mat-icon class=" material-symbols-outlined"
+                        [ngClass]="disableNextBtn ? 'text-gray-400' : 'text-primary'">chevron_right</mat-icon>
+                </button>
+            </div>
+            @if(!hasApiError){
+            <loading-button type="light" [basicButton]="true" (onButtonClick)="openStepperPopup()">View
+                Activity</loading-button>}
+        </div>
+    </div>
+
+    <div class="p-3 pt-0 flex-1 overflow-hidden">
+        @if(hasApiError){
+        <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+        }@else{
+        <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+            <div class="relative flex-1 overflow-hidden">
+                <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100 h-full"
+                    [(selectedIndex)]="selectedTabIndex">
+
+
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            <span>Details</span>
+                        </ng-template>
+                        <div class="h-full overflow-auto p-4 mt-2">
+                            <div class="space-y-8">
+
+                                <!-- <div>
+                                    <div class="text-gray-500 text-sm mb-2">Collection Point ID:</div>
+                                    <ng-container *ngIf="!isLoading">
+                                        <div class="flex items-center gap-1 body-large text-ellipsize">{{
+                                            collectionPoint.id }}</div>
+                                    </ng-container>
+                                    <ng-container *ngIf="isLoading">
+                                        <div class="shimmer-line shimmer-medium"></div>
+                                    </ng-container>
+                                </div> -->
+
+
+                                <div>
+                                    <div class="text-gray-500 text-sm mb-2">Collection Point Name:</div>
+                                    <ng-container *ngIf="!isLoading">
+                                        <div class="flex items-center gap-1 body-large text-ellipsize">{{
+                                            collectionPoint.name }}</div>
+                                    </ng-container>
+                                    <ng-container *ngIf="isLoading">
+                                        <div class="shimmer-line shimmer-large"></div>
+                                    </ng-container>
+                                </div>
+
+
+                                <div>
+                                    <div class="text-gray-500 text-sm mb-2">Collection Point Type:</div>
+                                    <ng-container *ngIf="!isLoading">
+                                        <div class="flex items-center gap-1 body-large text-ellipsize">
+                                            {{getStatusText(collectionPoint.type)}}
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngIf="isLoading">
+                                        <div class="shimmer-line shimmer-small"></div>
+                                    </ng-container>
+                                </div>
+
+
+                                <!-- <div>
+                                    <div class="text-gray-500 text-sm  mb-2">Source Type:</div>
+                                    <ng-container *ngIf="!isLoading">
+                                        <div class="flex items-center gap-1 body-large text-ellipsize">
+                                            {{getStatusText(collectionPoint.sourceType)}}
+                </div>
+                                    </ng-container>
+                                    <ng-container *ngIf="isLoading">
+                                        <div class="shimmer-line shimmer-small"></div>
+                                    </ng-container>
+                                </div> -->
+
+
+                                <!-- <div>
+                                    <div class="text-gray-500 text-sm mb-2">Linked BPA Count:</div>
+                                    <ng-container *ngIf="!isLoading">
+                                        <div class="flex items-center gap-1 body-large text-ellipsize">{{
+                                            collectionPoint.linkedBPACount }}</div>
+                  </ng-container>
+                                    <ng-container *ngIf="isLoading">
+                                        <div class="shimmer-line shimmer-small"></div>
+                                    </ng-container>
+                                </div> -->
+
+
+                                <!-- <div>
+                                    <div class="text-gray-500 text-sm mb-2">Linked PD Elements Count:</div>
+                                    <ng-container *ngIf="!isLoading">
+                                        <div class="flex items-center gap-1 body-large text-ellipsize">{{
+                                            collectionPoint.linkedPdElementsCount }}
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngIf="isLoading">
+                                        <div class="shimmer-line shimmer-small"></div>
+                                    </ng-container>
+                                </div> -->
+                            </div>
+                        </div>
+                    </mat-tab>
+
+
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            <span>Personal Data Elements</span>
+                        </ng-template>
+                        <div class="flex flex-col overflow-hidden mt-2 no-scrollbar">
+                            <div class="flex-1 overflow-y-auto rounded-lg no-scrollbar max-h-[400px]">
+                                @if(dataElementsDataSource.data.length){
+                                <cdk-accordion class="configure-accordion overflow-y-auto">
+                                    <cdk-accordion-item class="configure-accordion-item"
+                                        *ngFor="let ds of dataSubjects; let i = index">
+                                        <button class="configure-accordion-item-header"
+                                            (click)="ds.expanded = !ds.expanded">
+                                            <span class="title-small text-gray-700"
+                                                [ngClass]="{ 'text-primary': ds.expanded }">
+                                                {{ ds.dsName || ('Data Subject ' + (i+1)) }}
+                                                <span class="grayOut-expand">({{ ds?.dataElements?.length }})</span>
+                                            </span>
+                                            <mat-icon class="material-symbols-outlined text-primary">
+                                                {{ ds.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+                                            </mat-icon>
+                                        </button>
+
+                                        <div *ngIf="ds?.expanded" class="configure-accordion-item-body" role="region">
+                                            <div class="overflow-auto no-scrollbar">
+                                                <table mat-table
+                                                    [dataSource]="isLoading ? shimmerDataElements : (ds.dataSource.data.length === 0 ? [] : ds.dataSource)"
+                                                    matSort class="mat-elevation-z8 w-100 custom-table table">
+                                                    <ng-container matColumnDef="name">
+                                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                            class="title-small !text-center">
+                                                            <span
+                                                                class="text-grey title-small !text-center whitespace-nowrap">Personal
+                                                                Data Element</span>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                                            <ng-container *ngIf="!isLoading">
+                                                                <span class="body-large">{{ row.name }}</span>
+                                                            </ng-container>
+                                                            <ng-container *ngIf="isLoading">
+                                                                <div class="shimmer-line shimmer-large"></div>
+                                                            </ng-container>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="dataCategory">
+                                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                            class="title-small !text-center">
+                                                            <span
+                                                                class="text-grey title-small !text-center whitespace-nowrap">Category</span>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                                            <ng-container *ngIf="!isLoading">
+                                                                <span class="body-large">{{
+                                                                    row.dataCategory?.[0]?.categoryName || 'N/A'
+                                                                    }}</span>
+                                                            </ng-container>
+                                                            <ng-container *ngIf="isLoading">
+                                                                <div class="shimmer-line shimmer-medium"></div>
+                                                            </ng-container>
+                                                        </td>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="dataClassification">
+                                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                            class="title-small !text-center">
+                                                            <span
+                                                                class="text-grey title-small !text-center whitespace-nowrap">Classification</span>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                                            <ng-container *ngIf="!isLoading">
+                                                                <span class="body-large">{{
+                                                                    row.dataClassification?.[0]?.classificationName ||
+                                                                    'N/A' }}</span>
+                                                            </ng-container>
+                                                            <ng-container *ngIf="isLoading">
+                                                                <div class="shimmer-line shimmer-medium"></div>
+                                                            </ng-container>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row
+                                                        *matHeaderRowDef="dataElementsColumns; sticky: true"
+                                                        class="bg-gray-100 title-small"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: dataElementsColumns;"
+                                                        [class.shimmer-row]="isLoading"></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                    </cdk-accordion-item>
+
+                                </cdk-accordion>}
+                                @else{
+                                @if(!isLoading){
+                                <item-not-found [imgHeight]="'200px'"
+                                    heading="No personal data elements have been linked to this Collection point"></item-not-found>
+                                }
+                                }
+                            </div>
+                        </div>
+                    </mat-tab>
+
+
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            <span>Linked Processing Activities</span>
+                        </ng-template>
+                        <div class="h-full flex flex-col overflow-hidden mt-2">
+                            <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+                                @if(linkedBpaDataSource.data.length){
+                                <table mat-table
+                                    [dataSource]="isLoading ? shimmerLinkedBpa : (linkedBpaDataSource.data.length === 0 ? [] : linkedBpaDataSource)"
+                                    matSort class="mat-elevation-z8 w-100 custom-table table">
+                                    <ng-container matColumnDef="id">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                            class="title-small !text-center">
+                                            <span class="text-grey title-small !text-center whitespace-nowrap">Process
+                                                ID</span>
+                                        </th>
+                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                            <ng-container *ngIf="!isLoading">
+                                                <span class="body-large">{{ row.id }}</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="isLoading">
+                                                <div class="shimmer-line shimmer-small"></div>
+                                            </ng-container>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="processName">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                            class="title-small !text-center">
+                                            <span class="text-grey title-small !text-center whitespace-nowrap">
+                                                Process Name</span>
+                                        </th>
+                                        <td mat-cell *matCellDef="let row;let i=index" class="whitespace-nowrap"
+                                            (click)="viewAssetDetails(row,i)">
+                                            <ng-container *ngIf="!isLoading">
+                                                <span class="label-large text-primary pointer">{{ row.processName
+                                                    }}</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="isLoading">
+                                                <div class="shimmer-line shimmer-large"></div>
+                                            </ng-container>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="bpaOwner">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                            class="title-small !text-center">
+                                            <span class="text-grey title-small !text-center whitespace-nowrap">Bpa
+                                                Owner</span>
+                                        </th>
+                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                            <ng-container *ngIf="!isLoading">
+                                                <span class="body-large">{{ row.bpaOwner }}</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="isLoading">
+                                                <div class="shimmer-line shimmer-medium"></div>
+                                            </ng-container>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="DepartMentName">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                            class="title-small !text-center">
+                                            <span
+                                                class="text-grey title-small !text-center whitespace-nowrap">Department</span>
+                                        </th>
+                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                            <ng-container *ngIf="!isLoading">
+                                                <span class="body-large">{{ row.departmentName }}</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="isLoading">
+                                                <div class="shimmer-line shimmer-large"></div>
+                                            </ng-container>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="VolOfData">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                            class="title-small !text-center">
+                                            <span class="text-grey title-small !text-center whitespace-nowrap">Volume of
+                                                Data</span>
+                                        </th>
+                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap">
+                                            <ng-container *ngIf="!isLoading">
+                                                <span class="body-large">{{ row.volumeOfPersonalData }}</span>
+                                            </ng-container>
+                                            <ng-container *ngIf="isLoading">
+                                                <div class="shimmer-line shimmer-large"></div>
+                                            </ng-container>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="status">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                            class="title-small !text-center">
+                                            <span
+                                                class="text-grey title-small !text-center whitespace-nowrap">Status</span>
+                                        </th>
+                                        <td mat-cell *matCellDef="let row" class="whitespace-nowrap text-center">
+                                            <ng-container *ngIf="!isLoading">
+                                                <div class="flex align-items-center justify-content-center  w-[100px] body-large px-2 py-1 rounded"
+                                                    [ngStyle]="{'background-color': getStatusColors(row.status),
+                                                  'color': getStatusTextColors(row.status) }"> {{ row.status }}
+                                                </div>
+                                            </ng-container>
+                                            <ng-container *ngIf="isLoading">
+                                                <div class="shimmer-line shimmer-large"></div>
+                                            </ng-container>
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="linkedBpaColumns; sticky: true"
+                                        class="bg-gray-100 title-small"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: linkedBpaColumns;"
+                                        [class.shimmer-row]="isLoading"></tr>
+                                </table>
+                                }@else{
+                                @if(!isLoading){
+                                <item-not-found [imgHeight]="'200px'"
+                                    heading="No processing activities have been linked to this collection point"></item-not-found>
+                                }
+                                }
+                            </div>
+                            <!-- <div class="bg-white z-10">
+                                <mat-paginator #linkedBpaPaginator class="bg-white" [pageSize]="pageSize"
+                                    [length]="linkedBpaTotalItems" (page)="onLinkedBpaPageChange($event)"
+                                    [pageSizeOptions]="[10, 50, 100]" aria-label="Select page">
+                                </mat-paginator>
+                            </div> -->
+                        </div>
+                    </mat-tab>
+                </mat-tab-group>
+
+            </div>
+            <div class="p-2  pt-2 flex justify-end">
+                <!-- <loading-button type="secondary" (click)="goBack()">
+                    Cancel
+                </loading-button> -->
+            </div>
+
+        </div>
+        }
+    </div>
+</div>
+
+<ng-template #errorLoading>
+    <div
+        class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2 justify-content-center">
+        <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    </div>
+</ng-template>

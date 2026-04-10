@@ -1,0 +1,387 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3">
+    <div class="flex justify-between items-center mb-2">
+        <ng-container>
+            @if(drawerMode==DrawerMode.PD_MAPPING){
+            <div class="title-medium my-auto">{{getAssetNameByIndex(selectedSourceIndex)}}</div>
+            }
+            @else{
+            <div class="title-medium my-auto">Asset</div>
+            }
+            <div class="my-auto">
+                <button mat-icon-button (click)="close()">
+                    <mat-icon class="material-symbols-outlined">close</mat-icon>
+                </button>
+            </div>
+        </ng-container>
+    </div>
+
+    <div class="d-flex editor-wrapper overflow-hidden position-relative h-100 pb-0">
+        <div class="col w-100 h-100 overflow-auto overflow-x-hidden main-canvas no-scrollbar">
+            @if(drawerMode==DrawerMode.PD_MAPPING){
+            <ng-container *ngTemplateOutlet="pdElementSelection; context:{}">
+            </ng-container>
+            }
+            @else if(drawerMode==DrawerMode.MAPPING){
+            <div class="flex flex-col gap-2 flex-grow h-100">
+                @if(viewType==ADD_VIEW){
+                <ng-container *ngTemplateOutlet="addAsset; context:{}">
+                </ng-container>
+                }
+                @else{
+                <div class="grid grid-cols-12 mb-2 justify-between">
+                    <div class="col-span-8">
+                        <div class="mb-2">
+                            <mat-radio-group [(ngModel)]="isAssetMode" (change)="onToggleChange($event.value)"
+                                class="source-type-radio-group">
+                                <mat-radio-button [value]="true" class="me-3">Asset</mat-radio-button>
+                                <mat-radio-button [value]="false">Collection Point</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+                    <div class="col-span-4 text-end">
+                        <div class="d-flex w-full justify-end my-auto">
+                            <loading-button type="secondary" (onButtonClick)="onAddNew()">
+                                Add new
+                            </loading-button>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-12 mb-3 justify-between">
+                    <div class="col-span-8">
+                        <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0  pt-2">
+                            <mat-label>{{ currentDropdownLabel }}</mat-label>
+                            <mat-select #sourceSelect [(ngModel)]="selectedSource"
+                                (selectionChange)="onSourceChange($event)">
+                                @if(isAssetMode){
+                                <cdk-virtual-scroll-viewport itemSize="48" style="height: 200px;scrollbar-width: none;"
+                                    (scrolledIndexChange)="loadMoreAssets(sourceSelect)" class="overflow-x-hidden">
+                                    @for (source of bpaSourceAssetList;track source.assetId) {
+                                    <mat-option [value]="source">{{ source.name }}</mat-option>
+                                    }
+                                </cdk-virtual-scroll-viewport>
+                                }
+                                @else{
+                                @for (collectionPoint of collectionPointMasterList; track collectionPoint.id) {
+                                <mat-option [value]="collectionPoint">{{ collectionPoint.collectionPoint }}</mat-option>
+                                }
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="!text-right">
+                    <button class="fontColor label-medium">
+                        {{ totalSelected }} selected
+                    </button>
+                </div>
+                <div class="overflow-auto h-100">
+                    <ng-container
+                        *ngTemplateOutlet="ngTemplateTable; context:{dataSource: datasource, tableHeaders:tableHeaders, displayedHeaders:displayedHeaders}">
+                    </ng-container>
+                </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+    @if(isEditMode){
+    <div class="d-flex justify-content-end mt-2">
+        <div class="flex gap-2">
+            <loading-button type="secondary" (onButtonClick)="onCloseClick()">
+                Cancel
+            </loading-button>
+            <loading-button type="primary" (onButtonClick)="onApplyClick()" [loading]="isSubmitLoading"
+                [loadingText]="'Add'">
+                Add
+            </loading-button>
+        </div>
+    </div>
+    }
+</div>
+
+<!-- Table -->
+<ng-template #ngTemplateTable let-dataSource="dataSource" let-tableHeaders="tableHeaders"
+    let-displayedHeaders="displayedHeaders">
+
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+        <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef [style.width]="'50px'" [style.minWidth]="'50px'" class="px-0">
+                <mat-checkbox [(ngModel)]="selectAll" class="label-medium me-2 my-auto"
+                    (change)="onChangeSelectAll($event)">
+                </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let element" [style.width]="'50px'" [style.minWidth]="'50px'" class="px-0">
+                <div class="my-auto">
+                    <mat-checkbox [(ngModel)]="element.selected" class="label-medium me-2 my-auto"
+                        (change)="onChangeEvent(element)">
+                    </mat-checkbox>
+                </div>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef class="name-column">Source Name</th>
+            <td mat-cell *matCellDef="let element" class="name-column">
+                <div class="truncate-text" [title]="element.source.name">{{ element.source.name }}</div>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef class="type-column">Type</th>
+            <td mat-cell *matCellDef="let element" class="type-column">
+                <span class="type-badge" [ngClass]="getTypeBadgeClass(element.source.type)">
+                    {{ element.source.type }}
+                </span>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="sourceType">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let element">
+                <div>{{element?.source?.sourceType}}</div>
+            </td>
+        </ng-container>
+        <!-- <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-column">Actions</th>
+            <td mat-cell *matCellDef="let element; let i = index" class="actions-column">
+                <button mat-icon-button (click)="removeSource(i)" class="text-blue-600" matTooltip="Delete">
+                    <mat-icon class="mat-md-icon text-primary material-symbols-outlined">delete</mat-icon>
+                </button>
+            </td>
+        </ng-container> -->
+        <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+    </table>
+</ng-template>
+
+
+<ng-template #addAsset>
+    <div class="mb-3">
+        <mat-radio-group [(ngModel)]="isAssetMode" (change)="onToggleChange($event.value)"
+            class="source-type-radio-group">
+            <mat-radio-button [value]="true" class="me-3">Asset</mat-radio-button>
+            <mat-radio-button [value]="false">Collection Point</mat-radio-button>
+        </mat-radio-group>
+    </div>
+    <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Add New {{ isAssetMode ? 'Asset' : 'Collection Point' }}</h6>
+        </div>
+        @if (isAssetMode) {
+        @if(assetForm){
+        <div [formGroup]="assetForm">
+
+            <div class="d-flex flex-column gap-3">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0 chip-input-field">
+                    <mat-label>Asset Name</mat-label>
+                    <input matInput formControlName="newAssetName">
+                </mat-form-field>
+                <div class="form-section">
+                    <label class="form-label">Asset Type</label>
+                    <mat-radio-group formControlName="newAssetType" class="asset-type-radio-group">
+                        @for(assetType of ASSET_TYPE; track assetType.key;) {
+                        <mat-radio-button [value]="assetType.key" class="me-3">
+                            {{assetType.label}}
+                        </mat-radio-button>
+                        }
+                    </mat-radio-group>
+                </div>
+                <div class="flex gap-2 align-items-center">
+                    <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-input chip-input-field">
+                        <mat-label>Category</mat-label>
+                        <mat-select formControlName="newAssetCategory">
+                            @for (category of categoriesList; track category.id) {
+                            <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <loading-button type="stroked" color="primary"
+                        (onButtonClick)="addNewCategory()">Add</loading-button>
+                </div>
+
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0 chip-input-field">
+                    <mat-label>Hosting Type</mat-label>
+                    <mat-select formControlName="newAssetHostingType">
+                        @for (hostingType of hostingTypesList; track hostingType.key) {
+                        <mat-option [value]="hostingType.key">
+                            {{ hostingType.label }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                <!-- Location -->
+                <mat-form-field appearance="outline" class="md:col-span-4 w-full mat-sm-xl-input mat-mdc-mb-0">
+                    <mat-label>Hosting Location</mat-label>
+                    <input matInput formControlName="newAssetHostingLocation" [matAutocomplete]="locationAuto"
+                        (input)="filterLocations($any($event.target).value)" />
+
+                    <mat-autocomplete #locationAuto="matAutocomplete" [displayWith]="displayLocationName">
+                        @for (location of filteredLocationList; track location.id) {
+                        <mat-option [value]="location">
+                            {{ location.name }}
+                        </mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0 chip-input-field">
+                    <mat-label>Vendor</mat-label>
+                    <mat-select formControlName="newAssetVendor">
+                        @for (vendor of vendorsList; track vendor.vendorId) {
+                        <mat-option [value]="vendor.vendorId">{{ vendor.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+        </div>
+        }
+        }
+        @else{
+        @if(collectionPointForm){
+        <div class="d-flex flex-column gap-3" [formGroup]="collectionPointForm">
+            <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0 chip-input-field">
+                <mat-label>Collection Point Name</mat-label>
+                <input matInput formControlName="newCollectionPointName">
+            </mat-form-field>
+            <div class="form-section">
+                <label class="form-label">Type</label>
+                <mat-radio-group formControlName="newCollectionPointType" class="collection-type-radio-group">
+                    @for(collectionPoint of COLLECTION_POINT_TYPE; track collectionPoint.key;) {
+                    <mat-radio-button [value]="collectionPoint.key" class="me-3">
+                        {{collectionPoint.label}}
+                    </mat-radio-button>
+                    }
+                </mat-radio-group>
+            </div>
+        </div>
+        }
+        }
+    </div>
+
+</ng-template>
+
+<ng-template #pdElementSelection>
+    <div class="flex flex-col gap-2 flex-grow">
+        @if(viewType==ADD_VIEW){
+        <ng-container *ngTemplateOutlet="addPdElements; context:{}">
+        </ng-container>
+        }
+        @else{
+        <div class="grid grid-cols-12 mb-2 justify-between">
+            @if(isEditMode){
+            <div class="col-span-12 text-end">
+                <div class="d-flex w-full justify-end my-auto">
+                    <loading-button type="secondary" (onButtonClick)="onAddNew()">
+                        Add new
+                    </loading-button>
+                </div>
+            </div>
+            }
+        </div>
+        <div class="!text-right">
+            <button class="fontColor label-medium">
+                {{ totalSelected }} selected
+            </button>
+        </div>
+        <div class="overflow-auto h-100">
+            <ng-container
+                *ngTemplateOutlet="ngTemplatePdElementsTable; context:{dataSource: datasource, tableHeaders:tableHeaders, displayedHeaders:displayedHeaders}">
+            </ng-container>
+        </div>
+        }
+    </div>
+</ng-template>
+
+
+<!-- Table -->
+<ng-template #ngTemplatePdElementsTable let-dataSource="dataSource" let-tableHeaders="tableHeaders"
+    let-displayedHeaders="displayedHeaders">
+
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table">
+        <ng-container matColumnDef="select" sticky>
+            <th mat-header-cell *matHeaderCellDef [style.width]="'50px'" [style.minWidth]="'50px'" class="px-0">
+                <mat-checkbox [(ngModel)]="selectAll" class="label-medium me-2 my-auto enabled-mat-checkbox"
+                    [disabled]="!isEditMode" (change)="onChangeSelectAll($event)">
+                </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let element" [style.width]="'50px'" [style.minWidth]="'50px'" class="px-0">
+                <div class="my-auto">
+                    <mat-checkbox [(ngModel)]="element.selected" class="label-medium me-2 my-auto enabled-mat-checkbox"
+                        [disabled]="!isEditMode" (change)="onChangeEvent(element)">
+                    </mat-checkbox>
+                </div>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="personalDataElement" sticky>
+            <th mat-header-cell *matHeaderCellDef>Personal Data Element</th>
+            <td mat-cell *matCellDef="let element">
+                <div class="my-auto">{{element?.pdElement?.name}}</div>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="dataSubject">
+            <th mat-header-cell *matHeaderCellDef>Data Subject</th>
+            <td mat-cell *matCellDef="let element">
+                {{ element.dataSubject?.name }}
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="dataCategory" sticky>
+            <th mat-header-cell *matHeaderCellDef>Data Category</th>
+            <td mat-cell *matCellDef="let element">
+                <div>{{element?.pdElement?.categoryName}}</div>
+            </td>
+        </ng-container>
+        <ng-container matColumnDef="sensitivity" sticky>
+            <th mat-header-cell *matHeaderCellDef>Sensitivity</th>
+            <td mat-cell *matCellDef="let element">
+                <div class="status p-2 d-flex align-items-center justify-content-center label-large"
+                    [ngStyle]="{ 'background-color': getSensitivityColors(element?.pdElement?.sensitivity),color: getSensitivityTextColors(element?.pdElement?.sensitivity)}">
+                    {{ getSensitivityText(element?.pdElement?.sensitivity) }}
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+    </table>
+</ng-template>
+
+
+<ng-template #addPdElements>
+    @if(pdElementForm){
+    <div [formGroup]="pdElementForm">
+        <div class="grid grid-cols-12 my-2">
+            <div class="col-span-8">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input  mat-mdc-mb-0 mb-3">
+                    <mat-label>Data Subject</mat-label>
+                    <mat-select #categorySelect formControlName="dataSubject" panelClass="custom-mat-select">
+                        <div class="option-wrapper">
+                            @for(dataSubject of dataSubjectList; track dataSubject.id){
+                            <mat-option [value]="dataSubject">{{ dataSubject.name }}</mat-option>
+                            }
+                        </div>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="col-span-8">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input  mat-mdc-mb-0 mb-3">
+                    <mat-label>Choose Category</mat-label>
+                    <mat-select #categorySelect formControlName="pdElementCategory" panelClass="custom-mat-select">
+                        <div class="option-wrapper">
+                            @for(category of bpaCategoriesList; track category.id){
+                            <mat-option [value]="category">{{ category.name }}</mat-option>
+                            }
+                        </div>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="grid grid-cols-12 mb-2">
+            <div class="col-span-8">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+                    <mat-label class="body-medium">Name</mat-label>
+                    <input matInput formControlName="pdElementName" />
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+    }
+</ng-template>

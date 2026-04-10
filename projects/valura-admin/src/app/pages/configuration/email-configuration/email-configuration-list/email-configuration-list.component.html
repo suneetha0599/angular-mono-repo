@@ -1,0 +1,191 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+
+    <div class="p-3 pb-0">
+        <div class="flex items-center justify-between">
+            <div class="headline-medium my-auto">Email Configuration</div>
+            @if(emailFullAccess){
+            <loading-button type="primary" (onButtonClick)="onCreateTemplate()">
+                Create Template
+            </loading-button>
+            }
+        </div>
+    </div>
+    <div class="p-3 flex-1 overflow-hidden">
+        <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+            <div class="relative flex-1 overflow-hidden">
+                <div class="flex gap-2 z-10" style="position:absolute; top:6px; right:12px;">
+
+                    @if(!showSearch){
+                    <button mat-mini-fab class="material-symbols-outlined shadow-none bg-light mat-md-fab-btn"
+                        (click)="toggleSearch()">
+                        <mat-icon color="primary">search</mat-icon>
+                    </button>
+                    } @if(showSearch){
+                    <div class="flex items-center">
+                        <mat-form-field appearance="outline"
+                            class="mat-sm-input mat-round-input enabled-mat-input search-bar mat-mdc-mb-0">
+                            <mat-icon
+                                class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+                                matPrefix>search</mat-icon>
+                            <input matInput [(ngModel)]="searchText" placeholder="Search..." [debounceTime]="1000"
+                                (ngModelDebounceChange)="onSearchChange()" />
+                            @if(searchText){
+                            <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+                                <mat-icon
+                                    class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey">close</mat-icon>
+                            </button>
+                            }
+                        </mat-form-field>
+                        <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()">
+                            <mat-icon
+                                class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-primary">search</mat-icon>
+                        </button>
+                    </div>
+                    }
+                </div>
+                <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+                    [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
+
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            <span>All</span>
+                        </ng-template>
+                        <div class="h-full flex flex-col overflow-hidden">
+                            <ng-container *ngTemplateOutlet="templateTable"></ng-container>
+                            <div class="bg-white z-10">
+                                @if(this.totalItems > 10){
+                                <mat-paginator #paginator class="bg-white" [pageSize]="pageSize" [length]="totalItems"
+                                    (page)="onPageChange($event)" [pageSizeOptions]="[10, 50, 100]"
+                                    aria-label="Select page">
+                                </mat-paginator>
+                                }
+                            </div>
+                        </div>
+                    </mat-tab>
+
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            <span>Drafts</span>
+                        </ng-template>
+                        <div class="h-full flex flex-col overflow-hidden">
+                            <ng-container *ngTemplateOutlet="templateTable"></ng-container>
+                        </div>
+                    </mat-tab>
+
+                </mat-tab-group>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #templateTable>
+    @if(!isLoading && hasApiError){
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    }
+    @else if(!isLoading && isEmptyRequest){
+    <item-not-found [imgHeight]="'200px'" [heading]=errorTitle></item-not-found>
+    }
+    @else{
+    <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+        <table mat-table [dataSource]="isLoading ? shimmerDataSource : (dataSource.data.length === 0 ? [] : dataSource)"
+            matSort class="mat-elevation-z8 w-100 custom-table table table-layout-fixed"
+            (matSortChange)="onSortChange($event)">
+
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="name" [style.width]="'25%'">Name
+                </th>
+                <td mat-cell *matCellDef="let element; let i = index" class="truncate-cell">
+                    <ng-container *ngIf="!isLoading">
+                        <span class="truncate-text" [class.label-large]="emailFullAccess"
+                            [class.text-black-500]="!emailFullAccess" [class.text-primary]="emailFullAccess"
+                            [style.cursor]="emailFullAccess ? 'pointer' : 'default'"
+                            [style.pointer-events]="emailFullAccess ? 'auto' : 'none'"
+                            (click)="emailFullAccess && onEditTemplate(element, i)" appTruncateTooltip
+                            [matTooltip]="element.get('name').value" matTooltipPosition="above">
+                            {{ element.get('name').value }}
+                        </span>
+                    </ng-container>
+                    <ng-container *ngIf="isLoading">
+                        <div class="shimmer-line shimmer-large"></div>
+                    </ng-container>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="triggerDescription">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="triggerDescription" [style.width]="'25%'">Trigger
+                    Event
+                </th>
+                <td mat-cell *matCellDef="let element" class="truncate-cell">
+                    <ng-container *ngIf="!isLoading">
+                        <span class="truncate-text" appTruncateTooltip
+                            [matTooltip]="element.get('triggerDescription').value" matTooltipPosition="above">
+                            {{element.get('triggerDescription').value}}
+                        </span>
+                    </ng-container>
+                    <ng-container *ngIf="isLoading">
+                        <div class="shimmer-line shimmer-medium"></div>
+                    </ng-container>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="subject">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="subject" [style.width]="'40%'">Subject</th>
+                <td mat-cell *matCellDef="let element" class="truncate-cell">
+                    <ng-container *ngIf="!isLoading">
+                        <span class="truncate-text" appTruncateTooltip
+                            [matTooltip]="element.get('subject').value || 'No subject'" matTooltipPosition="above">
+                            {{element.get('subject').value || 'No subject'}}
+                        </span>
+                    </ng-container>
+                    <ng-container *ngIf="isLoading">
+                        <div class="shimmer-line shimmer-large"></div>
+                    </ng-container>
+                </td>
+            </ng-container>
+
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef [style.width]="'10%'">
+                    <span class="text-grey title-small">Actions</span>
+                </th>
+                <td mat-cell *matCellDef="let element; let i = index" class="px-2 whitespace-nowrap actions-col">
+                    <ng-container *ngIf="!isLoading">
+                        <div class="flex justify-center items-center gap-2">
+                            <mat-icon class="material-symbols-outlined mat-md-icon"
+                                [class.text-primary]="emailFullAccess" [class.text-grey]="!emailFullAccess"
+                                [class.cursor-pointer]="emailFullAccess" [style.opacity]="emailFullAccess ? '1' : '0.8'"
+                                (click)="emailFullAccess && onEditTemplate(element, i)" title="Edit">
+                                edit
+                            </mat-icon>
+                            <mat-icon class="material-symbols-outlined mat-md-icon"
+                                [class.text-primary]="emailFullAccess" [class.text-grey]="!emailFullAccess"
+                                [class.cursor-pointer]="emailFullAccess" [style.opacity]="emailFullAccess ? '1' : '0.8'"
+                                (click)="emailFullAccess && onDeleteTemplate(element, i)" title="Delete">
+                                delete
+                            </mat-icon>
+                        </div>
+                    </ng-container>
+                    <ng-container *ngIf="isLoading">
+                        <div class="shimmer-line shimmer-small"></div>
+                    </ng-container>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.shimmer-row]="isLoading"></tr>
+
+            <tr *ngIf="!isLoading && dataSource.data.length === 0" class="no-data-row">
+                <td [attr.colspan]="displayedColumns.length" class="text-center py-16">
+                    <div class="flex flex-col items-center">
+                        <mat-icon class="text-6xl text-gray-400 mb-4">email</mat-icon>
+                        <p class="text-gray-600 text-lg mb-2">No email templates found</p>
+                        <p class="text-gray-500">Create your first template to get started</p>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    }
+</ng-template>

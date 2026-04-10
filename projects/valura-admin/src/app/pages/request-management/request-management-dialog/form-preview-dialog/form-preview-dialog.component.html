@@ -1,0 +1,13 @@
+<!-- Dialog Header -->
+<h3 mat-dialog-title class="flex justify-between items-center px-4 py-2">
+  <span class="p-1 headline-small truncate max-w-[35%]" >Preview Details</span>
+
+  <div class="flex items-center gap-2">
+    <button class="p-0" mat-icon-button mat-dialog-close aria-label="Close dialog" matTooltip="Close"
+      (click)="close()">
+      <mat-icon class="material-symbols-outlined">close</mat-icon>
+    </button>
+  </div>
+</h3>
+
+<iframe *ngIf="externalLink" #extFrame [src]="externalLink" frameborder="0" class="size"></iframe>

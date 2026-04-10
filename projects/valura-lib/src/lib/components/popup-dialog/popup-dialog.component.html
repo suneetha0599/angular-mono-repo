@@ -1,0 +1,49 @@
+<div mat-dialog-title class="dialog-header">
+  <mat-icon class="material-symbols-outlined" *ngIf="data.showIcon" [ngClass]="getIconClass()">{{ data.iconName
+    }}</mat-icon>
+  <h2 class="dialog-title-text ms-3">{{ data.title }}</h2>
+</div>
+
+<div mat-dialog-content class="m-0 p-3">
+  <div *ngIf="data.type === 'confirmation'">
+    <p class="confirmation-text mb-2">{{ data.content }}</p>
+    <div *ngIf="data.confirmationDetail" class="confirmation-detail-box">
+      <p class="source-name">{{ data.confirmationDetail }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="data.type === 'pdElements'" class="pd-elements-container">
+    <div *ngIf="!data.pdElements || data.pdElements.length === 0" class="no-elements-found">
+      <mat-icon class="info-icon material-symbols-outlined">info_outline</mat-icon>
+      <p>No personal data elements found.</p>
+    </div>
+
+    <div *ngFor="let element of data.pdElements; let i = index" class="pd-element-item">
+      <div class="pd-element-index">{{ i + 1 }}</div>
+      <span class="pd-element-name">{{ element }}</span>
+    </div>
+  </div>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <ng-container *ngIf="data.type === 'confirmation'">
+      <loading-button type="secondary" (onButtonClick)="onConfirm(false)" class="cancel">
+        {{ data.cancelText || 'Cancel' }}
+      </loading-button>
+
+    <loading-button type="primary" (onButtonClick)="onConfirm(true)" class="confirm-btn">
+      <mat-icon class="material-symbols-outlined mat-md-icon m-lg-1">
+        {{ data.confirmIcon || 'delete_outline' }}
+      </mat-icon>
+      {{ data.confirmText || 'Delete' }}
+    </loading-button>
+
+    </ng-container>
+    <ng-container *ngIf="data.type === 'pdElements'">
+      <button mat-flat-button [mat-dialog-close]="true">
+        Cancel
+      </button>
+    </ng-container>
+  </div>
+</div>

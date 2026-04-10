@@ -1,0 +1,694 @@
+<div class="flex flex-col overflow-hidden h-full">
+    <div class="flex justify-between items-center px-3 pt-2">
+        <div class="flex my-auto gap-2">
+            @if(showForm){
+            <button class="flex my-auto">
+                <mat-icon class="material-symbols-outlined border border-gray-200 rounded  hover:bg-gray-200"
+                    (click)="cancelForm()">arrow_back</mat-icon>
+            </button>
+            }
+            <div class="title-medium my-auto">
+                {{
+                isViewOnlyValue
+                ? 'View Rule'
+                : showForm
+                ? (editingIndex !== null ? 'Edit Rule' : 'Add Rule')
+                : 'Rule details'
+                }}
+            </div>
+        </div>
+        <button mat-icon-button (click)="close()">
+            <mat-icon class="material-symbols-outlined">close</mat-icon>
+        </button>
+    </div>
+    <hr>
+    @if(!showForm){
+    <div class="flex-1 overflow-y-auto min-h-0 px-3">
+        @if(!isViewOnly){
+        <div class="flex justify-end my-2">
+            <loading-button type="light" [basicButton]="true" class="label-medium" (onButtonClick)="addNewRule()">
+                <mat-icon class="material-symbols-outlined me-2">add</mat-icon>
+                {{rulesList.length > 0 ?'Add Another Rule' :'Add Rule'}}
+            </loading-button>
+        </div>
+        }
+        @if(rulesList.length > 0){
+        <table mat-table [dataSource]="rulesList" [trackBy]="trackByRuleIndex"
+            class="w-full custom-table table table-md-row table-layout-fixed">
+            <ng-container matColumnDef="trigger">
+                <th mat-header-cell *matHeaderCellDef [style.width]="'10%'">Trigger Type</th>
+                <td mat-cell *matCellDef="let rule">{{ getRuleTriggerType(rule) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef [style.width]="'80%'">Description</th>
+                <td mat-cell *matCellDef="let rule" class="text-primary font-medium">
+                    <span [appEllipsisTooltip]="getRuleDescription(rule)" [matTooltip]="getRuleDescription(rule)"
+                        matTooltipPosition="below" matTooltipClass="material-tooltip">
+                    </span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef [style.width]="'10%'">Action</th>
+                <td mat-cell *matCellDef="let rule; let i = index">
+                    @if(!isViewOnly){
+                    <div class="flex !gap-0">
+                        <button mat-icon-button (click)="editRule(i)" class="tiny-icon-btn">
+                            <mat-icon class="edit-icon material-symbols-outlined text-primary">edit</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="deleteRule(i)" class="tiny-icon-btn">
+                            <mat-icon class="edit-icon material-symbols-outlined text-primary">delete</mat-icon>
+                        </button>
+                    </div>
+                    } @else{
+                    <button mat-icon-button (click)="viewRule(i)" class="tiny-icon-btn">
+                        <mat-icon class="edit-icon material-symbols-outlined text-primary">visibility</mat-icon>
+                    </button>
+                    }
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedHeaders"></tr>
+        </table>
+        } @else {
+        <div class="flex justify-center items-center text-gray-500 h-[calc(100vh-140px)]">
+            No rules added yet. Click "Add Rule" to create one.
+        </div>
+        }
+    </div>
+    <!-- <div class="flex justify-end gap-3 p-3">
+      <loading-button type="secondary" (onButtonClick)="close()">Close</loading-button>
+      </div> -->
+    }
+    @if(showForm){
+    <form [formGroup]="form" class="flex-1 overflow-y-auto min-h-0 scroll-w-0 px-3">
+        <div class="py-4 space-y-4">
+            <div class="flex gap-3 items-center">
+                <div class="body-medium">IF</div>
+                <mat-form-field appearance="outline" class="flex-1 mat-sm-input mat-mdc-mb-0 enabled-mat-input">
+                    <mat-label>Question</mat-label>
+                    <input matInput [value]="questionText" [disabled]="isViewOnly && viewMode" />
+                </mat-form-field>
+            </div>
+            <div class="flex gap-3 justify-end">
+                @if(!isViewOnly && !viewMode){
+                <loading-button type="secondary" (click)="addCondition()"
+                    [disabled]="isSingleValueType() && blocks.length > 0">
+                    <mat-icon class="material-symbols-outlined mr-1">add</mat-icon>
+                    Add Condition
+                </loading-button>
+                }
+                <!-- 
+               <loading-button type="secondary" (click)="addGroup()">
+                   <mat-icon class="material-symbols-outlined mr-1">add</mat-icon>
+                   Add Group
+               </loading-button> -->
+            </div>
+            <div formArrayName="blocks">
+                @for(block of blocks.controls; track $index; let bi = $index){
+                <div [formGroupName]="bi" class="space-y-3">
+                    @if(block.get('type')?.value === 'group'){
+                    <div class="border rounded-lg p-2 bg-white">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="font-medium">Group {{ bi + 1 }}</div>
+                            <div class="flex items-center gap-3">
+                                <mat-form-field appearance="outline" class="w-24 mat-sm-input mat-mdc-mb-0">
+                                    <mat-label>Logic</mat-label>
+                                    <mat-select formControlName="groupLogic">
+                                        <mat-option value="AND">AND</mat-option>
+                                        <mat-option value="OR">OR</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <button mat-icon-button color="warn" (click)="removeBlock(bi)" [disabled]="isViewOnly">
+                                    <mat-icon class="mat-md-icon material-symbols-outlined">delete</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                        <div formArrayName="conditions" class="space-y-3">
+                            @for(cond of getConditionsArray(block).controls; track $index; let ci = $index){
+                            <div class="flex items-center gap-3 space-y-5" [formGroupName]="ci">
+                                <div class="w-8 font-medium text-sm">
+                                    C{{ getGlobalConditionNumber(bi, ci) }}
+                                </div>
+                                <div class="w-16 text-sm text-gray-600">
+                                    Answer
+                                </div>
+                                <ng-container [ngTemplateOutlet]="conditionFields"
+                                    [ngTemplateOutletContext]="{ $implicit: cond }">
+                                </ng-container>
+                                <button mat-icon-button color="warn" (click)="removeConditionFromGroup(bi, ci)"
+                                    [disabled]="isViewOnly || viewMode">
+                                    <mat-icon class="material-symbols-outlined mat-md-icon">delete</mat-icon>
+                                </button>
+                            </div>
+                            }
+                        </div>
+                        <button mat-button type="button" (click)="addConditionToGroup(bi)" class="mt-2">
+                            <mat-icon class="material-symbols-outlined mr-1">add</mat-icon>
+                            Add Condition Inside Group
+                        </button>
+                    </div>
+                    }
+                    @if(block.get('type')?.value === 'condition'){
+                    <div class="flex items-center gap-3 border rounded-lg p-2 bg-white">
+                        <div class="w-8 font-medium text-sm">
+                            C{{ getGlobalConditionNumber(bi) }}
+                        </div>
+                        <div class="w-16 text-sm text-gray-600">
+                            Answer
+                        </div>
+                        <ng-container [ngTemplateOutlet]="conditionFields"
+                            [ngTemplateOutletContext]="{ $implicit: block }">
+                        </ng-container>
+                        <button mat-icon-button color="warn" (click)="removeBlock(bi)"
+                            [disabled]="isViewOnly || viewMode">
+                            <mat-icon class="material-symbols-outlined mat-md-icon">delete</mat-icon>
+                        </button>
+                    </div>
+                    }
+                    @if(bi < blocks.length - 1){ <div class="flex items-center gap-3 justify-start my-3">
+                        <mat-form-field appearance="outline" class="w-24 mat-sm-input mat-mdc-mb-0">
+                            <mat-label>Logic</mat-label>
+                            <mat-select [formControl]="getConnectorControl(bi)">
+                                <mat-option value="AND">AND</mat-option>
+                                <mat-option value="OR">OR</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        <div class="pt-3">
+            <div class="font-medium mb-2">Expression Preview</div>
+            <div class="p-3 bg-gray-100 rounded text-sm font-mono">
+                {{ generateExpression() }}
+            </div>
+        </div>
+</div>
+<div class="space-y-4">
+    <div class="body-medium">THEN</div>
+    <div class="border-t border-gray-200"></div>
+    <div class="body-medium">Trigger</div>
+    <div class="flex gap-3">
+        @for(option of triggerOptions; track option.key){
+        <button mat-button type="button" [disabled]="isViewOnly || viewMode" (click)="trigger = option.key"
+            class="border rounded px-3 p-2 flex items-center gap-2 label-large gray-btn" [ngClass]="{
+            '!bg-[#F8F8F8] active-btn !border-none': trigger === option.key
+            }">
+            @if(trigger === option.key){
+            <mat-icon class="text-[16px] material-symbols-outlined active-btn">
+                check
+            </mat-icon>
+            }
+            {{ option.label }}
+        </button>
+        }
+    </div>
+    @if(trigger === 'display'){
+    <div [formGroup]="form" class="flex flex-col gap-3 w-full">
+        <div class="grid grid-cols-3 gap-3">
+            <mat-form-field appearance="outline" class="mat-sm-input mat-md-mb-0">
+                <mat-label>Section</mat-label>
+                <mat-select panelClass="custom-checkbox" formControlName="sectionId" multiple>
+                    <mat-select-trigger>
+                        {{ getSelectedSectionNames() }}
+                    </mat-select-trigger>
+                    @for(s of filteredSections; track s.id) {
+                    <mat-option [value]="s.id" [disabled]="isViewOnly || viewMode || isAlreadySelectedSection(s.id)">
+                        {{ s.displaySectionOrder }}. {{ s.section }}
+                    </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+            <mat-checkbox formControlName="entireSection">
+                Entire section
+            </mat-checkbox>
+        </div>
+        @if(!form.value.entireSection){
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Question</mat-label>
+            <mat-select panelClass="custom-checkbox" formControlName="targetQuestionId" multiple>
+                <mat-select-trigger>
+                    {{ getSelectedQuestionNames() }}
+                </mat-select-trigger>
+                @for (q of questionsForSelectedSection; track q.id; let i = $index) {
+                <mat-option [value]="q.id" class="single-line-option"
+                    [disabled]="isViewOnly || viewMode || isAlreadySubQuestion(q.id)">
+                    {{ q.displaySectionOrder}}. {{ q.displayOrder }}
+                    . <span [innerHTML]="q.text"></span>
+                </mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+        }
+    </div>
+    }
+    @if (trigger === 'risk') {
+    <div class="flex flex-col gap-3 w-full">
+        <div>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input w-full">
+                <mat-label>Risk Title</mat-label>
+                <input matInput formControlName="riskParameter" />
+                <mat-error>
+                    <custom-mat-error [errors]="riskParameter.errors" [control]="riskParameter"
+                        controlActualName="Risk Title" class="inline-block">
+                    </custom-mat-error>
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Description*</label>
+            <app-custom-editor [initialContent]="riskEditorInitialContent" [showInsertVariable]="false"
+                (contentChange)="onDescriptionChange($event)">
+                <mat-error>
+                    <custom-mat-error [errors]="riskDescription.errors" [control]="riskDescription"
+                        controlActualName="Description" class="inline-block">
+                    </custom-mat-error>
+                </mat-error>
+            </app-custom-editor>
+
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Likelihood</mat-label>
+                <mat-select formControlName="likelihood">
+                    @for (s of likelihoodList; track $index) {
+                    <mat-option [value]="s.value">
+                        {{ s.label }}
+                    </mat-option>
+                    }
+                </mat-select>
+                <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="likelihoodControl.errors"
+                        [control]="likelihoodControl" controlActualName="likelihoodControl">
+                    </custom-mat-error>
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Impact</mat-label>
+                <mat-select formControlName="severity">
+                    @for (s of impactLevel; track $index) {
+                    <mat-option [value]="s.value">
+                        {{ s.label }}
+                    </mat-option>
+                    }
+                </mat-select>
+                <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="severityControl.errors" [control]="severityControl"
+                        controlActualName="severityControl">
+                    </custom-mat-error>
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Risk Level</mat-label>
+                <input matInput formControlName="riskLevel" readonly />
+                <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="riskLevelControl.errors"
+                        [control]="riskLevelControl" controlActualName="riskLevelControl">
+                    </custom-mat-error>
+                </mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+    <div>
+        <div class="text-sm text-gray-700 mb-2">Measure Type</div>
+        <div class="flex gap-3 mb-4 flex-wrap">
+            @for (op of riskOptions; track $index) {
+            <button mat-button type="button" class="border border-gray-200 p-2 label-large gray-btn"
+                [ngClass]="{'!bg-[#F8F8F8] active-btn !border-none':form.get('measureType')?.value === op.key}"
+                (click)="form.get('measureType')?.setValue(op.key)" [disabled]="isViewOnly || viewMode">
+                @if (form.get('measureType')?.value === op.key) {
+                <mat-icon class="material-symbols-outlined">
+                    check
+                </mat-icon>
+                }
+                {{ op.label | titlecase }}
+            </button>
+            }
+        </div>
+        @if(form.get('measureType')?.value){
+        <div class="grid grid-cols-2 gap-3">
+            @if (form.get('measureType')?.value === 'MITIGATE') {
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Mitigate Measure</mat-label>
+                <input matInput formControlName="mitigateMeasure" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Standard</mat-label>
+                <input matInput formControlName="standard" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Control Category</mat-label>
+                <input matInput formControlName="controlCategory" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Control Description</mat-label>
+                <input matInput formControlName="controlDescription" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Effect on Risk</mat-label>
+                <mat-select formControlName="effectOnRisk">
+                    @for (s of riskEffects; track $index) {
+                    <mat-option [value]="s.key">
+                        {{ s.label }}
+                    </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+            }
+            @else {
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Description</mat-label>
+                <input matInput formControlName="measureDescription" />
+            </mat-form-field>
+            }
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Residual Risk</mat-label>
+                <mat-select formControlName="residualRisk">
+                    @for (s of residualRisk; track $index) {
+                    <mat-option [value]="s.key">
+                        {{ s.label }}
+                    </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+        }
+    </div>
+    }
+    @if (trigger === 'assessment') {
+    <div>
+        <div class="mb-3 mt-3">
+            <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                <mat-label>Assessment Title</mat-label>
+                <input matInput formControlName="assessmentName" />
+                <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="assessmentName.errors" [control]="assessmentName"
+                        controlActualName="Assessment">
+                    </custom-mat-error>
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"> Description</label>
+            <app-custom-editor [initialContent]="editorInitialContentAssesmet" [showInsertVariable]="false"
+                (contentChange)="onDescriptionChange($event)">
+            </app-custom-editor>
+            <!-- <mat-error>
+                <custom-mat-error [errors]="assessmentDescription.errors" [control]="assessmentDescription"
+                    controlActualName="Assessment type">
+                </custom-mat-error>
+            </mat-error> -->
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Assessment Type</mat-label>
+                <mat-select formControlName="assessmentType" (selectionChange)="onAssessmentTypeChange()">
+                    @for (s of assessmentTypes; track $index) {
+                    <mat-option [value]="s.id">
+                        {{ s.name }}
+                    </mat-option>
+                    }
+                </mat-select>
+                <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="assementType.errors" [control]="assementType"
+                        controlActualName="Assessment">
+                    </custom-mat-error>
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1 mat-sm-input">
+                <mat-label>Choose Template</mat-label>
+                <mat-select formControlName="templateId" (openedChange)="onTemplateDropdownOpen($event)">
+                    <mat-option *ngFor="let s of templateList; trackBy: trackByTemplate" [value]="s.templateId">
+                        {{ s.name }}
+                    </mat-option>
+                    <mat-option *ngIf="templatePaginationDetail.loading" disabled>
+                        Loading...
+                    </mat-option>
+                </mat-select>
+                <mat-error>
+                    <custom-mat-error class="inline-block" [errors]="templateId.errors" [control]="templateId"
+                        controlActualName="templateId">
+                    </custom-mat-error>
+                </mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+    }
+    @if(trigger === 'task'){
+    <div class="mb-3 mt-3">
+        <mat-form-field appearance="outline" floatLabel="auto" class="w-full mat-sm-input">
+            <mat-label>Task Title</mat-label>
+            <input matInput formControlName="taskTitle" maxlength="100" />
+            <mat-error>
+                <custom-mat-error [errors]="taskTitleControl.errors" [control]="taskTitleControl"
+                    controlActualName="Task Title" class="inline-block">
+                </custom-mat-error>
+            </mat-error>
+        </mat-form-field>
+    </div>
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description*</label>
+        <app-custom-editor [initialContent]="editorInitialContent" [showInsertVariable]="false"
+            (contentChange)="onDescriptionChange($event)">
+        </app-custom-editor>
+        <mat-error>
+            <custom-mat-error [errors]="descriptionControl.errors" [control]="descriptionControl"
+                controlActualName="taskDescription">
+            </custom-mat-error>
+        </mat-error>
+    </div>
+    <div>
+        <mat-form-field appearance="outline" class="w-1/2 mat-sm-input">
+            <mat-label>Due Date</mat-label>
+            <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" [min]="minToDateFilter" readonly>
+            <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker">
+                <mat-icon class="material-symbols-outlined mat-md-icon">
+                    calendar_month
+                </mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #dueDatePicker></mat-datepicker>
+        </mat-form-field>
+    </div>
+    <div class="grid grid-cols-[auto_1fr] gap-15 mb-5">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+            <div class="flex gap-2">
+                @for(priority of priorityOptions; track $index) {
+                <button mat-button type="button" (click)="selectPriority(priority.value)"
+                    [disabled]="isViewOnly || viewMode"
+                    class="border rounded px-3 p-2 flex items-center gap-2 label-large gray-btn"
+                    [ngClass]="{'!bg-[#F8F8F8] active-btn !border-none': form.get('priority')?.value === priority.value}">
+                    @if(form.get('priority')?.value === priority.value){
+                    <mat-icon class="text-[16px] material-symbols-outlined active-btn">
+                        check
+                    </mat-icon>
+                    }
+                    {{ priority.label }}
+                </button>
+                }
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Level Of Effort</label>
+            <div class="flex gap-2">
+                @for(effort of effortLevels; track $index) {
+                <button mat-button type="button" (click)="selectEffortLevel(effort.value)"
+                    [disabled]="isViewOnly || viewMode"
+                    class="border rounded px-3 p-2 flex items-center gap-2 label-large gray-btn"
+                    [ngClass]="{'!bg-[#F8F8F8] active-btn !border-none': form.get('effortLevel')?.value === effort.value}">
+                    @if(form.get('effortLevel')?.value === effort.value){
+                    <mat-icon class="text-[16px] material-symbols-outlined active-btn">
+                        check
+                    </mat-icon>
+                    }
+                    {{ effort.label }}
+                </button>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Add Labels</label>
+        <mat-form-field appearance="outline" class="w-full mat-sm-auto-input mat-mdc-mb-0">
+            <mat-chip-grid #labelChipGrid aria-label="Label selection">
+                @for (label of form.get('labels')?.value || []; track $index; let i = $index) {
+                <mat-chip-row [removable]="!(isViewOnly || viewMode)" (removed)="removeLabel(i)">
+                    {{ getLabelName(label) }}
+                    <button type="button" matChipRemove aria-label="Remove label"
+                        [disabled]="isViewOnly || viewMode || labelsLoading()">
+                        <mat-icon class="delete-icn material-symbols-outlined mat-md-icon">close</mat-icon>
+                    </button>
+                </mat-chip-row>
+                }
+            </mat-chip-grid>
+            <input #labelInput matInput [matChipInputFor]="labelChipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="false"
+                (matChipInputTokenEnd)="addTypedLabel($event)" [matAutocomplete]="autoLabels"
+                [(ngModel)]="labelSearchTerm" [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="onSearchLabels($event)"
+                placeholder="{{ (form.get('labels')?.value?.length > 0) ? '' : 'Type to add new or select from list' }}"
+                autocomplete="off" [disabled]="isViewOnly || viewMode" />
+            <mat-autocomplete #autoLabels="matAutocomplete" (optionSelected)="selectLabel($event.option.value)"
+                class="labels-autocomplete-panel">
+                @if (labelsLoading()) {
+                <mat-option disabled class="py-4" [disabled]="isViewOnly || viewMode">
+                    <div class="flex items-center justify-center gap-2">
+                        <mat-spinner diameter="20"></mat-spinner>
+                        <span>Loading labels...</span>
+                    </div>
+                </mat-option>
+                }
+                @else if (!labelsLoading() && filteredLabelsList.length === 0 && labelSearchTerm.trim()) {
+                <mat-option disabled>
+                    <span class="text-gray-500 italic">No matching labels found</span>
+                </mat-option>
+                }
+                @else if (!labelsLoading() && filteredLabelsList.length === 0) {
+                <mat-option disabled>
+                    <span class="text-gray-500 italic">No labels available</span>
+                </mat-option>
+                }
+                @else {
+                @for (label of filteredLabelsList; track $index) {
+                <mat-option [value]="label">
+                    <div class="flex items-center justify-between w-full">
+                        <span>{{ label.name }}</span>
+                        @if (isLabelSelected(label)) {
+                        <mat-icon class="text-primary text-sm material-symbols-outlined">check</mat-icon>
+                        }
+                    </div>
+                </mat-option>
+                }
+                }
+            </mat-autocomplete>
+            <button mat-icon-button matSuffix tabindex="-1" type="button" (click)="openLabelsDropdown()"
+                matTooltip="Open labels list" [disabled]="labelsLoading()">
+                <mat-icon class="material-symbols-outlined mat-md-icon">
+                    arrow_drop_down
+                </mat-icon>
+            </button>
+        </mat-form-field>
+    </div>
+    }
+</div>
+</form>
+<div class="flex justify-end gap-3 p-3">
+    @if(!isViewOnly && !viewMode){
+    <loading-button type="secondary" (onButtonClick)="cancelForm()">Cancel</loading-button>
+    <loading-button type="primary" (onButtonClick)="saveRule()"
+        [disabled]="!hasValidConditions() || form.invalid">Save</loading-button>
+    }
+</div>
+}
+</div>
+
+<ng-template #conditionFields let-cond>
+    <ng-container [formGroup]="asFormGroup(cond)">
+        <mat-form-field appearance="outline" class="w-40 mat-sm-input mat-mdc-mb-0">
+            <mat-label>Operator</mat-label>
+            <mat-select formControlName="operator" (selectionChange)="onOperatorChange(cond)">
+                @for(op of getAvailableOperators(); track op){
+                <mat-option [value]="op">
+                    {{ op.replace('_',' ') | titlecase }}
+                </mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+        <div class="flex-1">
+            @if(!isNoValueOperator(cond)){
+            <div>
+                @if(isDateType() && !isBetween(cond)){
+                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                    <mat-label>Value</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="value" />
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+                }
+                @if(isBetween(cond)){
+                <div class="flex gap-3">
+                    <ng-container *ngIf="isDateType(); else numericBetween">
+                        <mat-form-field appearance="outline" class="flex-1 mat-sm-input mat-mdc-mb-0">
+                            <mat-label>From</mat-label>
+                            <input matInput [matDatepicker]="fromPicker" formControlName="value" />
+                            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #fromPicker></mat-datepicker>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="flex-1 mat-sm-input mat-mdc-mb-0">
+                            <mat-label>To</mat-label>
+                            <input matInput [matDatepicker]="toPicker" formControlName="valueTo" />
+                            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #toPicker></mat-datepicker>
+                        </mat-form-field>
+                    </ng-container>
+                    <ng-template #numericBetween>
+                        <mat-form-field appearance="outline" class="flex-1 mat-sm-input mat-mdc-mb-0">
+                            <mat-label>From</mat-label>
+                            <input matInput type="number" formControlName="value">
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="flex-1 mat-sm-input mat-mdc-mb-0">
+                            <mat-label>To</mat-label>
+                            <input matInput type="number" formControlName="valueTo">
+                        </mat-form-field>
+                    </ng-template>
+                </div>
+                }
+                @if(isSelectType() && isMultiValueOperator(cond)){
+                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                    <mat-label>Value</mat-label>
+                    <mat-select panelClass="custom-checkbox" formControlName="value" multiple>
+                        @for(opt of currentQuestion?.options; track $index){
+                        <mat-option [value]="opt.value">
+                            {{ opt.value }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                }
+                @if(isSelectType() && !isMultiValueOperator(cond) && !isMultiSelect()){
+                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                    <mat-label>Value</mat-label>
+                    <mat-select formControlName="value">
+                        @for(opt of currentQuestion?.options; track $index){
+                        <mat-option [value]="opt.value">
+                            {{ opt.value }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                }
+                @if(isMultiSelect() && !isMultiValueOperator(cond)){
+                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                    <mat-label>Value</mat-label>
+                    <mat-select panelClass="custom-checkbox" formControlName="value" multiple>
+                        @for(opt of currentQuestion?.options; track $index){
+                        <mat-option [value]="opt.value">
+                            {{ opt.value }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                }
+                @if(isNumericType() && !isBetween(cond)){
+                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                    <mat-label>Value</mat-label>
+                    <input *ngIf="isMultiValueOperator(cond); else singleNumber" matInput formControlName="value"
+                        placeholder="Enter comma separated values" (blur)="convertToArray(cond)" />
+                    <ng-template #singleNumber>
+                        <input matInput type="number" formControlName="value" />
+                    </ng-template>
+                </mat-form-field>
+                }
+                @if(!isSelectType() && !isNumericType() && !isDateType() && !isBetween(cond)){
+                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                    <mat-label>Value</mat-label>
+                    <input matInput formControlName="value" />
+                </mat-form-field>
+                }
+            </div>
+            }
+        </div>
+    </ng-container>
+</ng-template>

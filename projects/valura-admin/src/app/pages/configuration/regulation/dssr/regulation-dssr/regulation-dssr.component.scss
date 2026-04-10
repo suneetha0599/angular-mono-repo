@@ -1,0 +1,115 @@
+@use "../../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../../styles/custom/typography.scss" as typography;
+
+.btn-add-right {
+    border-radius: 5px;
+}
+
+.main-container {
+    font-size: typography.$fs-13;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.position-absolute {
+    position: absolute;
+}
+
+.custom-tab-group {
+    ::ng-deep {
+        .mat-mdc-tab-labels {
+            position: relative;
+            padding-right: 280px; // Space for action buttons
+        }
+
+        .mat-mdc-tab-label {
+            color: colors.$secondary;
+            font-weight: 500;
+
+            &.mat-mdc-tab-label-active {
+                color: colors.$primary;
+            }
+        }
+
+        .mat-mdc-tab-body-content {
+            overflow: visible;
+        }
+    }
+}
+
+.tab-content-wrapper {
+    padding-top: 0.00rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+// Utility classes for action buttons
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+.h-12 {
+    height: 3rem;
+}
+
+.pr-3 {
+    padding-right: 0.75rem;
+}
+
+.top-0 {
+    top: 0;
+}
+
+.right-0 {
+    right: 0;
+}
+
+.actions {
+    right: 10px;
+    top: 0;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.search {
+    width: 220px !important;
+    height: 32px !important;
+}
+
+.close-btn {
+    height: 25px;
+    width: 25px;
+    padding: 0;
+}
+
+.wrapper {
+    background: colors.$bg-light-grey;
+    border-radius: 5px;
+}
+
+.main {
+    font-size: typography.$fs-13;
+}
+
+::ng-deep .tab-container .mat-mdc-tab-header {
+    width: 60% !important;
+}

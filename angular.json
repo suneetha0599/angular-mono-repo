@@ -3,6 +3,39 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
+    "valura-lib": {
+      "projectType": "library",
+      "root": "projects/valura-lib",
+      "sourceRoot": "projects/valura-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/valura-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/valura-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/valura-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/valura-lib/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
     "valura-admin": {
       "projectType": "application",
       "schematics": {
@@ -34,15 +67,7 @@
             "styles": [
               "projects/valura-admin/src/styles.scss"
             ],
-            "scripts": [],
-            "server": "projects/valura-admin/src/main.server.ts",
-            "security": {
-              "allowedHosts": []
-            },
-            "prerender": true,
-            "ssr": {
-              "entry": "projects/valura-admin/src/server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -137,15 +162,7 @@
             "styles": [
               "projects/valura-questionnaire/src/styles.scss"
             ],
-            "scripts": [],
-            "server": "projects/valura-questionnaire/src/main.server.ts",
-            "security": {
-              "allowedHosts": []
-            },
-            "prerender": true,
-            "ssr": {
-              "entry": "projects/valura-questionnaire/src/server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -205,39 +222,6 @@
               "projects/valura-questionnaire/src/styles.scss"
             ],
             "scripts": []
-          }
-        }
-      }
-    },
-    "valura-lib": {
-      "projectType": "library",
-      "root": "projects/valura-lib",
-      "sourceRoot": "projects/valura-lib/src",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
-          "options": {
-            "project": "projects/valura-lib/ng-package.json"
-          },
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/valura-lib/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/valura-lib/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "tsConfig": "projects/valura-lib/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
           }
         }
       }

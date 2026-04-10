@@ -1,0 +1,73 @@
+@use "../../../../styles/custom/colors.scss" as us;
+
+.fontColor {
+  color: us.$primary;
+}
+
+.sticky-end {
+  position: sticky;
+  right: 0;
+  background-color: #ffffff;
+  z-index: 100;
+}
+
+.text-ellipsis {
+  display: inline-block;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.search-bar {
+  width: 220px;
+}
+
+.close-btn {
+  height: 25px;
+  width: 25px;
+  padding: 0;
+}
+
+.dropdown-button {
+  border: 0.5px solid #e5e5ef;
+}
+
+.status {
+  border-radius: 8px;
+}
+
+.shimmer-line {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  display: inline-block;
+  height: 14px;
+}
+
+.shimmer-small {
+  width: 80px;
+  height: 12px;
+}
+
+.shimmer-medium {
+  width: 140px;
+  height: 14px;
+}
+
+.shimmer-large {
+  width: 200px;
+  height: 16px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}

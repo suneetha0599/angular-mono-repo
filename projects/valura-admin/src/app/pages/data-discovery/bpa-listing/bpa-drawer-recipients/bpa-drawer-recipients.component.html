@@ -1,0 +1,265 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3 pt-2 ">
+  <div class="flex justify-between items-center mb-2">
+    <div class="title-medium my-auto">
+      @if(isEditMode){
+      {{ isPdElementsEditMode ? 'Edit PD Elements ' : 'Recipients' }}
+      }
+    </div>
+    <button mat-icon-button (click)="close()">
+      <mat-icon class="material-symbols-outlined">close</mat-icon>
+    </button>
+  </div>
+
+  @if(isEditMode){
+  <div class="flex justify-content-end">
+    @if (isPdElementsEditMode && !showAddPdElementInput) {
+    <loading-button type="primary" (onButtonClick)="showAddNewPdElement()">Add New</loading-button>
+    }
+  </div>
+  }
+
+  <div class="d-flex editor-wrapper overflow-hidden position-relative h-100 pb-0">
+    <div class="col w-100 h-100 overflow-auto overflow-x-hidden main-canvas no-scrollbar pt-2">
+      @if (showAddPdElementInput && isPdElementsEditMode) {
+      <div class="mb-3" [formGroup]="pdElementForm">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="mb-0 label-large">Add New Personal Data Element</div>
+        </div>
+        <div class="d-flex flex-column gap-3">
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0 chip-input-field">
+            <mat-label>Choose category</mat-label>
+            <mat-select formControlName="pdElementCategory">
+              @for (category of bpaCategoriesList; track category.id) {
+              <mat-option [value]="category.id">{{ category.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0 chip-input-field">
+            <mat-label>Choose Data Subject Type</mat-label>
+            <mat-select formControlName="pdElementDataSubjectType">
+              @for (dataSubject of dataSubjectList; track dataSubject.id) {
+              <mat-option [value]="dataSubject">{{ dataSubject.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mb-0 chip-input-field">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="pdElementName" >
+          </mat-form-field>
+        </div>
+      </div>
+      } @else if (isPdElementsEditMode && selectedRecipients?.length > 0) {
+      <div class="space-y-1">
+        @for (recipient of selectedRecipients; track recipient; let recipientIndex = $index) {
+        <div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="title-small my-2">{{ recipient.recipient?.name }}</div>
+            <div class="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded">
+              Selected: {{ getSelectedCount(recipient) }} of {{ recipient.pdElementMappingList.length }}
+            </div>
+          </div>
+          <div class="overflow-auto  no-scrollbar">
+            <table mat-table [dataSource]="recipient.pdElementMappingList ?? []"
+              class="mat-elevation-z8 w-100 custom-table table">
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                  <ng-container>
+                    <mat-checkbox class="enabled-mat-checkbox" [checked]="isAllSelectedPdElement(recipient)"
+                      [disabled]="!isEditMode" (change)="toggleSelectAll(recipient, $event.checked)">
+                    </mat-checkbox>
+                  </ng-container>
+                </th>
+                <td mat-cell *matCellDef="let pdElement">
+                  <mat-checkbox class="enabled-mat-checkbox" [(ngModel)]="pdElement.selected"
+                    [disabled]="!isEditMode"></mat-checkbox>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef> Personal Data Element</th>
+                <td mat-cell *matCellDef="let pdElement">
+                  {{ pdElement.pdElement?.name }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="dataSubject">
+                <th mat-header-cell *matHeaderCellDef>Data subject</th>
+                <td mat-cell *matCellDef="let pdElement">{{ pdElement.dataSubject?.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef> Data category</th>
+                <td mat-cell *matCellDef="let pdElement">
+                  {{ pdElement.pdElement?.categoryName || 'N/A' }}
+                </td>
+              </ng-container>
+
+              @if (!isPdElementsEditMode) {
+              <ng-container matColumnDef="sensitivity">
+                <th mat-header-cell *matHeaderCellDef> Sensitivity</th>
+                <td mat-cell *matCellDef="let pdElement">
+                  <span class="px-2 py-1 rounded text-xs font-medium"
+                    [ngClass]="getSensitivityClass(pdElement.pdElement?.sensitivity)">
+                    {{ pdElement.pdElement?.sensitivity || 'N/A' }}
+                  </span>
+                </td>
+              </ng-container>
+              }
+              <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        </div>
+        }
+      </div>
+      } @else if (!isPdElementsEditMode) {
+      <div class="grid grid-cols-12 mb-3 justify-between">
+        <div class="col-span-8">
+          <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+            <mat-label>Recipients</mat-label>
+            <mat-select [(ngModel)]="selectedRecipients" (selectionChange)="onRecipientsChange($event)">
+              @for (source of recipientsList; track source) {
+              <mat-option [value]="source">{{ source.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      @if (selectedRecipients?.key === BpaRecepient.DEPARTMENT) {
+      <ng-container>
+        <div class="grid grid-cols-12 mb-2 justify-between">
+          <div class="col-span-8">
+            <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+              <mat-label>Select Department</mat-label>
+              <input matInput [(ngModel)]="departmentSearch" (ngModelChange)="filterDepartments()"
+                [matAutocomplete]="deptAuto">
+              <mat-autocomplete #deptAuto="matAutocomplete"
+                (optionSelected)="onDepartmentSelected($event.option.value)">
+                @for (dept of filteredDepartments; track $index) {
+                <mat-option [value]="dept">{{ dept.name }}</mat-option>
+                }
+                @if (departmentSearch && !isDepartmentExist(departmentSearch)) {
+                <mat-option [value]="departmentSearch"
+                  (onSelectionChange)="onAddDepartmentOptionSelected($event, departmentSearch.trim())">+ Add
+                  "{{ departmentSearch }}"
+                </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+        </div>
+      </ng-container>
+      }
+      @if (selectedRecipients?.key === BpaRecepient.VENDOR) {
+      <ng-container>
+        <div class="grid grid-cols-12 mb-2 justify-between">
+          <div class="col-span-8">
+            <mat-form-field appearance="outline" class="w-full  mat-sm-xl-input mat-mdc-mb-0">
+              <mat-label>Select Vendor</mat-label>
+              <input matInput [(ngModel)]="vendorSearch" (ngModelChange)="filterVendors()"
+                [matAutocomplete]="vendorAuto">
+              <mat-autocomplete #vendorAuto="matAutocomplete" (optionSelected)="onVendorSelected($event.option.value)">
+                @for (vendor of filteredVendors; track $index) {
+                <mat-option [value]="vendor">{{ vendor.name }}</mat-option>
+                }
+                @if (vendorSearch && !isVendorExist(vendorSearch)) {
+                <mat-option [value]="vendorSearch"
+                  (onSelectionChange)="onAddVendorOptionSelected($event, vendorSearch.trim())" class="add-option">
+                  + Add "{{ vendorSearch }}"
+                </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+        </div>
+      </ng-container>
+      }
+      @if (selectedRecipients?.key === BpaRecepient.THIRD_PARTY) {
+      <ng-container>
+        <div class="grid grid-cols-12 mb-2 justify-between">
+          <div class="col-span-8">
+            <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+              <mat-label>Select Third Party</mat-label>
+              <input matInput [(ngModel)]="thirdSearch" (ngModelChange)="filterThirdParties()"
+                [matAutocomplete]="thirdAuto">
+              <mat-autocomplete #thirdAuto="matAutocomplete"
+                (optionSelected)="onThirdPartySelected($event.option.value)">
+                @for (tp of filteredThirdParties; track tp) {
+                <mat-option [value]="tp">{{ tp.name }}</mat-option>
+                }
+                @if (thirdSearch && !isThirdPartyExist(thirdSearch)) {
+                <mat-option [value]="thirdSearch.trim()"
+                  (onSelectionChange)="onAddThirdPartyOptionSelected($event, thirdSearch.trim())">+ Add
+                  "{{ thirdSearch }}"
+                </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+        </div>
+      </ng-container>
+      }
+      @if (showTable) {
+      <div class="mt-6">
+        <div class="overflow-auto  no-scrollbar">
+          <table mat-table [dataSource]="displayRecipients" class="mat-elevation-z8 w-100 custom-table table">
+            <ng-container matColumnDef="selected">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-checkbox [checked]="isAllSelected()" [indeterminate]="isSomeSelected()"
+                  (change)="toggleAllRows($event.checked)"></mat-checkbox>
+              </th>
+              <td mat-cell *matCellDef="let row">
+                <mat-checkbox [formControl]="row.get('selected')"></mat-checkbox>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Recipient Type</th>
+              <td mat-cell *matCellDef="let row">{{ row.value.type }}</td>
+            </ng-container>
+            <ng-container matColumnDef="recipient">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let row">{{ row.value.recipient?.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="purpose">
+              <th mat-header-cell *matHeaderCellDef>Purpose</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+                  <input matInput [formControl]="row.get('purpose')" />
+                </mat-form-field>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="numAccess">
+              <th mat-header-cell *matHeaderCellDef>Number of People having Access</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-form-field appearance="outline" class="w-full mat-sm-xl-input mat-mdc-mb-0">
+                  <input matInput type="number" [formControl]="row.get('numberOfPersonHavingAccess')" />
+                </mat-form-field>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['selected','type','recipient','purpose','numAccess']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['selected','type','recipient','purpose','numAccess']"></tr>
+          </table>
+        </div>
+      </div>
+      }
+      }
+    </div>
+  </div>
+
+  @if(isEditMode){
+  <div class="d-flex justify-end mt-2 gap-2">
+    @if (showAddPdElementInput && isPdElementsEditMode) {
+    <loading-button type="secondary" (onButtonClick)="cancelAddNewPdElement()">Cancel</loading-button>
+    <loading-button type="primary" (onButtonClick)="savePdElement()" [loading]="isSubmitPdElementLoading"
+      [disabled]="pdElementForm.invalid">
+      Add
+    </loading-button>
+    } @else if (isPdElementsEditMode && !showAddPdElementInput) {
+    <loading-button type="secondary" (onButtonClick)="close()">Cancel</loading-button>
+    <loading-button type="primary" (onButtonClick)="onSavePdElements()">Save</loading-button>
+    } @else {
+    <loading-button type="secondary" (onButtonClick)="close()">Cancel</loading-button>
+    <loading-button type="primary" (onButtonClick)="onApplyClick()">Add</loading-button>
+    }
+  </div>
+  }
+</div>

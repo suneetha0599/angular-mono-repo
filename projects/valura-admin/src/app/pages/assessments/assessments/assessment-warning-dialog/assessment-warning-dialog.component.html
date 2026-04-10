@@ -1,0 +1,48 @@
+<h3 mat-dialog-title class="my-0 p-2 flex justify-between items-center">
+  Alert
+</h3>
+<button mat-icon-button tabindex="-1" class="close" aria-label="Close dialog" (click)="closeDialog(false)">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+<div mat-dialog-content class="p-3" [formGroup]="form">
+  <p class="mb-4 title-medium-normal">
+    There are changes to the template, do you want to save the changes?
+  </p>
+  <div class="flex-column mx-2 col-span-4">
+    <label class="label-large">Template Name</label>
+
+    <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2">
+      <input matInput formControlName="templateName" />
+      <mat-error>
+        <custom-mat-error class="inline-block" [errors]="templateName.errors" [control]="templateName"
+          controlActualName="templateName">
+        </custom-mat-error>
+      </mat-error>
+    </mat-form-field>
+    <div class="flex items-center gap-2 text-sm mt-2">
+      <span class="text-primary">
+        Click here to generate a new template name
+      </span>
+      <span class="icon-wrapper flex items-center justify-center">
+        @if (!isTemplateLoading) {
+        <mat-icon (click)="duplicateTemplate()"
+          class="material-symbols-outlined cursor-pointer text-primary hover:opacity-80"
+          style="font-size: 18px;margin-top: 3px;">
+          refresh
+        </mat-icon>
+        } @else {
+        <mat-progress-spinner diameter="12" strokeWidth="2" mode="indeterminate" class="text-primary">
+        </mat-progress-spinner>
+        }
+      </span>
+    </div>
+  </div>
+</div>
+<div mat-dialog-actions class="flex justify-end p-3 gap-2">
+  <loading-button type="secondary" (onButtonClick)="saveAssessment(false)" [loading]="isSavingAssessment">
+    Continue without Saving
+  </loading-button>
+  <loading-button type="primary" (onButtonClick)="saveAssessment(true)" [loading]="isSavingTemplate">
+    Save Template
+  </loading-button>
+</div>

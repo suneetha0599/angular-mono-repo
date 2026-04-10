@@ -1,0 +1,37 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{ title }}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="cancel()" aria-label="close dialog">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <form [formGroup]="form" class="flex flex-col gap-4">
+    @if (data.type !==ItemType.Reason) {
+    <mat-form-field appearance="outline" class="w-full mt-2 mat-sm-input mat-mdc-mb-0">
+      <mat-label>Name</mat-label>
+      <input title="name" matInput formControlName="name" />
+    </mat-form-field>
+    }
+
+    @if (data.type === ItemType.Department || data.type === ItemType.AssetDepartment||
+    data.type === ItemType.Reason || data.type === ItemType.UserDepartment) {
+    <app-custom-mat-textarea [label]="data.type === ItemType.Reason ? 'Reason' : 'Description'" [minRows]="1"
+      [maxRows]="5">
+    </app-custom-mat-textarea>
+    }
+  </form>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="cancel()">
+      Cancel
+    </loading-button>
+
+    <loading-button type="primary" [disabled]="form.invalid" (onButtonClick)="save()">
+      Save
+    </loading-button>
+  </div>
+</div>

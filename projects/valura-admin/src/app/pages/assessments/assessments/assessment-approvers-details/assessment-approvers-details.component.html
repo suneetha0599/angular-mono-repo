@@ -1,0 +1,47 @@
+<div class="d-flex items-center gap-3 justify-content-between p-3">
+    <p class="title-medium ">Details</p>
+    <button mat-icon-button class="close" (click)="closeDrawer()">
+        <mat-icon class="material-symbols-outlined mat-md-icon">close</mat-icon>
+    </button>
+</div>
+<div class="p-3 space-y-6">
+    <div class="bg-[#F8F8F8] border rounded-lg p-4">
+        <div class="grid grid-cols-3 gap-6 text-sm z-1000">
+            <div>
+                <p class="text-gray-500 text-xs">Approver Name</p>
+                <p class="text-sm text-gray-800">
+                    {{ approverData?.name || '-' }}
+                </p>
+            </div>
+            @if(approverData?.status === "Rejected"){
+            <div>
+                <p class="text-gray-500 text-xs">Date Of Rejected</p>
+                <p class="text-sm text-gray-800">
+                    {{ approverData?.dateOfApproval || '-' }}
+                </p>
+            </div>
+            }@else{
+            <div>
+                <p class="text-gray-500 text-xs">Date Of Approval</p>
+                <p class="text-sm text-gray-800">
+                    {{ approverData?.dateOfApproval || '-' }}
+                </p>
+            </div>
+            }
+            <div>
+                <p class="text-gray-500 text-xs">Level</p>
+                <p class="text-sm text-gray-800">
+                    {{ approverData?.level || '-' }}
+                </p>
+            </div>
+        </div>
+    </div>
+    @if(approverData?.status === "Rejected"){
+    <div>
+        <p class="text-xs text-gray-500 mb-1">Comment</p>
+        <p class="text-sm text-gray-800">
+            {{ approverData?.comment || 'No comment available' }}
+        </p>
+    </div>
+    }
+</div>

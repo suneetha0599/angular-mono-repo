@@ -1,0 +1,147 @@
+<div class="d-flex flex-column overflow-hidden view-wrapper p-3">
+  <div class="flex justify-between">
+    <div class="my-auto title-medium">Filter BPA</div>
+    <div class="my-auto">
+      <button mat-icon-button (click)="closeDrawer()">
+        <mat-icon class="material-symbols-outlined">close</mat-icon>
+      </button>
+    </div>
+  </div>
+  <div class="d-flex editor-wrapper overflow-hidden position-relative h-100 pb-0">
+    <div class="col w-100 h-100 overflow-auto overflow-x-hidden main-canvas">
+      <div>
+        <div class="my-2">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Department</mat-label>
+            <mat-select
+              [(ngModel)]="filterConfiguration.tempselectedDepartment"
+              multiple
+            >
+              @if (filterConfiguration.tempselectedDepartment?.length > 2){
+              <mat-select-trigger>
+                <span class="example-additional-selection">
+                  {{ filterConfiguration.tempselectedDepartment[0]?.name }}
+                  (+{{
+                  (filterConfiguration.tempselectedDepartment.length || 0) - 1
+                  }}
+                  {{
+                  filterConfiguration.tempselectedDepartment.length === 2
+                  ? "other"
+                  : "others"
+                  }})
+                </span>
+              </mat-select-trigger>
+              } @for (category of filterConfiguration.departmentNameList; track
+              $index) {
+              <mat-option [value]="category">{{ category.name }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div>
+        <div class="my-2">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Data Subject Type</mat-label>
+            <mat-select [(ngModel)]="filterConfiguration.tempSelectedDataSubject" multiple>
+              @if(filterConfiguration.tempSelectedDataSubject?.length>2){
+              <mat-select-trigger>
+                <span class="example-additional-selection">
+                  {{ filterConfiguration.tempSelectedDataSubject[0]?.name }}
+                  (+{{
+                  (filterConfiguration.tempSelectedDataSubject.length || 0) -
+                  1
+                  }}
+                  {{
+                  filterConfiguration.tempSelectedDataSubject.length === 2
+                  ? "other"
+                  : "others"
+                  }})
+                </span>
+              </mat-select-trigger>
+              } @for (category of filterConfiguration.dataSubjectList; track
+              $index) {
+              <mat-option [value]="category">{{ category.name }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div>
+        <div class="my-2">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Region</mat-label>
+            <mat-select [(ngModel)]="filterConfiguration.tempSelectedCountry" multiple>
+              @if(filterConfiguration.tempSelectedCountry?.length > 2){
+              <mat-select-trigger>
+                <span class="example-additional-selection">
+                  {{ filterConfiguration.tempSelectedCountry[0]?.name }}
+                  (+{{
+                  (filterConfiguration.tempSelectedCountry.length || 0) - 1
+                  }}
+                  {{
+                  filterConfiguration.tempSelectedCountry.length === 2
+                  ? "other"
+                  : "others"
+                  }})
+                </span>
+              </mat-select-trigger>
+              } @for (category of filterConfiguration.countryList; track $index)
+              {
+              <mat-option [value]="category">{{ category.name }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div>
+        <div class="my-2">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Frequency of Processing</mat-label>
+
+            <mat-select [(ngModel)]="filterConfiguration.tempSelectedFrequencies" multiple>
+              @if (filterConfiguration.tempSelectedFrequencies?.length > 2) {
+              <mat-select-trigger>
+                <span class="example-additional-selection">
+                  {{ filterConfiguration.tempSelectedFrequencies[0]?.name }}
+                  (+{{
+                  filterConfiguration.tempSelectedFrequencies.length - 1
+                  }}
+                  {{
+                  filterConfiguration.tempSelectedFrequencies.length === 2
+                  ? "other"
+                  : "others"
+                  }})
+                </span>
+              </mat-select-trigger>
+              } @for (item of frequencies; track $index) {
+              <mat-option [value]="item">{{ item.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div>
+        <div class="my-2">
+          <mat-form-field appearance="outline" class="w-full mat-sm-input">
+            <mat-label>Status</mat-label>
+
+            <mat-select [(ngModel)]="filterConfiguration.tempSelectedStatus" multiple>
+              @for (item of status; track $index) {
+              <mat-option [value]="item">{{ item.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-end mt-2">
+    <div class="flex gap-2">
+      <loading-button type="secondary" (onButtonClick)="onClose.emit()">Cancel</loading-button>
+      <loading-button (onButtonClick)="onApplyFilter()">Apply</loading-button>
+    </div>
+  </div>
+</div>

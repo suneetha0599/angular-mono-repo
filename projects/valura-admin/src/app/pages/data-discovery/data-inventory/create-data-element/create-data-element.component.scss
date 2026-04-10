@@ -1,0 +1,39 @@
+@use "../../../../../styles/custom/colors.scss" as us;
+
+.btnColor {
+    background-color: us.$primary;
+}
+
+.fontColor {
+    color: us.$primary;
+    ;
+}
+
+::ng-deep .mat-mdc-checkbox .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background {
+    background-color: us.$primary !important;
+    border-color: us.$primary !important;
+}
+
+::ng-deep .material-tooltip {
+    position: absolute;
+    background: #ffffff;
+    color: #1c2b70;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: pre-line;
+    max-width: 300px;
+    overflow: visible;
+}
+
+::ng-deep .material-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 40%;
+    left: -14px;
+    transform: translateY(50%) rotate(90deg);
+    width: 16px;
+    height: 8px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #E9EFEE;
+}

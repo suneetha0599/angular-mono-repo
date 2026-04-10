@@ -1,0 +1,97 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+  <div class="mb-2">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+        <button (click)="goBack()"
+          class="w-6 h-6 flex !rounded-lg items-center justify-center me-3 text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+          <mat-icon class="back-icon">arrow_back</mat-icon>
+        </button>
+        <div class="headline-medium my-auto">Declaration Details</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative p-3 pb-1 bg-white rounded">
+    <div class="d-flex h-100 w-100 flex-column main-canvas bg-white">
+      <div class="flex-1 overflow-auto p-3 scroll-w-0">
+        <form>
+          <div class="flex flex-col gap-4 mb-2">
+            <!-- Declaration ID -->
+            <div>
+              <p class="label-large mb-2">Declaration ID</p>
+              <ng-container *ngIf="!isLoading">
+                <mat-form-field appearance="outline" class="w-[400px] mat-sm-xl-input enabled-mat-input">
+                  <input title="Declaration ID" matInput [value]="declaration?.id" readonly />
+                </mat-form-field>
+              </ng-container>
+              <ng-container *ngIf="isLoading">
+                <div class="shimmer-line shimmer-small"></div>
+              </ng-container>
+            </div>
+
+            <!-- Declaration Statement -->
+            <div>
+              <p class="label-large mb-2">Declaration Statement</p>
+              <ng-container *ngIf="!isLoading">
+                <app-custom-mat-textarea [minRows]="1" [maxRows]="5">
+                </app-custom-mat-textarea>
+
+              </ng-container>
+              <ng-container *ngIf="isLoading">
+                <div class="shimmer-line shimmer-large"></div>
+              </ng-container>
+            </div>
+
+            <!-- Type -->
+            <div>
+              <p class="label-large mb-2">Type</p>
+              <ng-container *ngIf="!isLoading">
+                <mat-form-field appearance="outline" class="w-[400px] mat-sm-xl-input enabled-mat-input">
+                  <input title="Type" matInput [value]="getTypeLabel()" readonly />
+                </mat-form-field>
+              </ng-container>
+              <ng-container *ngIf="isLoading">
+                <div class="shimmer-line shimmer-medium"></div>
+              </ng-container>
+            </div>
+
+            <!-- Entity Type -->
+            <div>
+              <p class="label-large mb-2">Entity Type</p>
+              <ng-container *ngIf="!isLoading">
+                <mat-form-field appearance="outline" class="w-[400px] mat-sm-xl-input enabled-mat-input">
+                  <input title="Entity Type" matInput [value]="getEntityTypeLabel()" readonly />
+                </mat-form-field>
+              </ng-container>
+              <ng-container *ngIf="isLoading">
+                <div class="shimmer-line shimmer-medium"></div>
+              </ng-container>
+            </div>
+
+            <!-- Entity ID -->
+            <div>
+              <p class="label-large mb-2">Entity ID</p>
+              <ng-container *ngIf="!isLoading">
+                <mat-form-field appearance="outline" class="w-[400px] mat-sm-xl-input enabled-mat-input">
+                  <input title="Entity ID" matInput [value]="declaration?.entityId" readonly />
+                </mat-form-field>
+              </ng-container>
+              <ng-container *ngIf="isLoading">
+                <div class="shimmer-line shimmer-small"></div>
+              </ng-container>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer section -->
+  <div class="bg-white px-4 pt-1 pb-2">
+    <div class="d-flex justify-end">
+      <loading-button type="secondary" (onButtonClick)="goBack()">
+        <span>Cancel</span>
+      </loading-button>
+    </div>
+  </div>
+</div>

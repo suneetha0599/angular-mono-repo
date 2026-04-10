@@ -1,0 +1,36 @@
+@if(isLoading){
+<ng-container *ngTemplateOutlet="shimmerSection"></ng-container>
+}
+@else if(externalLink){
+<iframe #extFrame [src]="externalLink" frameborder="0" class="size"></iframe>
+}
+@else{
+<ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+}
+
+<ng-template #shimmerSection>
+    <div>
+        @for (item of [1,2,3,4]; track item) {
+        <div class="shimmer-section-card">
+            <div class="shimmer-section-left">
+                <div class="shimmer-circle"></div>
+                <div class="shimmer-bar shimmer-bar--medium"></div>
+                <div class="shimmer-bar shimmer-bar--short"></div>
+            </div>
+            <div class="shimmer-section-right">
+                <div class="shimmer-bar shimmer-bar--progress"></div>
+                <div class="shimmer-bar shimmer-bar--percent"></div>
+                <div class="shimmer-bar shimmer-bar--icon"></div>
+            </div>
+        </div>
+        }
+    </div>
+</ng-template>
+
+<ng-template #errorLoading>
+    <div class="h-100 flex flex-row">
+        <div class="flex-1 flex items-center justify-center bg-white">
+            <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+        </div>
+    </div>
+</ng-template>

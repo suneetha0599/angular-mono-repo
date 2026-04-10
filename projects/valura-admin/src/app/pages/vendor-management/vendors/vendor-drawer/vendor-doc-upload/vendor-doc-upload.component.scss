@@ -1,0 +1,45 @@
+ .file-icon {
+     font-size: 16px;
+     width: 16px;
+     height: 16px;
+ }
+
+ .delete-icn {
+     font-size: 17px;
+     width: 17px;
+     height: 17px;
+ }
+
+ .tiny-icon-btn {
+     --mdc-icon-button-state-layer-size: 30px;
+     --mdc-icon-button-icon-size: 18px;
+     width: 30px !important;
+     padding: 0 !important;
+ }
+
+ .tiny-icon-btn .edit-icon {
+     font-size: 18px !important;
+     width: 18px !important;
+     height: 18px !important;
+ }
+
+ .view-wrapper {
+     .editor-wrapper {
+         .main-canvas {
+             padding-right: 0;
+         }
+     }
+
+
+     .mat-sm-xl-input,
+     .table-container {
+         margin-right: 0;
+         box-sizing: border-box;
+     }
+
+
+     .mb-2,
+     .mb-3 {
+         margin-right: 0;
+     }
+ }

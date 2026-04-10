@@ -1,0 +1,714 @@
+<mat-drawer-container class="right-sidebar fixed-drawer-container" autosize>
+    <mat-drawer #rightDrawer class="w-75 section-mat-drawer" mode="over" position="end" [disableClose]="true">
+        <app-section-details-drawer (onCloseDrawer)="closeSectionDetailsDrawer()"
+            (getSectionDetails)="addEditSection($event)" [sectionData]="sectionDetailsData">
+        </app-section-details-drawer>
+    </mat-drawer>
+</mat-drawer-container>
+
+@if(assessmentsFormArray.length === 0) {
+<div class="d-flex align-items-center justify-center h-100 w-100">
+    <div class="text-center text-grey">
+        <div class="label-large mb-1">
+            No sections or questions have been added yet.
+        </div>
+        @if(!isViewMode) {
+        <div class="label-large">Start creating</div>
+        <button mat-button (click)="openSectionDetailsDrawer(); $event.stopPropagation();"
+            class="cursor-pointer bg-primary text-light mt-3">
+            <mat-icon class="material-symbols-outlined mat-md-icon">add</mat-icon>
+            Add Section
+        </button>
+        }
+    </div>
+</div>
+}
+<div class="d-flex overflow-hidden position-relative h-100">
+    @if(assessmentsFormArray.length > 0) {
+    <div class="w-[480px] bg-white border border-white h-100 rounded overflow-auto">
+        <div class="section-header-sticky mb-2">
+            <div class="d-flex justify-between align-items-center p-3">
+                <div class="fw-medium my-auto ms-1 me-3 label-large">Sections</div>
+                @if(!isAddSection && (mode === CREATE || mode === EDIT) && !isViewMode) {
+                <!-- <div class="my-auto text-decoration-none cursor-pointer text-primary label-large"
+               (click)="addSection()">
+               Add Section
+               </div> -->
+                <div class="my-auto text-decoration-none cursor-pointer text-primary label-large d-flex align-center add-section-btn"
+                    (click)="openSectionDetailsDrawer()">
+                    <mat-icon class="material-symbols-outlined me-1 mat-md-icon">add</mat-icon>
+                    <div>Add Section</div>
+                </div>
+                }
+            </div>
+            <mat-divider class="divider mx-3"></mat-divider>
+        </div>
+        <div class="cursor-pointer section-content px-3 pb-3">
+            <div class="list-unstyled m-0">
+                @if(isAddSection) {
+                <div class="mt-1 mb-2">
+                    <div class="d-flex align-items-center justify-between">
+                        <mat-form-field appearance="outline" class="me-2 mat-sm-input mat-mdc-mb-0">
+                            <mat-label>Section Title</mat-label>
+                            <input matInput [formControl]="newSectionControl" (keydown.enter)="saveSection()" />
+                            <mat-error>
+                                <custom-mat-error [errors]="newSectionControl.errors" [control]="newSectionControl"
+                                    controlActualName="Section title">
+                                </custom-mat-error>
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-icon class="material-symbols-outlined fs-5 mt-1 save-icon"
+                            (click)="saveSection()">check_circle</mat-icon>
+                        <mat-icon class="material-symbols-outlined fs-5 mt-1 cancel-icon"
+                            (click)="isAddSection=false; newSectionControl.reset()">cancel</mat-icon>
+                    </div>
+                    <mat-form-field appearance="outline" class=" mat-sm-text-area  mt-5 mat-sm-input mat-mdc-mb-0">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1" cdkAutosizeMaxRows="5"
+                            [formControl]="newSectionDescriptionControl" (keydown.enter)="saveSection()">
+                  </textarea>
+                        <mat-error>
+                            <custom-mat-error [errors]="newSectionDescriptionControl.errors"
+                                [control]="newSectionDescriptionControl" controlActualName="Description">
+                            </custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                    <!-- <app-custom-mat-textarea label="Description" [minRows]="1" [maxRows]="5"
+                            [control]="newSectionDescriptionControl">
+                        </app-custom-mat-textarea> -->
+                </div>
+                x
+                }
+                <div cdkDropList (cdkDropListDropped)="dropSection($event)" class="mt-2">
+                    @for(sectionCtrl of assessmentsFormArray.controls; track i; let i = $index) {
+                    <div class="p-2 mt-2" cdkDrag
+                        [ngClass]="{ 'active-section': selectedIndex === i, 'inactive-section': selectedIndex !== i }"
+                        (click)="selectSection(i); $event.stopPropagation();">
+                        <div class="title d-flex">
+                            @if((mode === CREATE || mode === EDIT) && !isViewMode) {
+                            <div class="pt-1">
+                                <mat-icon class="material-symbols-outlined cursor-pointer mat-md-icon text-grey"
+                                    cdkDragHandle>drag_indicator</mat-icon>
+                            </div>
+                            }
+                            <div class="text-black ms-1" [ngClass]="{ 'text-primary': selectedIndex === i}">
+                                <div>
+                                    {{ i + 1 }}
+                                </div>
+                            </div>
+                            <div class="w-100">
+                                <div class="d-flex me-3 justify-between">
+                                    <div class="px-2" [appEllipsisTooltip]="sectionCtrl.get('section')?.value"
+                                        [matTooltip]="sectionCtrl.get('section')?.value"
+                                        [matTooltip]="sectionCtrl.get('section')?.value"
+                                        [ngClass]="{ 'text-primary': selectedIndex === i}">
+                                        {{ i + 1 }}. {{ sectionCtrl.get('section')?.value }}
+                                    </div>
+                                    <!-- <div class="d-flex align-items-center pt-1">
+                        <mat-icon class="material-symbols-outlined fs-14 text-primary"
+                            [matTooltip]="sectionCtrl.get('description')?.value || 'No description'">
+                            info
+                        </mat-icon>
+                        <mat-icon *ngIf="mode === CREATE || mode === EDIT"
+                            class="material-symbols-outlined fs-14 text-danger cursor-pointer"
+                            (click)="deleteSection(i); $event.stopPropagation()">
+                            delete
+                        </mat-icon>
+                        </div> -->
+                                </div>
+                                <div class="ms-2"
+                                    [ngClass]="{ 'text-dark': selectedIndex === i, 'text-muted': selectedIndex !== i }">
+                                    {{ sectionCtrl.get('questions')?.value?.length || 0 }} questions
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+    @if(assessmentsFormArray && assessmentsFormArray.length > 0) {
+    <div class="d-flex flex-column overflow-hidden w-100 h-100 bg-white rounded ms-3 p-3 pt-0">
+        <div class="w-100 mb-2" [formGroup]="selectedSection">
+            <div class="grid grid-cols-[1fr_auto] mt-3 flex-shrink-0">
+                <div class="fw-medium">
+                    <div>
+                        <div class="label-large d-flex align-items-center cursor-default">
+                            <div class="section-name fw-semibold section-name cursor-default">Section {{ selectedIndex +
+                                1
+                                }}: {{sectionControl.value }}
+                            </div>
+                            <div class="ms-2 text-grey question-total">({{ questionCount }} questions)</div>
+                        </div>
+                        @if(hasDescription(discriptionControl.value)) {
+                        <div class="section-container">
+                            <div class="label-large cursor-default description section-description"
+                                [innerHTML]="discriptionControl.value | safeHtml"></div>
+                        </div>
+                        }
+                    </div>
+                </div>
+                @if(!isViewMode) {
+                <div class="">
+                    <div class="d-flex my-auto w-100 justify-content-end mb-1">
+                        <mat-icon class="material-symbols-outlined mat-md-icon me-2 text-primary cursor-pointer my-auto"
+                            (click)="openSectionDetailsDrawer(selectedIndex); $event.stopPropagation()">edit</mat-icon>
+                        <mat-icon class="material-symbols-outlined mat-md-icon me-2 text-primary cursor-pointer my-auto"
+                            (click)="deleteSection(selectedIndex); $event.stopPropagation()">delete</mat-icon>
+                        @if(questionCount > 0) {
+                        <div class="my-auto text-decoration-none cursor-pointer text-light bg-primary label-large d-flex align-center add-section-btn"
+                            (click)="addQuestion(); $event.stopPropagation();">
+                            <mat-icon class="material-symbols-outlined me-1 mat-md-icon my-auto">add</mat-icon>
+                            <div>Add Question</div>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+            <!-- <div class=" my-auto w-100">
+         <div class="px-3 pt-3 d-flex justify-between">
+             <div>
+                     <mat-form-field appearance="fill" style="padding-bottom: 1px;"
+                         class="me-2 w-100  mat-sm-input  mat-sm-text-field mat-mdc-mb-0 fw-medium px-2"
+                         [ngClass]="{'section custom-mdc-text-field': sectionControl.value}">
+                         <input matInput [formControl]="sectionControl" (keydown.enter)="saveEditSection()"
+                             [readonly]="!isEditMode && mode !== 'CREATE'" />
+         
+                         <mat-error *ngIf="sectionControl.errors" style="display: inline-flex; ">
+                             <custom-mat-error [errors]="sectionControl.errors" [control]="sectionControl"
+                                 controlActualName="sectionTitleDescription">
+                             </custom-mat-error>
+                         </mat-error>
+                     </mat-form-field>
+                 </div>
+                 <div>
+                     <mat-form-field appearance="fill"
+                         class="me-2 w-100  mat-sm-input  mat-sm-text-field mat-mdc-mb-0 fw-medium px-2"
+                         [ngClass]="{'section custom-mdc-text-field': discriptionControl.value}">
+                         <input matInput [formControl]="discriptionControl" (keydown.enter)="saveEditSection()"
+                             [readonly]="!isEditMode && mode !== 'CREATE'" />
+                     </mat-form-field>
+                 </div>
+         </div>
+         </div> -->
+            <!-- <div class="pt-1 text-decoration-none cursor-pointer text-primary">Add rule (0)</div> -->
+        </div>
+        <mat-divider class="divider pt-1"></mat-divider>
+        <div class="col w-100 h-100 overflow-auto mt-1">
+            <div class="d-flex justify-center h-100">
+                @if(questionCount === 0 && !addNewQuestion && !isViewMode) {
+                <div class="d-flex align-items-center justify-center h-100 w-100">
+                    <div class="text-center text-grey">
+                        <div class="label-large">
+                            No questions have been added yet.
+                        </div>
+                        <div class="label-large">Start creating</div>
+                        <button mat-button (click)="addQuestion()" class="cursor-pointer bg-primary text-light mt-3">
+                            <mat-icon class="material-symbols-outlined mat-md-icon">add</mat-icon>
+                            Add Question
+                        </button>
+                    </div>
+                </div>
+                }
+                @else {
+                <div class="preview-content w-100 mx-1 overflow-x-hidden overflow-y-auto" cdkDropList
+                    [cdkDropListData]="questionsForm.controls" (cdkDropListDropped)="drop($event)" #questionsContainer>
+                    @for (question of questionsForm.controls; track i; let i = $index) {
+                    <div class="mb-3 mx-1 d-flex w-100" cdkDrag #questionCard>
+                        @if((mode === CREATE || mode === EDIT) && !isViewMode) {
+                        <mat-icon class="material-symbols-outlined cursor-pointer mat-md-icon me-2 mt-1 text-grey"
+                            cdkDragHandle>drag_indicator</mat-icon>
+                        }
+                        <mat-card class="p-2 rounded shadow- cursor-pointer" [class.cursor-pointer]="!isViewMode"
+                            (click)="!isViewMode && editQuestion(i)" [ngClass]="{ 'question-card': editingQuestionIndex !== i,
+            'editing-card': editingQuestionIndex === i,
+            'cursor-pointer': !isViewMode }">
+                            @if(editingQuestionIndex !== i) {
+                            <div class="d-flex justify-between title my-1">
+                                <div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="ms-2 d-flex">
+                                            {{
+                                            assessmentsFormArray.at(selectedIndex).value.order || i + 1 }}.{{ i + 1
+                                            }}
+                                            <span class="ms-1" [innerHTML]="question.value.text | safeHtml">
+                                            </span>
+                                        </div>
+                                    </div>
+                                    @if(hasDescription(question?.value?.helper)) {
+                                    <div class="ms-4 ps-1 mb-2 helper-text-preview"
+                                        [innerHTML]="question.value.helper | safeHtml"
+                                        (click)="onHelperContentClick($event) ">
+                                    </div>
+                                    }
+                                    <div class="ms-4 ps-1 text-grey">
+                                        Question Type: {{ ((question.value.type === YES_NO || question.value.type ===
+                                        RADIO) ? 'Radio
+                                        Button' : question.value.type.replaceAll('_', ' ')) | titlecase }}
+                                    </div>
+                                    @if(question.value.options.length > 0) {
+                                    @for(opt of (question.value.options); track j; let j = $index) {
+                                    <ng-container>
+                                        <div class="options d-flex align-items-center me-2 my-2">
+                                            @if(question.value.type === SINGLE_SELECT || question.value.type ===
+                                            MULTI_SELECT) {
+                                            <div class="label-large me-1">{{ j + 1 }}.</div>
+                                            }
+                                            @else if(question.value.type === CHECK_BOX){
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey me-2">check_box_outline_blank</mat-icon>
+                                            }
+                                            @else if(question.value.type === RADIO || question.value.type === YES_NO) {
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey me-2">radio_button_unchecked</mat-icon>
+                                            }
+                                            {{ opt.value }}
+                                        </div>
+                                    </ng-container>
+                                    }
+                                    }
+                                </div>
+                                @if(mode === CREATE || mode === EDIT) {
+                                <div class="text-muted d-flex pt-1">
+                                    <!-- @if(question.value.helper) {
+                  <mat-icon
+                      class="material-symbols-outlined text-primary mx-1 cursor-pointer mat-md-icon"
+                      [matTooltip]="helperTextValue(question.value.helper)">
+                      info
+                  </mat-icon>
+                  } -->
+                                    <!-- <mat-icon class="material-symbols-outlined text-primary cursor-pointer mat-md-icon"
+                  [matMenuTriggerFor]="editMenu">more_vert</mat-icon> -->
+                                    @if(!isViewMode) {
+                                    @if(isTargetQuestion(i)) {
+                                    <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn me-2"
+                                        (click)="$event.stopPropagation()">
+                                        <mat-icon
+                                            class="material-symbols-outlined mat-md-icon text-primary cursor-pointer"
+                                            [matTooltip]="getParentQuestionInfo(i)" matTooltipPosition="above">
+                                            preview
+                                        </mat-icon>
+                                    </button>
+                                    }
+                                    <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn me-2"
+                                        (click)="$event.stopPropagation();deleteQuestion(i,selectedSection)">
+                                        <mat-icon
+                                            class="material-symbols-outlined mat-md-icon d-flex align-items-center cursor-pointer text-primary">
+                                            delete
+                                        </mat-icon>
+                                    </button>
+                                    <!-- <mat-icon (click)="$event.stopPropagation();deleteQuestion(i,selectedSection)"
+                  class="material-symbols-outlined mat-md-icon d-flex align-items-center me-2 cursor-pointer text-primary pt-1">delete</mat-icon> -->
+                                    @if(hasRule(i)){
+                                    <button mat-mini-fab
+                                        class="shadow-none bg-light mat-md-fab-btn border border-gray-200 "
+                                        (click)="openTemplateTriggerDrawer(i); $event.stopPropagation()" [matBadge]="1"
+                                        matBadgeOverlap="true" matBadgeColor="warn" matBadgeSize="small"
+                                        aria-label="Entity actions">
+                                        <mat-icon
+                                            class="material-symbols-outlined mat-md-icon d-flex align-items-center cursor-pointer text-primary">flowchart</mat-icon>
+                                    </button>
+                                    }
+                                    @else {
+                                    <button mat-mini-fab
+                                        class="shadow-none bg-light mat-md-fab-btn border border-gray-200"
+                                        (click)="openTemplateTriggerDrawer(i); $event.stopPropagation()">
+                                        <mat-icon
+                                            class="material-symbols-outlined mat-md-icon  text-primary">flowchart</mat-icon>
+                                    </button>
+                                    }
+                                    }
+                                    <!-- <mat-menu #editMenu="matMenu">
+               <button mat-menu-item class="text-primary" (click)="editQuestion(i)">
+                   <mat-icon
+                       class="material-symbols-outlined text-primary mat-md-icon">edit</mat-icon>
+                   <span>Edit</span>
+               </button>
+               <button mat-menu-item class="cancel-icon"
+                   (click)="deleteQuestion(i,selectedSection)">
+                   <mat-icon
+                       class="material-symbols-outlined cancel-icon mat-md-icon">delete</mat-icon>
+                   <span>Delete</span>
+               </button>
+               </mat-menu> -->
+                                </div>
+                                }
+                            </div>
+                            }
+                            @else {
+                            @if(editingQuestionIndex === i) {
+                            <div @expandCollapse class="pb-1 rounded overflow-x-hidden overflow-y-auto mt-2"
+                                [formGroup]="currentQuestionForm">
+                                <div class="d-flex justify-content-between mx-2">
+                                    <div class="title"> {{ assessmentsFormArray.at(selectedIndex).value.order }}.{{
+                                        i + 1 }} <label class="title ms-1">Question</label>
+                                    </div>
+                                    <div>
+                                        <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn"
+                                            (click)="$event.stopPropagation();deleteQuestion(editingQuestionIndex!, selectedSection);">
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon d-flex align-items-center cursor-pointer text-primary">
+                                                delete
+                                            </mat-icon>
+                                        </button>
+                                    </div>
+                                    <!-- @if(mode === CREATE || mode === EDIT) {
+               <mat-icon class="material-symbols-outlined cursor-pointer mat-md-icon "
+                   cdkDragHandle>drag_indicator</mat-icon>
+               } -->
+                                </div>
+                                <div class="pe-4 pt-1 d-flex flex-column flex-1 overflow-hidden">
+                                    <div class="ms-2 w-100">
+                                        <app-custom-editor class="flex-1 d-flex flex-column"
+                                            [initialContent]="currentQuestionForm.get('text')?.value"
+                                            [showInsertVariable]="false" [autoFocus]="true"
+                                            (contentChange)="onQuestionTextChange($event)">
+                                        </app-custom-editor>
+                                    </div>
+                                </div>
+                                <div class="ms-2 w-100 pe-4 pt-2">
+                                    <div><label class="title ms-1">Helper Text</label></div>
+                                    <app-custom-editor class="flex-1 d-flex flex-column"
+                                        [initialContent]="currentQuestionForm.get('helper')?.value"
+                                        [showInsertVariable]="false" [showLinkInsert]="true" [showImageUpload]="true"
+                                        [autoFocus]="false" (contentChange)="onQuestionHelperChange($event)"
+                                        (imagesSelected)="onImagesSelected($event)">
+                                    </app-custom-editor>
+                                </div>
+                                <div class="ms-2 pe-4 pt-3 w-100">
+                                    <div class="w-100">
+                                        <mat-form-field appearance="outline"
+                                            class="w-100 me-2 mat-sm-input mat-mdc-mb-0">
+                                            <mat-label>Question Type</mat-label>
+                                            <mat-select formControlName="type">
+                                                @for (type of types; track type.value) {
+                                                <mat-option [value]="type.value">
+                                                    {{ type.label }}
+                                                </mat-option>
+                                                }
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                <!-- <div class="d-flex align-items-center mt-4 pt-2">
+            <mat-icon (click)="saveEdit(i)" (keydown.enter)="$event.stopPropagation()"
+                class="material-symbols-outlined save-icon cursor-pointer fs-5">check_circle</mat-icon>
+            <mat-icon (click)="cancelEdit()"
+                class="material-symbols-outlined fs-5 mx-2 cancel-icon cursor-pointer">close</mat-icon>
+            </div> -->
+                                @if(isType === YES_NO) {
+                                <div class="mt-2 ms-3">
+                                    <div class="ps-2 d-flex align-items-center">
+                                        <mat-icon class="material-symbols-outlined mat-md-icon text-grey">
+                                            radio_button_unchecked
+                                        </mat-icon>
+                                        <div class="option-label px-2 py-1 rounded text-dark me-2">Yes</div>
+                                    </div>
+                                    <div class="ps-2 d-flex align-items-center">
+                                        <mat-icon class="material-symbols-outlined mat-md-icon text-grey">
+                                            radio_button_unchecked
+                                        </mat-icon>
+                                        <div class="option-label px-2 py-1 rounded text-dark me-2">No</div>
+                                    </div>
+                                </div>
+                                }
+                                @if(isType === SINGLE_SELECT || isType === MULTI_SELECT || isType === RADIO || isType
+                                === CHECK_BOX) {
+                                <div class="options-list ms-3 mt-2" formArrayName="options" cdkDropList
+                                    [cdkDropListData]="options.controls" (cdkDropListDropped)="dropOption($event)">
+                                    @for (option of options.controls; let i = $index; track option) {
+                                    <div class="gf-option-row" [formGroupName]="i" cdkDrag>
+                                        @if((mode === CREATE || mode === EDIT) && !isViewMode) {
+                                        <mat-icon class="material-symbols-outlined gf-drag-handle text-grey"
+                                            cdkDragHandle>drag_indicator</mat-icon>
+                                        }
+                                        <div class="gf-option-icon">
+                                            @if(isType === SINGLE_SELECT || isType === MULTI_SELECT) {
+                                            <span class="gf-number-label">{{ i + 1 }}.</span>
+                                            } @else if(isType === CHECK_BOX) {
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey">check_box_outline_blank</mat-icon>
+                                            } @else if(isType === RADIO) {
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey">radio_button_unchecked</mat-icon>
+                                            }
+                                        </div>
+                                        <div class="gf-input-wrapper">
+                                            <input class="gf-input" formControlName="value"
+                                                [placeholder]="option.get('value')?.value === 'Other' ? '' : 'Option ' + (i + 1)"
+                                                [readOnly]="option.get('value')?.value === 'Other'"
+                                                [class.gf-input-other]="option.get('value')?.value === 'Other'"
+                                                (click)="option.get('value')?.value !== 'Other' && $any($event.target).select()"
+                                                (blur)="onOptionBlur(i)" (keydown.enter)="onOptionEnter($event, i)" />
+                                            <div class="gf-input-underline"></div>
+                                        </div>
+                                        @if(canDeleteOption(options, i)) {
+                                        <mat-icon
+                                            class="material-symbols-outlined gf-delete-btn text-grey cursor-pointer"
+                                            (click)="removeOption($event, i)">close</mat-icon>
+                                        }
+                                    </div>
+                                    }
+                                    <!-- Footer -->
+                                    <div class="gf-option-row gf-add-row">
+                                        <div class="gf-drag-handle-placeholder"></div>
+                                        <div class="gf-option-icon">
+                                            @if(isType === SINGLE_SELECT || isType === MULTI_SELECT) {
+                                            <span class="gf-number-label invisible">0.</span>
+                                            } @else if(isType === CHECK_BOX) {
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey opacity-50">check_box_outline_blank</mat-icon>
+                                            } @else if(isType === RADIO) {
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey opacity-50">radio_button_unchecked</mat-icon>
+                                            }
+                                        </div>
+                                        <div class="gf-add-option-text">
+                                            <span class="gf-add-label" (click)="addOption($event)">Add option</span>
+                                            @if(!hasOtherOption && isType !== SINGLE_SELECT && isType !== MULTI_SELECT)
+                                            {
+                                            <span class="gf-or-text"> or </span>
+                                            <span class="gf-add-other-label" (click)="addOtherOption($event)">add
+                                                "Other"</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                }
+                                <div class="flex  justify-between">
+                                    <div class="d-flex align-items-center mb-1 mt-1">
+                                        <mat-checkbox formControlName="required">Required</mat-checkbox>
+                                        @if(isType === TEXT) {
+                                        <mat-checkbox formControlName="numeric" class="ms-2">Numeric type</mat-checkbox>
+                                        }
+                                        @if(isType === SINGLE_SELECT || isType === MULTI_SELECT || isType === CHECK_BOX
+                                        || isType === RADIO ||
+                                        isType
+                                        === FILE_UPLOAD || isType === YES_NO) {
+                                        <mat-checkbox formControlName="comment" class="ms-2">Add Response</mat-checkbox>
+                                        }
+                                        @if(isType === TEXT || isType === TEXTAREA || isType === SINGLE_SELECT || isType
+                                        === MULTI_SELECT || isType
+                                        ===
+                                        CHECK_BOX || isType === RADIO || isType === YES_NO) {
+                                        <mat-checkbox formControlName="file" class="ms-2">Associated File</mat-checkbox>
+                                        }
+                                    </div>
+                                    @if(hasRule(i)){
+                                    <button mat-mini-fab
+                                        class="shadow-none bg-light mat-md-fab-btn mt-1 mb-1 border border-gray-200"
+                                        (click)="openTemplateTriggerDrawer(i); $event.stopPropagation()" [matBadge]="1"
+                                        matBadgeOverlap="true" matBadgeColor="warn" matBadgeSize="small"
+                                        aria-label="Entity actions">
+                                        <mat-icon class="material-symbols-outlined" color="primary">flowchart</mat-icon>
+                                    </button>
+                                    }
+                                    @else {
+                                    <button mat-mini-fab
+                                        class="shadow-none bg-light mat-md-fab-btn mt-1 mb-1 border border-gray-200"
+                                        (click)="openTemplateTriggerDrawer(i); $event.stopPropagation()">
+                                        <mat-icon class="material-symbols-outlined" color="primary">flowchart</mat-icon>
+                                    </button>
+                                    }
+                                </div>
+                            </div>
+                            }
+                            }
+                        </mat-card>
+                    </div>
+                    }
+                    @if(addNewQuestion) {
+                    <div class="d-flex">
+                        @if((mode === CREATE || mode === EDIT) && !isViewMode) {
+                        <mat-icon class="cursor-pointer mat-md-icon material-symbols-outlined text-grey"
+                            cdkDragHandle>drag_indicator</mat-icon>
+                        }
+                        <mat-card class="pt-3 pb-2 ps-2 ms-2 rounded shadow-none w-100" [formGroup]="newQuestionForm">
+                            <div class="rounded overflow-x-hidden overflow-y-auto">
+                                <div class="d-flex justify-content-between">
+                                    <div class="title mx-2">
+                                        {{ assessmentsFormArray.at(selectedIndex).value.order }}.{{
+                                        questionsFormArray(selectedIndex).length + 1 }} Question
+                                    </div>
+                                    <div>
+                                        <mat-icon (click)="cancelQuestion()"
+                                            class="material-symbols-outlined fs-5 mx-2 text-primary cursor-pointer mat-md-icon">delete</mat-icon>
+                                    </div>
+                                </div>
+                                <div class="pe-4 pt-1 d-flex flex-column flex-1 overflow-hidden">
+                                    <div class="ms-2 w-100">
+                                        <app-custom-editor class="flex-1 d-flex flex-column"
+                                            [initialContent]="newQuestionForm.get('text')?.value"
+                                            [showInsertVariable]="false" [autoFocus]="true"
+                                            (contentChange)="onNewQuestionTextChange($event)">
+                                        </app-custom-editor>
+                                    </div>
+                                </div>
+                                <div class="ms-2 w-100 pe-4 pt-2">
+                                    <div><label class="title ms-1">Helper Text</label></div>
+                                    <app-custom-editor class="flex-1 d-flex flex-column"
+                                        [initialContent]="newQuestionForm.get('helper')?.value"
+                                        [showInsertVariable]="false" [showLinkInsert]="true" [showImageUpload]="true"
+                                        [autoFocus]="false" (contentChange)="onNewQuestionHelperChange($event)"
+                                        (imagesSelected)="onImagesSelected($event)">
+                                    </app-custom-editor>
+                                </div>
+                                <div class="ms-2 pe-4 pt-3 w-100">
+                                    <div class="w-100">
+                                        <mat-form-field appearance="outline"
+                                            class="me-2 w-100 mat-sm-input mat-mdc-mb-0">
+                                            <mat-label>Question Type</mat-label>
+                                            <mat-select formControlName="type">
+                                                @for (type of types; track type.value) {
+                                                <mat-option [value]="type.value">
+                                                    {{ type.label }}
+                                                </mat-option>
+                                                }
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                <!-- <div class="d-flex align-items-center mt-4 pt-2">
+            <mat-icon (click)="saveQuestion()" (keydown.enter)="$event.stopPropagation()"
+                class="material-symbols-outlined save-icon cursor-pointer fs-5">check_circle</mat-icon>
+            <mat-icon (click)="cancelQuestion()"
+                class="material-symbols-outlined fs-5 mx-2 cancel-icon cursor-pointer">cancel</mat-icon>
+            </div> -->
+                                @if(isNewType === YES_NO) {
+                                <div class="mt-2 ms-3">
+                                    <div class="ps-2 mb-2 d-flex align-items-center">
+                                        <mat-icon class="material-symbols-outlined mat-md-icon text-grey mt-2">
+                                            radio_button_unchecked
+                                        </mat-icon>
+                                        <div class="option-label px-2 py-1 rounded text-dark me-2">Yes</div>
+                                    </div>
+                                    <div class="ps-2 mb-2 d-flex align-items-center">
+                                        <mat-icon class="material-symbols-outlined mat-md-icon text-grey mt-2">
+                                            radio_button_unchecked
+                                        </mat-icon>
+                                        <div class="option-label px-2 py-1 rounded text-dark me-2">No</div>
+                                    </div>
+                                </div>
+                                }
+                                @else if(isNewType === SINGLE_SELECT || isNewType === MULTI_SELECT || isNewType ===
+                                RADIO || isNewType === CHECK_BOX)
+                                {
+                                <div class="options-list ms-3 mt-2">
+                                    <div formArrayName="options" cdkDropList
+                                        [cdkDropListData]="getOptionsFormArray(newQuestionForm).controls"
+                                        (cdkDropListDropped)="dropNewOption($event)">
+                                        @for (optionCtrl of getOptionsFormArray(newQuestionForm).controls; let i =
+                                        $index; track optionCtrl) {
+                                        <div class="gf-option-row" [formGroupName]="i" cdkDrag>
+                                            @if((mode === CREATE || mode === EDIT) && !isViewMode) {
+                                            <mat-icon class="material-symbols-outlined gf-drag-handle text-grey"
+                                                cdkDragHandle>drag_indicator</mat-icon>
+                                            }
+                                            <div class="gf-option-icon">
+                                                @if(isNewType === SINGLE_SELECT || isNewType === MULTI_SELECT) {
+                                                <span class="gf-number-label">{{ i + 1 }}.</span>
+                                                } @else if(isNewType === CHECK_BOX) {
+                                                <mat-icon
+                                                    class="material-symbols-outlined mat-md-icon text-grey">check_box_outline_blank</mat-icon>
+                                                } @else if(isNewType === RADIO) {
+                                                <mat-icon
+                                                    class="material-symbols-outlined mat-md-icon text-grey">radio_button_unchecked</mat-icon>
+                                                }
+                                            </div>
+                                            <div class="gf-input-wrapper">
+                                                <input class="gf-input" formControlName="value"
+                                                    [placeholder]="optionCtrl.get('value')?.value === 'Other' ? '' : 'Option ' + (i + 1)"
+                                                    [readOnly]="optionCtrl.get('value')?.value === 'Other'"
+                                                    [class.gf-input-other]="optionCtrl.get('value')?.value === 'Other'"
+                                                    (click)="optionCtrl.get('value')?.value !== 'Other' && $any($event.target).select()"
+                                                    (blur)="onOptionBlur(i, newQuestionForm)"
+                                                    (keydown.enter)="onOptionEnter($event, i, newQuestionForm)" />
+                                                <div class="gf-input-underline"></div>
+                                            </div>
+                                            @if(canDeleteOption(getOptionsFormArray(newQuestionForm), i)) {
+                                            <mat-icon
+                                                class="material-symbols-outlined gf-delete-btn text-grey cursor-pointer"
+                                                (click)="removeOption($event, i, newQuestionForm)">close</mat-icon>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <!-- Footer -->
+                                    <div class="gf-option-row gf-add-row">
+                                        <div class="gf-drag-handle-placeholder"></div>
+                                        <div class="gf-option-icon">
+                                            @if(isNewType === SINGLE_SELECT || isNewType === MULTI_SELECT) {
+                                            <span class="gf-number-label invisible">0.</span>
+                                            } @else if(isNewType === CHECK_BOX) {
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey opacity-50">check_box_outline_blank</mat-icon>
+                                            } @else if(isNewType === RADIO) {
+                                            <mat-icon
+                                                class="material-symbols-outlined mat-md-icon text-grey opacity-50">radio_button_unchecked</mat-icon>
+                                            }
+                                        </div>
+                                        <div class="gf-add-option-text">
+                                            <span class="gf-add-label" (click)="addOption($event, newQuestionForm)">Add
+                                                option</span>
+                                            @if(!hasOtherOptionInForm(newQuestionForm) && isNewType !== SINGLE_SELECT &&
+                                            isNewType !== MULTI_SELECT) {
+                                            <span class="gf-or-text"> or </span>
+                                            <span class="gf-add-other-label"
+                                                (click)="addOtherOption($event, newQuestionForm)">add "Other"</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                }
+                                <div class="d-flex align-items-center mb-1 mt-1">
+                                    <mat-checkbox formControlName="required">Required</mat-checkbox>
+                                    @if(isNewType === TEXT) {
+                                    <mat-checkbox formControlName="numeric" class="ms-2">Numeric type</mat-checkbox>
+                                    }
+                                    @if(isNewType === SINGLE_SELECT || isNewType === MULTI_SELECT || isNewType ===
+                                    CHECK_BOX || isNewType === RADIO ||
+                                    isNewType === FILE_UPLOAD || isNewType === YES_NO) {
+                                    <mat-checkbox formControlName="comment" class="ms-2">Add comment</mat-checkbox>
+                                    }
+                                    @if(isNewType === TEXT || isNewType === TEXTAREA || isNewType === SINGLE_SELECT ||
+                                    isNewType === MULTI_SELECT ||
+                                    isNewType === CHECK_BOX || isNewType === RADIO || isNewType === YES_NO) {
+                                    <mat-checkbox formControlName="file" class="ms-2">Associated file</mat-checkbox>
+                                    }
+                                </div>
+                                <!-- <div class="ms-4 ps-1">
+         <div mat-button class="ms-2 text-primary cursor-pointer fs-14 fs-22"> + Add condition/rule </div>
+         </div> -->
+                            </div>
+                        </mat-card>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+        <!-- @if(mode === 'CREATE' || mode === 'EDIT') {
+   <div class="d-flex align-items-center" (click)="addQuestion()">
+       <mat-icon
+           class="material-symbols-outlined add-icon me-2 cursor-pointer bg-primary text-light">add</mat-icon>
+       <div class="my-auto text-decoration-none cursor-pointer text-primary label-large">Add Another Question</div>
+   </div>
+   } -->
+    </div>
+    }
+</div>
+<!-- <hr class="mb-1 hr-bold" />
+   <div class="d-flex justify-between gap-2 mx-2 fs-14">
+       <loading-button type="secondary">Cancel</loading-button>
+       <loading-button type="primary" (onButtonClick)="onSave()" [loading]="isSaveLoading">Save</loading-button>
+   </div> -->
+
+<mat-drawer-container class="right-sidebar mat-md-drawer fixed-drawer-container" [hasBackdrop]="true" autosize>
+    <mat-drawer #templateTriggerDrawer mode="over" position="end" class="section-mat-drawer" [disableClose]="true">
+        <app-trigger-drawer [editData]="selectedEditPayload" [assessmentSource]="assessmentSource"
+            (onSave)="onTriggerSave($event)" (onClose)="templateTriggerDrawer.close()"></app-trigger-drawer>
+    </mat-drawer>
+</mat-drawer-container>

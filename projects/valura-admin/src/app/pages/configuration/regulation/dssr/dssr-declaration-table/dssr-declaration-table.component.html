@@ -1,0 +1,94 @@
+<div class="h-full flex flex-col overflow-hidden">
+  @if (dataLoaded) {
+  @if (showTabs) {
+  <div class="mt-2 ms-2">
+    <mat-button-toggle-group class="toggle-btn-grp" [(ngModel)]="selectedTab" name="declarationTab"
+      aria-label="Declaration Tab" (change)="onTabChange($event)">
+      <mat-button-toggle value="REGULATION_SPECIFIC">General</mat-button-toggle>
+      <mat-button-toggle value="RIGHT_SPECIFIC">Right Specific</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+  }
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+    <table mat-table matSort [dataSource]="isLoading ? shimmerDataSource : filteredDeclarations()"
+      (matSortChange)="onSortChange($event)" class="mat-elevation-z8 w-100 custom-table table table-layout-fixed">
+
+      <ng-container matColumnDef="declaration">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="px-3 title-small whitespace-nowrap declaration-col"
+          [style.width]="rightSpecificTab ? '70%' : '90%'">
+          Declaration Statement
+        </th>
+        <td mat-cell *matCellDef="let item" class="px-3">
+          <ng-container *ngIf="!isLoading">
+            <span [appEllipsisTooltip]="item.declaration" (click)="openDeclarationDetails(item.id)">
+              {{ item.declaration }}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="isLoading">
+            <div class="shimmer-line shimmer-large"></div>
+          </ng-container>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="rightTitle">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          Rights
+        </th>
+
+        <td mat-cell *matCellDef="let item">
+          <ng-container *ngIf="!isLoading">
+            {{ item.rightTitle || '-' }}
+          </ng-container>
+
+          <ng-container *ngIf="isLoading">
+            <div class="shimmer-line shimmer-small"></div>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <!-- ========== ACTIONS COLUMN ========== -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>
+          Actions
+        </th>
+
+        <td mat-cell *matCellDef="let item">
+          <ng-container *ngIf="!isLoading">
+            <div class="flex items-center gap-2">
+
+              <mat-icon class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+                (click)="onEdit(item)" title="Edit" (mouseover)="onIconHover($event, '#1C2B70')"
+                (mouseout)="onIconHover($event, '#767676')">edit</mat-icon>
+
+              <mat-icon class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey"
+                (click)="onDelete(item)" title="Delete" (mouseover)="onIconHover($event, '#1C2B70')"
+                (mouseout)="onIconHover($event, '#767676')">delete</mat-icon>
+
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="isLoading">
+            <div class="shimmer-line shimmer-small"></div>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"
+        [style.display]="(!isLoading && filteredDeclarations().length === 0) ? 'none' : ''">
+      </tr>
+
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr *matNoDataRow>
+        <td class="mat-cell text-center" [attr.colspan]="displayedColumns.length">
+
+          <item-not-found [imgHeight]="'200px'" [heading]=errorTitle>
+          </item-not-found>
+        </td>
+      </tr>
+
+    </table>
+  </div>
+
+  }
+
+</div>

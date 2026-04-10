@@ -1,0 +1,49 @@
+<div class="icon-picker-container">
+  <div class="icon-picker-header">
+    <h4 class="icon-picker-title">Select Icon</h4>
+  </div>
+  <div class="icon-picker-content">
+    <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-input search-field">
+      <mat-label>Search icons</mat-label>
+      <input matInput [(ngModel)]="searchTerm" autocomplete="off" class="search-input-padding" />
+      @if (searchTerm) {
+      <button matSuffix mat-icon-button (click)="onClearSearch()">
+        <mat-icon class="material-symbols-outlined">close</mat-icon>
+      </button>
+      }
+    </mat-form-field>
+    @if (isLoading) {
+    <div class="icon-grid mt-3">
+      @for (item of shimmerItems; track $index) {
+      <div class="icon-box shimmer-box">
+        <div class="shimmer-icon"></div>
+        <div class="shimmer-text"></div>
+      </div>
+      }
+    </div>
+    } @else if (hasResults) {
+    <div class="icon-grid mt-3">
+      @for (icon of filteredIcons; track icon.id) {
+      <div class="icon-box" [class.selected]="isIconSelected(icon.icon)" (click)="onIconSelect(icon)">
+        <span class="material-symbols-outlined" [style.font-variation-settings]="fontSettings">
+          {{ icon.materialIcon }}
+        </span>
+        <div class="icon-name">{{ icon.name }}</div>
+      </div>
+      }
+    </div>
+    } @else {
+    <div class="no-results text-center mt-4">
+      <mat-icon class="material-symbols-outlined text-grey">search_off</mat-icon>
+      <p class="text-grey mt-2">No icons found for "{{ searchTerm }}"</p>
+    </div>
+    }
+  </div>
+  <div class="icon-picker-actions flex justify-end gap-2">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel </loading-button>
+    <loading-button type="primary" [disabled]="!hasSelection" (onButtonClick)="onConfirm()">
+      Select Icon
+    </loading-button>
+  </div>
+</div>

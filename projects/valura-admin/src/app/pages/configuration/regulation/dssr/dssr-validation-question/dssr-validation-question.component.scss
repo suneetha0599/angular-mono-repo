@@ -1,0 +1,19 @@
+::ng-deep .mat-mdc-table {
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 0 10px !important;
+  }
+
+  // Tighten specific columns
+  .mat-column-question {
+    padding-left: 16px !important;
+    padding-right: 15px !important;
+  }
+
+  .mat-column-helper {
+    padding-left: 8px !important;
+    padding-right: 16px !important;
+  }
+
+}

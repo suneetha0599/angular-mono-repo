@@ -1,0 +1,111 @@
+<mat-toolbar class="bg-white  px-4 py-2 flex justify-between items-center topbar">
+  <div class="flex items-center space-x-6">
+    @if(isCollapsed){
+    <img src="/assets/images/primary-logo.png" width="38" height="38" alt="logo" />
+    }
+    @if (!isCollapsed) {
+    <span class="font-semibold text-primary-40 text-2xl select-none">
+      Valura
+    </span>
+    }
+    <div [ngClass]="isCollapsed ? 'pl-2' : 'pl-30'" class="transition-all duration-300">
+      <button mat-icon-button aria-label="Toggle sidebar" (click)="toggle.emit()">
+        <mat-icon class="material-symbols-outlined">menu</mat-icon>
+      </button>
+    </div>
+    @for(breadcrumb of routeBreadCrumbsList; track breadcrumb.id;let isLast=$last){
+    <div class="label-large me-2 pointer" [ngClass]="{'text-secondary-50': isLast,'text-primary-40':!isLast}"
+      (click)="navigateToRoute(breadcrumb)">
+      {{breadcrumb.label}}
+    </div>
+    @if(!isLast){
+    <mat-icon class="me-2 material-symbols-outlined">chevron_left</mat-icon>
+    }
+    }
+  </div>
+  <div class="flex items-center gap-2">
+    <!-- 
+         @if (!isExternalUser && !isInternalUser) {
+         <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn download-button mr-4"
+           (click)="openexportData()">
+           <span class="material-symbols-outlined mt-2">file_export</span>
+         </button>
+         } -->
+    @if (showNotificationMenu) {
+    <button mat-mini-fab class="shadow-none bg-light ml-3" [matBadge]="badgeValue"
+      [matBadgeHidden]="hideNotificationBadge" matBadgeOverlap="true" matBadgeColor="warn" aria-label="Notifications"
+      (click)="openNotifications()">
+      <mat-icon class="text-primary material-symbols-outlined">notifications</mat-icon>
+    </button>
+    }
+    @if (entityList.length > 1) {
+    <div class="relative inline-block">
+      @if (hasAnyAction()) {
+      <button mat-mini-fab class="shadow-none bg-light" [matMenuTriggerFor]="entityMenu"
+        [matBadge]="getTotalActionCount()" matBadgeOverlap="true" matBadgeColor="warn" matBadgeSize="small"
+        aria-label="Entity actions">
+        <mat-icon color="primary" class="material-symbols-outlined">
+          language
+        </mat-icon>
+      </button>
+      } @else {
+      <button mat-mini-fab class="shadow-none bg-light" [matMenuTriggerFor]="entityMenu">
+        <mat-icon color="primary" class="material-symbols-outlined">
+          language
+        </mat-icon>
+      </button>
+      }
+    </div>
+    }
+    <mat-menu #entityMenu="matMenu">
+      @for (entity of entityList; track entity.id) {
+      <button mat-menu-item class="text-sm flex items-center"
+        [style.backgroundColor]="entity.isCurrent ? '#e5e7eb' : ''" (click)="onEntitySwitch(entity)">
+        <span class="ml-2 truncate max-w-[140px]">
+          {{ entity.id.charAt(0).toUpperCase() + entity.id.slice(1) }}
+        </span>
+
+        @if (entity.needsAction) {
+        <span class="ml-auto custom-badge-count">
+          {{ entity.actionItemsCount }}
+        </span>
+        }
+      </button>
+      }
+    </mat-menu>
+    <div class="cursor-pointer hover:opacity-80 transition mx-2 flex flex-row items-center space-x-4"
+      [matMenuTriggerFor]="menu">
+      @if (userInfo.profilePhoto) {
+      <img [src]="userInfo.profilePhoto" class="w-8 h-8 rounded-full border border-gray-300 object-cover" />
+      } @else {
+      <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300">
+        <mat-icon class="text-gray-600 text-base material-symbols-outlined">person</mat-icon>
+      </div>
+      }
+      <span class="text-sm font-medium select-none" [class.shimmer-box]="isLoading">
+        {{ isLoading ? '' : displayName }}
+      </span>
+      <mat-menu class="action-panel" #menu="matMenu">
+        <button mat-menu-item class="d-flex px-4" (click)="goToProfile()">
+          <mat-icon class="mat-md-icon text-primary my-auto material-symbols-outlined">person</mat-icon>
+          <span>My profile</span>
+        </button>
+        <button mat-menu-item class="d-flex px-4" (click)="logOut()">
+          <mat-icon class="mat-md-icon text-primary my-auto material-symbols-outlined">logout</mat-icon>
+          <span>Log out</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+</mat-toolbar>
+
+<mat-drawer-container class="right-sidebar mat-md-drawer" [hasBackdrop]="true" autosize>
+  <mat-drawer #notificationDrawer mode="over" position="end" class="w-80 h-screen">
+    <app-notification-drawer-content [notifications]="notifications" [currentPage]="pageNo"
+      [isMarkAllLoading]="isMarkAllLoading" [totalPages]="totalPages" [isLoadingMore]="notificationLoading"
+      (onCloseDrawer)="notificationDrawer.toggle()" (scrollReachedBottom)="loadNextPage()"
+      (loadMoreNotifications)="loadNextPage()" (notificationClick)="handleNotificationClick($event)"
+      (markAllAsReadClick)="handleMarkAllAsRead()">
+    </app-notification-drawer-content>
+  </mat-drawer>
+</mat-drawer-container>

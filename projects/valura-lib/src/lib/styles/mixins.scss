@@ -1,0 +1,33 @@
+@use './theme-colors' as colorTheme;
+@use './colors' as colors;
+
+
+$border-radius: 8px;
+
+@mixin primaryBorder {
+    border: 2px solid colors.$primary;
+}
+
+@mixin secondaryBorder {
+    border: 1px solid $med-grey;
+}
+
+@mixin radius {
+    border-radius: $border-radius;
+}
+
+@mixin btnBorderRadius {
+    border-radius: $btn-border-radius !important;
+}
+
+@mixin border-tertiary-base {
+    border-color: colorTheme.$tertiary-base !important;
+}
+
+@mixin bg-tertiary-light {
+    background-color: colorTheme.$tertiary-light !important;
+}
+
+@mixin bg-error-light {
+    background-color: colorTheme.$error-base !important;
+}

@@ -1,0 +1,391 @@
+<form [formGroup]="form">
+    <div class="label-large mb-1 mt-4">Who is rasing the request?</div>
+    <div class="body-medium text-gray-500 mb-3">
+        Are you making this request for yourself or someone else?
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+        @for (category of formConfiguration.requesterInfo; track $index) {
+        <div class="p-3 rounded-lg cursor-pointer"
+            [ngClass]="form.get('category')?.value == category.type ? 'border-primary request-selection' : 'default-category-button'"
+            (click)="selectCategory(category.type)">
+            <div class="flex items-start gap-3">
+                <mat-icon class="material-symbols-outlined flex-shrink-0 mt-[2px]">{{ getMaterialIcon(category.icon)
+                    }}</mat-icon>
+                <div class="flex flex-col">
+                    <span [ngClass]="{
+               'text-primary': form.get('category')?.value === category.type,
+               'label-large-bold': form.get('category')?.value === category.type,
+               'label-large': form.get('category')?.value !== category.type
+               }">{{ category.label }}</span>
+                    <p class="body-medium mt-1"
+                        [ngClass]="{'text-gray-500': form.get('category')?.value !== category.type}">
+                        {{ category.description }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    @if (form.get('category')?.value === THIRD_PARTY) {
+    <div class="grid grid-cols-2 gap-4 mt-4">
+        <!-- <cutsom-mat-input [formInputControl]="thirdPartyFirstName" label="First Name"></cutsom-mat-input> -->
+        <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="thirdPartyFirstName">
+            <mat-error>
+                <custom-mat-error class="inline-block" [errors]="thirdPartyFirstName.errors"
+                    [control]="thirdPartyFirstName"></custom-mat-error>
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="thirdPartyLastName">
+            <mat-error>
+                <custom-mat-error class="inline-block" [errors]="thirdPartyLastName.errors"
+                    [control]="thirdPartyLastName"></custom-mat-error>
+            </mat-error>
+        </mat-form-field>
+    </div>
+    <div class="grid grid-cols-2 gap-4 mt-4">
+        <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+            <mat-label>Email Address</mat-label>
+            <input matInput formControlName="thirdPartyEmail" />
+            <mat-error>
+                <custom-mat-error class="inline-block" [errors]="thirdPartyEmail.errors"
+                    [control]="thirdPartyEmail"></custom-mat-error>
+            </mat-error>
+        </mat-form-field>
+        <!--          <mat-form-field appearance="outline" class="w-full mat-sm-input">-->
+        <!--            <mat-label>Phone</mat-label>-->
+        <!--            <span matTextPrefix class="px-1">{{ selectedCountry?.countryPhoneCode || '+00' }}</span>-->
+        <!--            <input matInput formControlName="thirdPartyPhoneNumber" />-->
+        <!--            <mat-error>-->
+        <!--              <custom-mat-error class="inline-block" [errors]="thirdPartyPhoneNumber.errors"-->
+        <!--                [control]="thirdPartyPhoneNumber"></custom-mat-error>-->
+        <!--            </mat-error>-->
+        <!--          </mat-form-field>-->
+        <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+            <mat-label>Phone Number</mat-label>
+            <mat-select matPrefix [(value)]="selectedThirdPartyCountry" class="w-24" panelClass="search-select-panel"
+                (openedChange)="clearSearch(searchInput)">
+                <mat-select-trigger class="p-2">
+                    {{ selectedThirdPartyCountry?.countryPhoneCode }}
+                </mat-select-trigger>
+                <mat-optgroup class="sticky-searchbar">
+                    <input type="text" placeholder="Search Residency" #searchInput (click)="$event.stopPropagation()"
+                        (keyup)="filterThirdPartyCountries(searchInput.value)"
+                        class="w-full p-2 border rounded-lg outline-none" />
+                </mat-optgroup>
+                @if(searchInput.value){
+                <button type="button" class="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
+                    (click)="clearSearch(searchInput); searchInput.focus(); $event.stopPropagation()">
+                    <mat-icon fontIcon="close" class="text-sm material-symbols-outlined"></mat-icon>
+                </button>
+                }
+                @for (country of formConfiguration.filteredThirdPartyCountryList; track country) {
+                <mat-option [value]="country">
+                    {{ country.name }} ({{ country.countryPhoneCode }})
+                </mat-option>
+                }
+            </mat-select>
+            <input matInput maxlength="10" formControlName="thirdPartyPhoneNumber" (keypress)="allowNumbersOnly($event)"
+                (click)="$event.stopPropagation()" />
+            <mat-error>
+                <custom-mat-error class="inline-block" [errors]="thirdPartyPhoneNumber"
+                    [control]="thirdPartyPhoneNumber"></custom-mat-error>
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full mb-2 mat-sm-input mat-mdc-mb-0">
+            <mat-label>Choose Role</mat-label>
+            <mat-select formControlName="thirdPartyRole">
+                @for (role of formConfiguration.thirdPartyRoles; track $index) {
+                <mat-option [value]="role?.name">{{ role?.name }}</mat-option>
+                }
+            </mat-select>
+            <mat-error>
+                <custom-mat-error class="inline-block" [errors]="thirdPartyRole.errors"
+                    [control]="thirdPartyRole"></custom-mat-error>
+            </mat-error>
+        </mat-form-field>
+    </div>
+    <!--File upload-->
+    <!-- <div class="mt-4">
+        <custom-file-upload label="Upload any files or documents against your request"
+            [purpose]="DSR_THIRD_PARTY_VERIFICATION_PURPOSE" [infoMessage]="tooltip"
+            [fileUploadAccept]="fileUploadAccept" [fileUploadSupportedText]="fileUploadSupportedText"
+            (onUploadPresignedUrl)="onUploadPresignedUrl($event)" (onRemoveFile)="onRemoveFile($event)">
+        </custom-file-upload>
+    </div> -->
+    }
+
+    <div class="mt-4">
+        <div class="label-large mb-1">Country Of Residence</div>
+        <div class="body-medium text-gray-500 mb-4">
+            Select the country in which the individual related to the request resides
+        </div>
+        <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-12">
+                <div class="grid grid-cols-2 gap-4 mb-2">
+                    <!-- Residency -->
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                        <mat-label>Residency</mat-label>
+                        <mat-select formControlName="countryId" class="body-medium"
+                            panelClass="search-select-panel" (selectionChange)="onCountryChange()" (openedChange)="clearSearch(searchValue)">
+                            <mat-optgroup class="sticky-searchbar">
+                                <input type="text" placeholder="Search Residency" #searchInput
+                                    (keyup)="filterCountries(searchInput.value)"
+                                    class="w-full p-2 border rounded-lg outline-none body-medium" />
+                                @if(searchInput.value){
+                                <button type="button" class="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
+                                    (click)="clearSearch(searchInput); searchInput.focus(); $event.stopPropagation()">
+                                    <mat-icon fontIcon="close" class="text-sm material-symbols-outlined"></mat-icon>
+                                </button>
+                                }
+                            </mat-optgroup>
+                            @for (country of formConfiguration.filteredCountryList; track $index) {
+                            <mat-option [value]="country.id">{{ country.name }}</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>
+                            <custom-mat-error class="inline-block" [errors]="countryId.errors"
+                                [control]="countryId"></custom-mat-error>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rights -->
+    @if(form.get('countryId')?.value){
+    <div class="label-large mb-1 mt-4">What right do you wish to exercise?</div>
+    <div class="body-medium text-gray-500 mb-3">
+        Choose the type of request you’d like to make
+    </div>
+    }
+
+
+    <!-- Request Type List -->
+    @if (formConfiguration.dataSubjectRightsMasterList.length) {
+    <div class="grid grid-cols-2 gap-4">
+        @for (requestType of formConfiguration.dataSubjectRightsMasterList; track $index) {
+        <div class="card-option mt-3" [ngClass]="{
+      'selected-card-option': form.get('requestTypeId')?.value === requestType.id,
+      'default-card-option': form.get('requestTypeId')?.value !== requestType.id
+      }" (click)="onSelectRight(requestType.id)">
+            <div class="flex items-start gap-3">
+                <mat-icon class="mt-1 flex-shrink-0 material-symbols-outlined"
+                    [ngClass]="{ 'text-primary': form.get('requestTypeId')?.value === requestType.id }">
+                    {{ getMaterialIcon(requestType.icon) }}
+                </mat-icon>
+                <div>
+                    <div class="label-large"
+                        [ngClass]="{ 'text-primary': form.get('requestTypeId')?.value === requestType.id }">
+                        {{ requestType.title }}
+                    </div>
+                    <div class="body-medium text-gray-600 mt-1">
+                        {{ requestType.description }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    }
+    <!-- Section 4: Raise Request -->
+    @if(isCreateRequest){
+    <div class="mt-3 mb-4 label-large">Request Received Through</div>
+    }
+    @else {
+    <div class="mt-3 mb-4 label-large">Raise Your Request</div>
+    }
+    <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12">
+            <!-- Platform -->
+            <div class="grid grid-cols-2 gap-4 mb-2">
+                @if(formConfiguration.organizationList.length>0) {
+                <mat-form-field appearance="outline" class="w-full mat-sm-input mat-mdc-mb-0">
+                    <mat-label>Platform</mat-label>
+                    <mat-select formControlName="platform">
+                        @for (platform of formConfiguration.organizationList; track $index) {
+                        <mat-option [value]="platform.name">{{ platform.name }}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-error>
+                        <custom-mat-error class="inline-block" [errors]="platform.errors"
+                            [control]="platform"></custom-mat-error>
+                    </mat-error>
+                </mat-form-field>
+                }
+                <mat-form-field appearance="outline" class="w-full mat-sm-input  mat-mdc-mb-0">
+                    @if(isCreateRequest){
+                    <mat-label>Request Channel</mat-label>
+                    }
+                    @else {
+                    <mat-label>Channel</mat-label>
+                    }
+                    <mat-select formControlName="channel">
+                        @for (channel of formConfiguration.channelList; track $index) {
+                        @if (channel !== WEB_FORM) {
+                        <mat-option [value]="channel">{{ channel }}</mat-option>
+                        }
+                        }
+                    </mat-select>
+                    <mat-error>
+                        <custom-mat-error class="inline-block" [errors]="channel.errors"
+                            [control]="channel"></custom-mat-error>
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <!-- Personal Info -->
+            <div class=" mt-4 mb-4 flex gap-2 items-center">
+                <div class="label-large">Details of the individual this request is about</div>
+                <!-- <mat-icon class="text-base !text-[#2060EB] info-icn material-symbols-outlined" [matTooltip]="tooltip"
+                    matTooltipClass="material-tooltip" matTooltipPosition="right">info</mat-icon> -->
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                    <mat-label>First Name</mat-label>
+                    <input matInput formControlName="firstPartyFirstName">
+                    <mat-error>
+                        <custom-mat-error class="inline-block" [errors]="firstPartyFirstName.errors"
+                            [control]="firstPartyFirstName"></custom-mat-error>
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                    <mat-label>Last Name</mat-label>
+                    <input matInput formControlName="firstPartyLastName">
+                    <mat-error>
+                        <custom-mat-error class="inline-block" [errors]="firstPartyLastName.errors"
+                            [control]="firstPartyLastName"></custom-mat-error>
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-2">
+                <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                    <mat-label>Email Address</mat-label>
+                    <input matInput formControlName="email" />
+                    <mat-error>
+                        <custom-mat-error class="inline-block" [errors]="email.errors"
+                            [control]="email"></custom-mat-error>
+                    </mat-error>
+                </mat-form-field>
+                <!--              <mat-form-field appearance="outline" class="w-full mat-sm-input">-->
+                <!--                <mat-label>Phone</mat-label>-->
+                <!--                <span matTextPrefix class="px-1">{{ selectedCountry?.countryPhoneCode || '+00' }}&nbsp;</span>-->
+                <!--                <input matInput formControlName="phone" />-->
+                <!--              </mat-form-field>-->
+                <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                    <mat-label>Phone Number</mat-label>
+                    <mat-select matPrefix [(value)]="selectedDataSubjectCountry"
+                        (openedChange)="clearSearch(searchValue)" class="w-24" panelClass="search-select-panel">
+                        <mat-select-trigger class="p-2">
+                            {{ selectedDataSubjectCountry?.countryPhoneCode }}
+                        </mat-select-trigger>
+                        <mat-optgroup class="sticky-searchbar">
+                            <input type="text" placeholder="Search Residency" #searchValue
+                                (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
+                                (input)="filterDataSubjectPhoneCountry(searchValue.value)"
+                                class="w-full p-2 border rounded-lg outline-none body-medium" />
+                            @if(searchValue.value){
+                            <button type="button" class="absolute right-2 top-2 text-gray-500 hover:text-gray-800"
+                                (click)="clearSearch(searchValue); searchValue.focus(); $event.stopPropagation()">
+                                <mat-icon fontIcon="close" class="text-sm material-symbols-outlined"></mat-icon>
+                            </button>
+                            }
+                        </mat-optgroup>
+                        @for (country of formConfiguration.filteredDataSubjectPhoneList; track country.id) {
+                        <mat-option [value]="country">
+                            {{ country.name }} ({{ country.countryPhoneCode }})
+                        </mat-option>
+                        }
+                    </mat-select>
+                    <input matInput maxlength="10" formControlName="phone" (keypress)="allowNumbersOnly($event)"
+                        (click)="$event.stopPropagation()" />
+                    <mat-error>
+                        <custom-mat-error class="inline-block" [errors]="phone" [control]="phone"></custom-mat-error>
+                    </mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 mb-3 label-large">Select the relationship with the organisaton</div>
+    <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12">
+            <div class="flex flex-wrap gap-3 mt-2">
+                @for (item of formConfiguration.dataSubjectUserTypesList; track $index) {
+                <div class="flex items-center px-2 py-2 cursor-pointer gap-2 hover:!bg-gray-200 "
+                    [ngClass]="{ 'selected-button': form.get('requesterType')?.value === item.id, 'default-button': form.get('requesterType')?.value !== item.id }"
+                    (click)="form.patchValue({ requesterType: item.id })">
+                    @if (form.get('requesterType')?.value === item.id) {
+                    <mat-icon class="!text-primary info-icn material-symbols-outlined">check</mat-icon>
+                    }
+                    <div class="label-large">{{ item.name }}</div>
+
+                    <mat-icon class="text-sm !text-[#2060EB] ml-auto info-icn material-symbols-outlined"
+                        [matTooltip]="item.description" matTooltipClass="material-tooltip"
+                        matTooltipPosition="right">info</mat-icon>
+
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 mb-3 label-large">Write your request description here</div>
+    <div class="grid grid-cols-12 gap-4 mb-2">
+        <div class="col-span-12">
+            <app-custom-mat-textarea [control]="requestDescription" label="Request Details" [minRows]="1" [maxRows]="5">
+            </app-custom-mat-textarea>
+            <!-- File Upload -->
+            <div class="mt-4 gap-x-2 w-100">
+                <custom-file-upload label="Upload any files or documents against you request"
+                    [selectedFiles]=uploadedRequestAttachments [purpose]="DSR_ATTACHMENT_PURPOSE"
+                    [infoMessage]="tooltip" [fileUploadAccept]="fileUploadAccept"
+                    [fileUploadSupportedText]="fileUploadSupportedText" (uploadStatus)="uploadStatus($event)"
+                    (onUploadPresignedUrl)="onUploadPresignedUrl($event)" (onRemoveFile)="onRemoveFile($event)">
+                </custom-file-upload>
+            </div>
+        </div>
+    </div>
+    @if(isCreateRequest){
+    <mat-checkbox class="label-medium" formControlName="shouldLock">
+        Requester verification needed?
+    </mat-checkbox>
+    }
+
+    @for(dec of declarationsArray.controls; track $index; let i = $index) {
+    <div>
+        <mat-checkbox class="label-medium" [formControl]="getDeclarationControl(i, 'checked')"
+            (change)="onDeclarationChange(i)">
+            {{ getDeclarationControl(i, 'declaration').value }}
+        </mat-checkbox>
+    </div>
+    }
+    @if(isCreateRequest){
+    <div class="grid grid-cols-12 gap-3 mt-6">
+        <div class="col-span-12 flex flex-wrap gap-3">
+            <!-- Create Request -->
+            <loading-button type="primary" [loading]="submitLoading" [disabled]="_submitIsDisabled"
+                (onButtonClick)="onSubmit(false)" [appLogClick]="'Create Request'">
+                <span class="label-large">Create request</span>
+            </loading-button>
+            <!-- Save Draft -->
+            <loading-button type="secondary" [loading]="draftLoading" (onButtonClick)="onSubmit(true)"
+                [appLogClick]="'Save Draft'" [disabled]="isFinalSaved">
+                <span class="label-large">Save Draft</span>
+            </loading-button>
+            @if(isEditMode){
+            <loading-button type="secondary" [loading]="deleteDraftLoading" (onButtonClick)="onDeleteDraft()"
+                [appLogClick]="'Delete Draft'">
+                <span class="label-large">Delete draft</span>
+            </loading-button>
+            }
+            <loading-button type="light" [basicButton]="true" (onButtonClick)="goBack()" [appLogClick]="'Cancel'">
+                <span class="label-large">Cancel</span>
+            </loading-button>
+        </div>
+    </div>
+    }
+</form>

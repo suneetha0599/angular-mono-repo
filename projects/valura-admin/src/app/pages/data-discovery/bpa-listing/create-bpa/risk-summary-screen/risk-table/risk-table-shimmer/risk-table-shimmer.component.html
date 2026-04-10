@@ -1,0 +1,181 @@
+<div class="flex flex-col" style="height: 100%;">
+  <!-- Risk Table Container -->
+  <div class="table-container">
+
+    <!-- Main Risk Table Shimmer -->
+    <table mat-table class="mat-elevation-z8" style="width: 100%;">
+
+      <!-- Header Row Shimmer -->
+      <tr class="mat-mdc-header-row">
+        <th class="px-2 py-3" style="background: #F9F9FE !important; width: 33.333% !important;">
+          <div class="flex items-center space-x-2">
+            <div class="shimmer-box w-32 h-4"></div>
+          </div>
+        </th>
+        <th class="px-2 py-3" style="background: #F9F9FE !important; width: 33.333% !important;">
+          <div class="flex items-center space-x-2">
+            <div class="shimmer-box w-24 h-4"></div>
+          </div>
+        </th>
+        <th class="px-2 py-3" style="background: #F9F9FE !important; width: 33.333% !important;">
+          <div class="flex items-center space-x-2">
+            <div class="shimmer-box w-20 h-4"></div>
+          </div>
+        </th>
+      </tr>
+
+      <!-- Data Rows Shimmer -->
+      @for (row of [1, 2, 3]; track row) {
+      <tr class="mat-mdc-row">
+
+        <!-- Processing Risk Column Shimmer -->
+        <td class="px-2 py-2 processing-risk-bg" style="width: 33.333% !important;">
+          <div class="risk-card-shimmer" style="border-color: #bfdbfe;">
+
+            <!-- Parameter Section Shimmer -->
+            <div class="section-divider">
+              <div class="flex items-center justify-between mb-1">
+                <div class="shimmer-box w-16 h-3"></div>
+              </div>
+              <div class="shimmer-box w-full h-4 mb-1"></div>
+              <div class="shimmer-box w-3-4 h-4"></div>
+            </div>
+
+            <!-- Description Section Shimmer -->
+            <div class="section-divider">
+              <div class="shimmer-box w-24 h-3 mb-1"></div>
+              <div class="shimmer-box w-full h-3 mb-1"></div>
+              <div class="shimmer-box w-full h-3 mb-1"></div>
+              <div class="shimmer-box w-2-3 h-3"></div>
+            </div>
+
+            <!-- Impact Section Shimmer -->
+            <div>
+              <div class="shimmer-box w-16 h-3 mb-1"></div>
+              <div class="flex">
+                <div class="shimmer-box rounded-full" style="width: 60px; height: 24px;"></div>
+              </div>
+            </div>
+          </div>
+        </td>
+
+        <!-- Transfer Risk Column Shimmer -->
+        <td class="px-2 py-2 transfer-risk-bg" style="width: 33.333% !important;">
+          <div class="risk-card-shimmer" style="border-color: #d8b4fe;">
+
+            <!-- Parameter Section Shimmer -->
+            <div class="section-divider">
+              <div class="flex items-center justify-between mb-1">
+                <div class="shimmer-box w-16 h-3"></div>
+              </div>
+              <div class="shimmer-box w-full h-4 mb-1"></div>
+              <div class="shimmer-box w-3-4 h-4"></div>
+            </div>
+
+            <!-- Description Section Shimmer -->
+            <div class="section-divider">
+              <div class="shimmer-box w-24 h-3 mb-1"></div>
+              <div class="shimmer-box w-full h-3 mb-1"></div>
+              <div class="shimmer-box w-full h-3 mb-1"></div>
+              <div class="shimmer-box w-1-2 h-3"></div>
+            </div>
+
+            <!-- Impact Section Shimmer -->
+            <div>
+              <div class="shimmer-box w-16 h-3 mb-1"></div>
+              <div class="flex">
+                <div class="shimmer-box rounded-full" style="width: 70px; height: 24px;"></div>
+              </div>
+            </div>
+          </div>
+        </td>
+
+        <!-- AI Risk Column Shimmer -->
+        <td class="px-2 py-2 ai-risk-bg" style="width: 33.333% !important;">
+          <div class="risk-card-shimmer" style="border-color: #c7d2fe;">
+
+            <!-- Parameter Section Shimmer -->
+            <div class="section-divider">
+              <div class="flex items-center justify-between mb-1">
+                <div class="shimmer-box w-16 h-3"></div>
+              </div>
+              <div class="shimmer-box w-full h-4 mb-1"></div>
+              <div class="shimmer-box w-1-2 h-4"></div>
+            </div>
+
+            <!-- Description Section Shimmer -->
+            <div class="section-divider">
+              <div class="shimmer-box w-24 h-3 mb-1"></div>
+              <div class="shimmer-box w-full h-3 mb-1"></div>
+              <div class="shimmer-box w-full h-3 mb-1"></div>
+              <div class="shimmer-box w-3-4 h-3"></div>
+            </div>
+
+            <!-- Impact Section Shimmer -->
+            <div>
+              <div class="shimmer-box w-16 h-3 mb-1"></div>
+              <div class="flex">
+                <div class="shimmer-box rounded-full" style="width: 65px; height: 24px;"></div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      }
+    </table>
+
+    <!-- Overall Risk Summary Section Shimmer -->
+    <div class="summary-shimmer">
+
+      <!-- Header Section Shimmer -->
+      <div class="summary-header">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div>
+              <div class="shimmer-box w-48 h-6 mb-2"></div>
+              <div class="shimmer-box w-64 h-4"></div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="shimmer-box shimmer-number mb-1"></div>
+            <div class="shimmer-box w-16 h-4"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Section Shimmer -->
+      <div class="summary-content">
+        <!-- Risk Distribution Cards Shimmer -->
+        <div class="grid-3">
+
+          <!-- High Risk Card Shimmer -->
+          <div class="summary-card high-risk-border">
+            <div class="flex items-center justify-between mb-3">
+              <div class="shimmer-box shimmer-number"></div>
+              <div class="shimmer-box rounded-full" style="width: 48px; height: 20px;"></div>
+            </div>
+            <div class="shimmer-box w-20 h-4"></div>
+          </div>
+
+          <!-- Medium Risk Card Shimmer -->
+          <div class="summary-card medium-risk-border">
+            <div class="flex items-center justify-between mb-3">
+              <div class="shimmer-box shimmer-number"></div>
+              <div class="shimmer-box rounded-full" style="width: 64px; height: 20px;"></div>
+            </div>
+            <div class="shimmer-box w-24 h-4"></div>
+          </div>
+
+          <!-- Low Risk Card Shimmer -->
+          <div class="summary-card low-risk-border">
+            <div class="flex items-center justify-between mb-3">
+              <div class="shimmer-box shimmer-number"></div>
+              <div class="shimmer-box rounded-full" style="width: 40px; height: 20px;"></div>
+            </div>
+            <div class="shimmer-box w-20 h-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

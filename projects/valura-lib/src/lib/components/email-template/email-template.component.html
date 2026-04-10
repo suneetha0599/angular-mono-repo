@@ -1,0 +1,91 @@
+@if (templateLoading) {
+<div class="shimmer-container p-6">
+  <div class="mb-4">
+    <div class="shimmer-line w-16 h-4 mb-2"></div>
+    <div class="shimmer-line w-full h-10"></div>
+  </div>
+  <div class="mb-2">
+    <div class="shimmer-line w-32 h-4"></div>
+  </div>
+  <div class="shimmer-line w-full h-32 mb-4"></div>
+  <div class="mb-2">
+    <div class="shimmer-line w-24 h-4"></div>
+  </div>
+  <div class="border border-gray-200 rounded-lg overflow-hidden">
+    <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+      <div class="shimmer-line w-48 h-4 mb-1"></div>
+    </div>
+    <div class="p-4">
+      <div class="shimmer-line w-full h-4 mb-3"></div>
+      <div class="shimmer-line w-4/5 h-4 mb-3"></div>
+      <div class="shimmer-line w-3/4 h-4 mb-3"></div>
+      <div class="shimmer-line w-full h-4 mb-3"></div>
+      <div class="shimmer-line w-2/3 h-4"></div>
+    </div>
+  </div>
+</div>
+} @else {
+<div class="email-template-container flex flex-col gap-6">
+  <div class="email-composer">
+    <div class="email-header">
+      <div class="compose-title">New Message</div>
+
+      <div class="email-field">
+        <label class="field-label">To:</label>
+        @if (recipientEmailOptions.length > 0) {
+        <!-- Material Design Grouped Dropdown -->
+        <mat-form-field appearance="outline" class="recipient-dropdown small-dropdown">
+          <mat-select [formControl]="recipientEmailControl" (selectionChange)="onRecipientChange($event.value)"
+            >
+
+            @for (group of recipientEmailOptions; track group.groupName) {
+            <mat-optgroup [label]="group.groupName">
+              @for (option of group.options; track option.value) {
+              <mat-option [value]="option.value" class="recipient-option">
+                <div class="flex items-center gap-2">
+                  <span class="option-label">{{ option.label }}</span>
+                </div>
+              </mat-option>
+              }
+            </mat-optgroup>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        } @else {
+        <!-- Static display for single recipient -->
+        <div class="recipient-display">
+          {{ recipientEmail || 'user@example.com' }}
+        </div>
+        }
+      </div>
+
+      <div class="email-field">
+        <label class="field-label">Subject:</label>
+        <input type="text" class="field-input" [formControl]="emailSubject">
+      </div>
+    </div>
+
+    <div class="email-body overflow-auto">
+      <div #editableContent class="email-content-editor" contenteditable="true" (input)="onContentChange()"
+        (keydown)="onKeyDown($event)" (keyup)="checkFormattingState()" (mouseup)="checkFormattingState()"
+        [innerHTML]="renderedContent" >
+      </div>
+
+      <div class="format-toolbar">
+        <div class="toolbar-section">
+          <button type="button" class="format-btn" [class.active]="isBoldActive" (click)="formatText('bold')"
+            title="Bold">
+            <strong>B</strong>
+          </button>
+          <button type="button" class="format-btn" [class.active]="isItalicActive" (click)="formatText('italic')"
+            title="Italic">
+            <em>I</em>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+}

@@ -1,0 +1,171 @@
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+
+
+  .shimmer-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .shimmer-card {
+    width: 336px;
+    height: 130px;
+    border-radius: 8px;
+    border: 0.2px solid #AFAFAF;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+
+    100% {
+      background-position: 400px 0;
+    }
+  }
+
+  .tab-content {
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .tab-content-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Floating Label Styles */
+  .floating-label-container {
+    position: relative;
+  }
+
+  .floating-input,
+  .floating-select,
+  .floating-textarea {
+    width: 100%;
+    padding: 12px 27px 8px 27px;
+    border: 0.2px solid #AFAFAF;
+    border-radius: 8px;
+    background-color: white;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #161D1D;
+    line-height: 1.4;
+    letter-spacing: 0.1px;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+
+  .floating-input:focus,
+  .floating-select:focus,
+  .floating-textarea:focus {
+    border-color: #4447FF;
+  }
+
+  .floating-label {
+    position: absolute;
+    left: 27px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #767676;
+    line-height: 1.4;
+    letter-spacing: 0.1px;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background-color: white;
+    padding: 0 4px;
+    z-index: 1;
+  }
+
+  .floating-input:focus+.floating-label,
+  .floating-input:not(:placeholder-shown)+.floating-label,
+  .floating-input.has-value+.floating-label,
+  .floating-select:focus+.floating-label,
+  .floating-select:valid+.floating-label,
+  .floating-select.has-value+.floating-label,
+  .floating-textarea:focus+.floating-label,
+  .floating-textarea:not(:placeholder-shown)+.floating-label,
+  .floating-textarea.has-value+.floating-label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #4447FF;
+    font-weight: 600;
+  }
+
+  /* For select elements, we need to handle the valid state differently */
+  .floating-select:not([value=""])+.floating-label,
+  .floating-select option:checked+.floating-label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #4447FF;
+    font-weight: 600;
+  }
+
+  /* Existing data highlighting styles */
+  .floating-input.existing-data,
+  .floating-select.existing-data,
+  .floating-textarea.existing-data {
+    border-color: #4447FF;
+    background-color: #f8faff;
+    box-shadow: 0 1px 3px rgba(28, 43, 112, 0.1);
+  }
+
+  .floating-input.existing-data+.floating-label,
+  .floating-select.existing-data+.floating-label,
+  .floating-textarea.existing-data+.floating-label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #4447FF;
+    font-weight: 600;
+  }
+
+  .floating-textarea+.floating-label {
+    top: 20px;
+  }
+
+  .floating-textarea:focus+.floating-label,
+  .floating-textarea:not(:placeholder-shown)+.floating-label,
+  .floating-textarea.has-value+.floating-label,
+  .floating-textarea.existing-data+.floating-label {
+    top: 0;
+  }
+
+  .delete-md-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }

@@ -1,0 +1,88 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+::ng-deep {
+
+  /* Angular Material input fixes (unchanged) */
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: white;
+    }
+
+    .mat-mdc-form-field-focus-overlay {
+      background-color: transparent;
+    }
+  }
+
+  ngx-colors {
+
+    /* Remove border + shadow */
+    .color-picker-trigger {
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+
+    /* Square preview overrides */
+    .app-color-picker {
+
+      .preview,
+      .preview-background,
+      .circle {
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+    }
+  }
+
+  .reset-button {
+    margin-left: 7px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: white !important;
+    border: 1px solid #1C2B70 !important;
+    border-radius: 6px !important;
+    padding: 9px 12px !important;
+    min-width: auto !important;
+    height: auto !important;
+    gap: 6px !important;
+
+    .mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+      color: #1C2B70 !important;
+      margin: 0 !important;
+    }
+
+    .reset-text {
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      color: #1C2B70 !important;
+      line-height: 1 !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    &:hover {
+      background-color: #f9f9f9 !important;
+      border-color: #1C2B70 !important;
+    }
+
+    &:focus {
+      outline: none !important;
+    }
+  }
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+}

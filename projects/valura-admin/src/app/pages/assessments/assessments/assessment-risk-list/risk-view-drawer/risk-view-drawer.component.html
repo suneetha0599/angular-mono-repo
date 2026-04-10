@@ -1,0 +1,290 @@
+<div class="risk-view-wrapper">
+
+  <div class="view-header">
+    <span class="header-title">Risk Details</span>
+    <button mat-icon-button (click)="close()" aria-label="Close drawer"
+      class="w-6 h-6 min-w-6 hover:bg-gray-100 rounded-full transition-colors duration-200">
+      <mat-icon class="material-symbols-outlined">close</mat-icon>
+    </button>
+  </div>
+
+  <div class="header-divider"></div>
+
+  <div class="view-body">
+    @if (isLoadingDetail) {
+    <div class="w-full px-2 py-2">
+
+      <!-- Metadata card shimmer: Risk ID / Created on / Created by + action buttons -->
+      <div class="flex items-center justify-between border border-gray-200 rounded-lg px-4 py-3 mb-4 bg-gray-50">
+        <div class="flex gap-8">
+          @for (item of [1,2,3]; track item) {
+          <div class="flex flex-col gap-1">
+            <div class="shimmer-box h-3 w-16 rounded"></div>
+            <div class="shimmer-box h-4 w-20 rounded mt-1"></div>
+          </div>
+          }
+        </div>
+        <div class="flex gap-2">
+          <div class="shimmer-box h-8 w-8 rounded-full"></div>
+          <div class="shimmer-box h-8 w-8 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- Risk title shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-3 w-16 rounded mb-2"></div>
+        <div class="shimmer-box h-5 w-3/4 rounded"></div>
+      </div>
+
+      <!-- Description shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-3 w-20 rounded mb-2"></div>
+        <div class="shimmer-box h-4 w-full rounded mb-1"></div>
+        <div class="shimmer-box h-4 w-4/5 rounded mb-1"></div>
+        <div class="shimmer-box h-4 w-3/5 rounded"></div>
+      </div>
+
+      <!-- Risk raised for shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-3 w-24 rounded mb-2"></div>
+        <div class="shimmer-box h-4 w-1/2 rounded"></div>
+      </div>
+
+      <!-- Impact / Likelihood / Risk level badges shimmer -->
+      <div class="flex gap-6 mb-4">
+        @for (item of [1,2,3]; track item) {
+        <div class="flex flex-col gap-1">
+          <div class="shimmer-box h-3 w-16 rounded"></div>
+          <div class="shimmer-box h-6 w-20 rounded-full mt-1"></div>
+        </div>
+        }
+      </div>
+
+      <!-- Measure type shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-3 w-24 rounded mb-2"></div>
+        <div class="shimmer-box h-4 w-20 rounded mb-3"></div>
+        <div class="grid grid-cols-2 gap-3">
+          @for (item of [1,2,3,4,5,6]; track item) {
+          <div class="flex flex-col gap-1">
+            <div class="shimmer-box h-3 w-24 rounded"></div>
+            <div class="shimmer-box h-4 w-36 rounded mt-1"></div>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Residual risk shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-3 w-24 rounded mb-2"></div>
+        <div class="shimmer-box h-6 w-16 rounded-full"></div>
+      </div>
+
+      <!-- Tasks section shimmer -->
+      <div class="mb-4">
+        <div class="shimmer-box h-4 w-48 rounded mb-3"></div>
+        <div class="border border-gray-200 rounded-lg overflow-hidden">
+          <!-- Table header -->
+          <div class="grid grid-cols-4 gap-4 px-3 py-2 bg-gray-50 border-b border-gray-200">
+            @for (item of [1,2,3,4]; track item) {
+            <div class="shimmer-box h-3 w-full rounded"></div>
+            }
+          </div>
+          <!-- Table rows -->
+          @for (row of [1,2,3]; track row) {
+          <div class="grid grid-cols-4 gap-4 px-3 py-3 border-b border-gray-100">
+            @for (cell of [1,2,3,4]; track cell) {
+            <div class="shimmer-box h-4 w-full rounded"></div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+    </div>
+    } @else {
+
+    <div class="metadata-card">
+      <div class="meta-fields">
+        <div class="meta-col">
+          <span class="field-label">Risk ID</span>
+          <span class="field-value field-value--bold">{{ riskId }}</span>
+        </div>
+        <div class="meta-col">
+          <span class="field-label">Created On</span>
+          <span class="field-value">{{ createdOn }}</span>
+        </div>
+        <div class="meta-col">
+          <span class="field-label">Created By</span>
+          <span class="field-value">{{ createdBy }}</span>
+        </div>
+        <div class="meta-col">
+          <span class="field-label">Status</span>
+          <span class="field-value">{{ riskData?.status | titlecase }}</span>
+        </div>
+      </div>
+
+      <div class="meta-actions flex items-center gap-2">
+        @if(!assessmentRiskMaster && !viewMode && showActionButton){
+        <button mat-icon-button (click)="edit()" matTooltip="Edit" aria-label="Edit">
+          <mat-icon class="material-symbols-outlined meta-action-icon">edit</mat-icon>
+        </button>
+
+        <button mat-icon-button (click)="delete()" matTooltip="Delete" aria-label="Delete">
+          <mat-icon class="material-symbols-outlined meta-action-icon">delete</mat-icon>
+        </button>
+        }
+        @if ((isApprover || isRespondent) && !isAssessmentReadOnly) {
+        @if (riskData?.status === 'COMPLETED' || riskData?.status === 'Closed') {
+        <span class="completed-label">{{ riskData?.status }}</span>
+        } @else {
+        <mat-form-field appearance="outline" class="!w-[150px] mat-sm-input mat-mdc-mb-0">
+          <mat-select placeholder="Actions" [(value)]="selectedAction" class="text-teal-600 font-small"
+            (selectionChange)="onActionChange()" [disabled]="disableActionButton">
+            <mat-option *ngFor="let option of actionOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        }
+        }
+
+      </div>
+
+
+    </div>
+
+    <div class="section">
+      <span class="field-label">Risk Title</span>
+      <h2 class="risk-title">{{ riskTitle }}</h2>
+    </div>
+
+    <div class="section">
+      <span class="field-label">Description</span>
+      <div class="description-html" [innerHTML]="description | safeHtml"></div>
+    </div>
+
+    @if (attachedToAssessment && riskData?.assessmentTitle) {
+    <div class="section">
+      <span class="field-label">Related Assessment</span>
+      <span class="body-large text-primary">{{ riskData.assessmentTitle }}</span>
+    </div>
+    }
+
+    @if (attachedToQuestion && riskData?.sectionId && riskData?.questionId) {
+    <div class="section">
+      <span class="field-label mb-1">Related Question</span>
+      <app-question-conversation-panel [assessmentId]="assessmentId" [questionId]="riskData.questionId"
+        [sectionId]="riskData.sectionId" [sectionTitle]="riskData.sectionTitle || ''"
+        [questionTitle]="riskData.questionTitle || ''" [helperText]="riskData.helperText || ''"
+        [displayQuestionId]="riskData.questionId">
+      </app-question-conversation-panel>
+    </div>
+    }
+
+    <div class="section">
+      <div class="assessment-row">
+        <div class="assessment-col">
+          <span class="field-label">Impact</span>
+          <span class="badge badge-impact">{{ impactLabel | titlecase }}</span>
+        </div>
+        <div class="assessment-col">
+          <span class="field-label">Likelihood</span>
+          <span class="badge badge-likelihood">{{ likelihoodLabel | titlecase}}</span>
+        </div>
+        <div class="assessment-col">
+          <span class="field-label">Risk Level</span>
+          <span class="badge" [ngClass]="riskLevelClass">{{ riskLevelLabel }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="field-label">Measure Type</span>
+      <span class="measure-value">{{ measureTypeLabel }}</span>
+
+      @if (isMitigate) {
+      <div class="measure-grid">
+        <div class="measure-field">
+          <span class="field-label">Mitigate Measure</span>
+          <span class="field-value">{{ mitigateMeasure }}</span>
+        </div>
+        <div class="measure-field">
+          <span class="field-label">Standard</span>
+          <span class="field-value">{{ standard }}</span>
+        </div>
+        <div class="measure-field">
+          <span class="field-label">Control Category</span>
+          <span class="field-value">{{ controlCategory }}</span>
+        </div>
+        <div class="measure-field">
+          <span class="field-label">Control Description</span>
+          <span class="field-value">{{ controlDescription }}</span>
+        </div>
+        <div class="measure-field">
+          <span class="field-label">Effect On Risk</span>
+          <span class="field-value">{{ riskEffect }}</span>
+        </div>
+      </div>
+      } @else {
+      <span class="field-label mt-section">Description</span>
+      <p class="body-text">{{ measureDescription }}</p>
+      }
+    </div>
+
+    @if (residualRisk) {
+    <div class="section">
+      <span class="field-label mb-2">Residual Risk</span>
+      <span class="badge" [ngClass]="residualRiskClass">{{ residualRiskLabel }}</span>
+    </div>
+    }
+
+    <div class="tasks-section">
+      <span class="tasks-heading">Tasks created for this risk</span>
+      @if (taskDetails.length > 0) {
+      <div class="tasks-table-wrapper">
+        <table class="tasks-table">
+          <thead>
+            <tr>
+              <th><span class="th-content">Task ID <mat-icon
+                    class="sort-icon material-symbols-outlined">unfold_more</mat-icon></span></th>
+              <th><span class="th-content">Task Title <mat-icon
+                    class="sort-icon material-symbols-outlined">unfold_more</mat-icon></span></th>
+              <th><span class="th-content">Assignee <mat-icon
+                    class="sort-icon material-symbols-outlined">unfold_more</mat-icon></span></th>
+              <th><span class="th-content">Created On <mat-icon
+                    class="sort-icon material-symbols-outlined">unfold_more</mat-icon></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (task of taskDetails; track task.taskId) {
+            <tr>
+              <td class="col-task-id">{{ getTaskDisplayId(task) }}</td>
+              <td class="task-link col-task-title" (click)="goToTaskDetail(task)">
+                <span class="cell-ellipsis" [title]="task.title || ''">{{ task.title || '-' }}</span>
+              </td>
+              <td class="col-assignee">{{ getAssigneeName(task) }}</td>
+              <td class="col-date">{{ formatTaskDate(task.createdOn) }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      } @else {
+      <p class="no-tasks-text">No tasks have been created for this risk yet.</p>
+      }
+    </div>
+
+    }
+  </div>
+  <!-- @if(!assessmentRiskMaster){ -->
+  @if(showCreateTaskButton){
+  <div class="create-task-fab">
+    <loading-button type="primary" (onButtonClick)="createTask()">
+      Create Task
+    </loading-button>
+  </div>
+  }
+  <!-- } -->
+
+</div>

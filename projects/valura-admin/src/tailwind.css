@@ -1,0 +1,108 @@
+ @import "tailwindcss";
+ @config "../tailwind.config.js";
+
+ /* Typography */
+
+ /*
+ text= Font Size
+ leading= Line Height
+ tracking= letter-spacing
+*/
+
+
+ /* Display  */
+ .display-large {
+     @apply font-source-sans text-[57px] leading-[64px] tracking-[-0.25px] font-normal;
+ }
+
+ .display-medium {
+     @apply font-source-sans text-[45px] leading-[52px] tracking-[0px] font-normal;
+ }
+
+ .display-small {
+     @apply font-source-sans text-[36px] leading-[44px] tracking-[0px] font-semibold;
+ }
+
+ /*  Headline  */
+ .headline-large {
+     @apply font-source-sans text-[28px] leading-[36px] tracking-[0px] font-normal;
+ }
+
+ .headline-medium {
+     @apply font-source-sans text-[24px] leading-[32px] tracking-[0px] font-normal;
+ }
+
+ .headline-small {
+     @apply font-source-sans text-[18px] leading-[16px] tracking-[0px] font-normal;
+ }
+
+ /*  Title  */
+ .title-large {
+     @apply font-source-sans text-[18px] leading-[28px] tracking-[0px] font-normal;
+ }
+
+ .title-medium {
+     @apply font-source-sans text-[16px] leading-[24px] tracking-[0.15px] font-medium;
+ }
+
+ .title-medium-normal {
+     @apply font-source-sans text-[16px] leading-[24px] tracking-[0.15px] font-normal;
+ }
+
+ .title-small {
+     @apply font-source-sans text-[14px] leading-[20px] tracking-[0.1px] font-medium;
+ }
+
+ .title-medium {
+     @apply font-source-sans text-[16px] leading-[20px] tracking-[0.1px] font-medium;
+ }
+
+ .title-extra-small {
+     @apply font-source-sans text-[12px] leading-[20px] tracking-[0.1px] font-medium;
+ }
+
+ /*  Label  */
+ .label-large {
+     @apply font-source-sans text-[14px] leading-[20px] tracking-[0.1px] font-medium;
+ }
+
+ .label-large-normal {
+     @apply font-source-sans text-[14px] leading-[20px] tracking-[0.1px] font-normal;
+ }
+
+ .label-medium {
+     @apply font-source-sans text-[12px] leading-[16px] tracking-[0.5px] font-medium;
+ }
+
+ .label-small {
+     @apply font-source-sans text-[11px] leading-[16px] tracking-[0.5px] font-medium;
+ }
+
+ /*  Body  */
+ .body-large {
+     @apply font-source-sans text-[14px] leading-[22px] tracking-[0.5px] font-normal;
+ }
+
+ .body-medium {
+     @apply font-source-sans text-[13px] leading-[21px] tracking-[0.25px] font-normal;
+ }
+
+ .body-small {
+     @apply font-source-sans text-[12px] leading-[16px] tracking-[0.4px] font-normal;
+ }
+
+ .headline-large-bold {
+     @apply font-source-sans text-[28px] leading-[36px] tracking-[0px] font-bold;
+ }
+
+ .label-large-bold {
+     @apply font-source-sans text-[14px] leading-[20px] tracking-[0.1px] font-bold;
+ }
+
+ .title-medium-semibold {
+     @apply font-source-sans text-[16px] leading-[24px] tracking-[0.15px] font-semibold;
+ }
+
+ .label-medium-semibold {
+     @apply font-source-sans text-[28px] leading-[36px] tracking-[1.14px] font-semibold;
+ }

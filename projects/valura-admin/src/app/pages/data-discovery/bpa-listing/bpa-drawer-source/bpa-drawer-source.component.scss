@@ -1,0 +1,277 @@
+.chip-input-field {
+  width: 400px;
+
+  ::ng-deep .mat-mdc-form-field-wrapper {
+    height: 40px;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 40px !important;
+    border-radius: 8px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: 8px 12px !important;
+    min-height: auto !important;
+  }
+
+  ::ng-deep .mat-mdc-floating-label {
+    color: #666 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+
+    &.mdc-floating-label--float-above {
+      top: 0 !important;
+      transform: translateY(-50%) scale(0.75) !important;
+    }
+  }
+
+
+  &.user-search-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+  }
+
+  @media (max-width: 600px) {
+    min-width: 160px;
+  }
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 70px;
+  text-align: center;
+}
+
+.type-internal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.type-external {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.type-default {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+
+.text-red-600 {
+  color: #dc3545 !important;
+
+  &:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-radius: 4px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .custom-table {
+    font-size: 12px;
+
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 8px 12px;
+    }
+
+    .mat-column-name {
+      width: 150px;
+      min-width: 130px;
+    }
+
+    .mat-column-category,
+    .mat-column-location {
+      width: 90px;
+      min-width: 80px;
+    }
+  }
+}
+
+
+@media (max-width: 768px) {
+  .toggle-switch {
+    width: 180px;
+    height: 26px;
+  }
+
+  .toggle-slider {
+    height: 22px;
+    border-radius: 11px;
+  }
+
+  .toggle-option {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .table-container {
+    font-size: 14px;
+
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 8px 6px;
+    }
+  }
+
+
+  .name-column {
+    width: 160px;
+    min-width: 140px;
+  }
+
+  .category-column {
+    width: 100px;
+    min-width: 90px;
+  }
+
+  .location-column {
+    width: 80px;
+    min-width: 70px;
+  }
+}
+
+
+
+
+
+.text-red-600 {
+  color: #dc3545 !important;
+
+  &:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+  }
+}
+
+.text-green-600 {
+  color: #28a745 !important;
+
+  &:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+  }
+}
+
+
+.view-wrapper {
+  .editor-wrapper {
+    .main-canvas {
+      padding-right: 0;
+    }
+  }
+
+
+  .mat-sm-xl-input,
+  .table-container {
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+
+  .mb-2,
+  .mb-3 {
+    margin-right: 0;
+  }
+}
+
+
+.mat-sm-xl-input {
+  .mat-mdc-form-field-subscript-wrapper {
+    margin-top: 4px;
+  }
+}
+
+
+.mb-3 {
+  h6 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+  }
+}
+
+.form-section {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+
+.add-category-btn {
+  height: 56px;
+  min-width: 64px;
+  font-weight: 500;
+}
+
+// ::ng-deep .mat-drawer.mat-drawer-end {
+//   width: 600px !important;
+//   min-width: 600px !important;
+//   max-width: 600px !important;
+// }
+
+::ng-deep .mat-drawer-content {
+  margin-right: 0 !important;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 80px;
+  text-align: center;
+}
+
+
+.title-small {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 16px 0 8px 0;
+}
+
+
+.selected-count-badge {
+  font-size: 12px;
+  color: #495057;
+  background-color: #e3f2fd;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.add-form-wrapper {
+
+
+  background-color: red;
+  overflow-y: auto;
+  padding-right: 8px; // Compensate for scrollbar
+}

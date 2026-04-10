@@ -1,0 +1,167 @@
+@if (dialogType === CONSENT_PURPOSES) {
+<h3 mat-dialog-title class="my-0 p-2 px-3">Consent Purposes</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-icon class="material-symbols-outlined" matPrefix>search</mat-icon>
+    <input matInput class="w-full outline-none bg-transparent" />
+  </mat-form-field>
+
+  <div class="text-center body-large mt-4">
+    No purpose found with this name
+  </div>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="primary">Create New</loading-button>
+  </div>
+</div>
+}
+
+@else if (dialogType === CONSENT_UPSTREAM) {
+<h3 mat-dialog-title class="my-0 p-2 px-3">Select upstream</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">cancel</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-select class="w-full bg-transparent body-large">
+      <mat-option *ngFor="let purpose of purposes" [value]="purpose">
+        {{ purpose }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="text-center body-large mt-4">
+    No upstream found
+  </div>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="primary">Create New</loading-button>
+  </div>
+</div>
+}
+
+@else if (dialogType === CONSENT_TEMPLATE) {
+<h3 mat-dialog-title class="my-0 p-2 px-3">Form fields</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="material-symbols-outlined">cancel</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <div class="flex flex-col w-[80%] mx-auto mb-3">
+    <label class="mb-1 body-large">First name</label>
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput  />
+    </mat-form-field>
+  </div>
+
+  <div class="flex flex-col w-[80%] mx-auto mb-3">
+    <label class="mb-1 body-large">Last name</label>
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput />
+    </mat-form-field>
+  </div>
+
+  <div class="flex flex-col w-[80%] mx-auto mb-3">
+    <label class="body-large">Email ID <span class="text-red-600">*</span></label>
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput type="email" required />
+    </mat-form-field>
+  </div>
+
+  <div class="flex flex-col w-[80%] mx-auto mb-3">
+    <label class="mb-1 body-large">Phone number</label>
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput />
+    </mat-form-field>
+  </div>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="primary">Done</loading-button>
+  </div>
+</div>
+}
+
+@else if (dialogType === PUBLISH_CONFIRMATION) {
+<h3 mat-dialog-title class="my-0 p-2 px-3">Form will be saved</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">cancel</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <p class="body-large mb-4 text-black">Add name for your form</p>
+
+  <label class="mb-1 body-large text-black">Form name</label>
+  <mat-form-field appearance="outline" class="w-full">
+    <input matInput class="body-large" />
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="primary">Save</loading-button>
+  </div>
+</div>
+}
+
+@else if (dialogType === TERMS_AND_CONDITIONS) {
+<h3 mat-dialog-title class="my-0 p-2 px-3">Terms & Conditions</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="dialogRef.close()"
+  aria-label="confirm dialog close button">
+  <mat-icon class="material-symbols-outlined">cancel</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3 overflow-y-auto text-sm text-gray-800 space-y-4">
+
+  <div>
+    <strong class="title-small !font-semibold">1. Acceptance of Terms</strong>
+    <p class="body-medium mt-1">
+      By accessing or using our platform, you agree to these Terms & Conditions.
+    </p>
+  </div>
+
+  <div>
+    <strong class="title-small !font-semibold">2. Use of Services</strong>
+    <p class="body-medium mt-1">
+      You may use our services only as permitted by law.
+    </p>
+  </div>
+
+  <div>
+    <strong class="title-small !font-semibold">3. Privacy Policy</strong>
+    <p class="body-medium mt-1">
+      Your use is governed by our Privacy Policy.
+    </p>
+  </div>
+
+  <div>
+    <strong class="title-small !font-semibold">4. Contact Us</strong>
+    <p class="body-medium mt-1">
+      If you have any questions or concerns about these Terms & Conditions, contact us at:
+      <span class="text-gray-600">[support&#64;yourdomain.com]</span>
+    </p>
+  </div>
+
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="primary" (onButtonClick)="dialogRef.close()">Done</loading-button>
+  </div>
+</div>
+}

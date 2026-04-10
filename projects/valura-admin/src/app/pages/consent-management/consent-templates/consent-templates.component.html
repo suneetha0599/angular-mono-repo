@@ -1,0 +1,147 @@
+<div class="px-8 py-6">
+
+    <!-- Header -->
+    <div class="flex items-center mb-2 justify-between">
+        <div class="flex gap-2 p-1">
+            <p class="headline-medium">Consent template ID 123 </p>
+            <i class="material-symbols-outlined text-gray-400">navigate_before</i><i
+                class="material-symbols-outlined text-gray-400">navigate_next</i>
+        </div>
+        <button class="label-large me-2 p-2  mb-2 fontColor rounded hover:bg-gray-200">View Activity</button>
+    </div>
+    <div class="bg-white shadow-sm rounded-lg p-4 w-full ">
+        <!-- Tabs -->
+        <div class="flex justify-between items-center mb-4">
+            <mat-tab-group class="custom-tab-group remove-border-bottom">
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <span class="title-small fontColor">Details</span>
+                    </ng-template>
+                </mat-tab>
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <span class="title-small fontColor">Consent collected</span>
+                    </ng-template>
+                </mat-tab>
+            </mat-tab-group>
+
+            <div class="flex gap-2">
+                <i class="material-symbols-outlined fontColor cursor-pointer hover:bg-gray-100 p-1 rounded">edit</i>
+                <i class="material-symbols-outlined fontColor cursor-pointer hover:bg-gray-100 p-1 rounded">delete_outline</i>
+            </div>
+        </div>
+
+
+        <!-- Summary section -->
+        <div class="bg-gray-100 border border-gray-200 rounded px-4 py-3 pb-1 mb-6 flex flex-col gap-1">
+            <div class="flex flex-wrap items-center gap-3">
+                <p class="title-medium fontColor">Email marketing</p>
+                <span
+                    class="body-small border-1 border-blue-900  fontColor rounded-full px-2 py-1 mb-2 bg-white">Consent
+                    template ID: 123</span>
+            </div>
+            <p class="body-large text-gray-700">Used during user onboarding to collect consent for account creation,
+                personalized offers, and analytics.</p>
+        </div>
+
+        <!-- Basic Details -->
+        <p class="title-medium mb-2">Basic Details</p>
+        <div class="ms-4">
+            <div class="grid grid-cols-6 gap-1 justify-evenly text-sm mb-6  p-2">
+                <div class="flex items-center gap-2  py-2 w-full sm:w-1/3">
+                    <div class=" w-8 h-8 flex items-center justify-center rounded-full
+                                                border-gray-300 bg-gray-100 fontColor">
+                        <i class="material-symbols-outlined">next_week</i>
+                    </div>
+                    <div class="px-2 py-1">
+                        <div class="label-medium text-gray-500 whitespace-nowrap">Upstream source</div>
+                        <div class="title-medium  text-gray-900">Source Name 1</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 py-2 w-full sm:w-1/3">
+                    <div class="border-l-2 border-gray-200 p-2 flex items-center gap-2 h-full">
+                        <div
+                            class=" w-8 h-8 flex items-center justify-center rounded-full border-gray-300 bg-gray-100 fontColor">
+                            <i class="material-symbols-outlined">check_circle_outline</i>
+                        </div>
+                        <div class="px-2 py-1">
+                            <div class="label-medium text-gray-500">Status</div>
+                            <div class="title-medium font-semibold text-gray-900">Active</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 py-2 w-full sm:w-1/3">
+                    <div class="border-l-2 border-gray-200 p-2 flex items-center gap-2 h-full">
+                        <div class=" w-8 h-8 flex items-center justify-center rounded-full
+                                                    border-gray-300 bg-gray-100 fontColor">
+                            <i class="material-symbols-outlined">description</i>
+                        </div>
+                        <div class="py-1">
+                            <div class="label-medium text-gray-500">Form</div>
+                            <div class="title-medium font-semibold fontColor whitespace-nowrap">
+                                Default form</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-6 p-2">
+                <div class="flex items-start gap-2 mb-1">
+                    <i class="material-symbols-outlined text-base">chat_bubble_outline</i>
+                    <span class="label-medium text-gray-500 whitespace-nowrap">Description</span>
+                </div>
+                <p class="body-large text-gray-700 ml-6 columns-2 ms-4 px-2">Please review and manage your consent for
+                    how
+                    we
+                    use your data. This helps us provide and improve our services while respecting your privacy
+                    preferences</p>
+            </div>
+        </div>
+        <!-- Purposes Table -->
+        <div class="mb-6">
+            <p class="title-medium mb-2">Purposes integrated</p>
+            <table class="min-w-full  text-sm text-left">
+                <thead class="bg-gray-50 border-b">
+                    <tr>
+                        <th class="px-2 py-4 title-small text-gray-600">Purposes</th>
+                        <th class="px-2 py-4 title-small text-gray-600">Data Elements</th>
+                        <th class="px-2 py-4 title-small text-gray-600">Expiring on</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- @for (purpose of purposes; track purpose.name; let isEven = $even) { <tr class="border-b"
+                            [ngClass]="{'bg-gray-50': isEven}">
+                            <td class="ms-1 px-2 py-4 fontColor    ">{{ purpose.name }}</td>
+                            <td class="px-2 py-4">{{ purpose.dataElements }}</td>
+                            <td class="px-2 py-4">{{ purpose.expiresIn }}</td>
+                        </tr>
+                        } -->
+                    <tr class="border-b">
+                        <td class="ms-1 px-2 py-4 fontColor label-large">Marketing</td>
+                        <td class="px-2 py-4 label-large">Email, name, location, +2</td>
+                        <td class="px-2 py-4 label-large">12 months</td>
+                    </tr>
+                    <tr class="border-b bg-gray-50">
+                        <td class="px-2 py-4 fontColor label-large ">Employee onboarding</td>
+                        <td class="px-2 py-4 label-large">Email, Name, Phone number</td>
+                        <td class="px-2 py-4 label-large">7 years</td>
+                    </tr>
+                    <tr>
+                        <td class="px-2 py-4 fontColor  label-large">Retargeting ads</td>
+                        <td class="px-2 py-4 label-large">IP address, location</td>
+                        <td class="px-2 py-4 label-large">Until revoked</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- View button -->
+        <div class="text-right">
+            <loading-button type="primary" class="mx-2" (onButtonClick)="viewTemplate()">View
+                template</loading-button>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,161 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../styles/custom/typography.scss" as typography;
+
+.hr-bold {
+  height: 5px;
+  margin-top: 0px !important;
+}
+
+.card {
+  height: 98%;
+  background-color: colors.$body-bg;
+  border: 1px solid colors.$light-grey-border;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.add-icon {
+  border-radius: 50%;
+  font-size: typography.$fs-24;
+}
+
+.title {
+  font-size: typography.$fs-13;
+}
+
+.section-title {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.active-section {
+  background-color: colors.$light-grey-border;
+  border-radius: 6px;
+}
+
+.section-content {
+  max-height: 350px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.preview-content {
+  max-height: 350px;
+  height: 305px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.save-icon {
+  color: colors.$stage-success;
+}
+
+.cancel-icon {
+  color: colors.$bg-danger;
+}
+
+.options {
+  margin-left: 31px;
+}
+
+.option-label {
+  background-color: colors.$light-primary;
+}
+
+.header-actions {
+  position: absolute;
+  right: 10px;
+  margin-top: 25px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 16px;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+::ng-deep .custom-mat-tab-wrapper .mat-tab-wrapper {
+  position: relative;
+}
+
+::ng-deep .custom-tab-group .mat-tab-header {
+  padding-right: 180px;
+}
+
+::ng-deep .custom-tab-body .mat-tab-body-content-can-animate {
+  overflow: hidden;
+}
+
+::ng-deep .custom-mdc-text-field .mdc-line-ripple,
+::ng-deep .option-label .mdc-line-ripple,
+::ng-deep .option-label .mat-mdc-form-field-bottom-align::before,
+::ng-deep .option-label .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+::ng-deep
+  .custom-mdc-text-field
+  .mat-mdc-form-field.mat-focused
+  .mdc-line-ripple,
+::ng-deep .option-label .mat-mdc-form-field.mat-focused .mdc-line-ripple {
+  display: block;
+}
+
+::ng-deep
+  .custom-mdc-text-field
+  .mat-md-input
+  .mat-mdc-form-field-flex:not(:has(textarea)) {
+  height: auto !important;
+  width: 100% !important;
+}
+
+::ng-deep
+  .custom-mdc-text-field
+  .mat-md-input
+  .mat-mdc-form-field-flex:not(:has(textarea))
+  .mat-mdc-form-field-infix,
+::ng-deep .custom-mdc-text-field .mdc-text-field {
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field-infix,
+::ng-deep .custom-mdc-text-field .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  margin: 0 !important;
+  all: unset !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  margin: 0 !important;
+}
+
+::ng-deep .option-label .mat-mdc-form-field .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: unset !important;
+}
+
+.shimmer-line {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  display: inline-block;
+  height: 14px;
+}
+
+.shimmer-small { width: 80px; height: 12px; }
+.shimmer-medium { width: 140px; height: 14px; }
+.shimmer-large { width: 200px; height: 16px; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.status {
+  border-radius: 8px;
+  width: 94px !important;
+}

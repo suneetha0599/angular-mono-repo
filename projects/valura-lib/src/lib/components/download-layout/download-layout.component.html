@@ -1,0 +1,28 @@
+<div class="d-flex flex-column h-100 h-screen overflow-hidden">
+    <div class="p-3 pb-0">
+
+    </div>
+    <div class="p-3 flex-1 overflow-hidden">
+        <div class="d-flex flex-column  overflow-hidden position-relative h-full ">
+            <div class="relative  d-flex justify-center my-auto overflow-auto ">
+                <div class="bg-white w-50 p-4">
+                    <div class="flex mb-3">
+                        <div class="headline-medium">{{downloadText}}</div>
+                        @if(showRetryButton){
+                        <loading-button type="secondary" (onButtonClick)="retryFailedRequest()"
+                            [disabled]="retryLoading" [isIconButton]="true" class="ms-2">
+                            <mat-icon class="toolbar-icon material-symbols-outlined mat-md-icon me-1">replay</mat-icon>
+                            Retry
+                        </loading-button>
+                        }
+                    </div>
+                    <div class="download-progressbar">
+                        @if(showProgress){
+                        <mat-progress-bar mode="determinate" [value]="progressValue"></mat-progress-bar>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

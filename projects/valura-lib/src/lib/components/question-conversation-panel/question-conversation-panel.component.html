@@ -1,0 +1,282 @@
+<div class="bg-[#F9F9F9] rounded">
+
+  <button (click)="toggleDropdown()"
+    class="!bg-[#EEEEEE] w-100 title-small !rounded p-3 flex justify-between items-center">
+    <div>
+      <span class="title-small me-2">{{ sectionTitle }}</span>
+      <span class="border border-primary p-1 bg-white rounded-full text-primary body-small">
+        Question ID : {{ displayQuestionId || questionId }}
+      </span>
+    </div>
+    <mat-icon class="material-symbols-outlined secondary-base-50">
+      {{ dropDownOpen ? 'arrow_drop_up' : 'arrow_drop_down' }}
+    </mat-icon>
+  </button>
+
+  @if (dropDownOpen) {
+  <div class="mx-3 my-2">
+    <div class="body-large my-2" [innerHTML]="questionTitle"></div>
+
+    @if (helperText) {
+    <mat-card class="p-2 bg-white shadow-none">
+      <div class="body-large" [innerHTML]="helperText"></div>
+    </mat-card>
+    }
+
+    @if (!showFullQuestionDetails) {
+    <div class="flex justify-end py-2">
+      <loading-button type="light" [basicButton]="true" (click)="viewFullQuestionDetails()">
+        <span class="label-medium"> View Full Details</span>
+      </loading-button>
+    </div>
+    }
+
+    @if (showFullQuestionDetails) {
+    @if (questionMessages.length > 0) {
+    <div class="chat-toggle-row">
+      <button class="chat-toggle-btn mt-1" (click)="toggleQuestionChat()">
+        <mat-icon class="material-symbols-outlined">
+          {{ showQuestionChat ? 'remove' : 'add' }}
+        </mat-icon>
+        {{ showQuestionChat ? 'Hide replies' : 'Show replies' }}
+      </button>
+    </div>
+    }
+
+    @if (showQuestionChat) {
+    <div class="mt-2">
+      @if (isLoadingQuestionMessages) {
+      <div class="text-gray-400 body-small py-2">Loading messages...</div>
+      } @else if (questionMessages.length === 0) {
+      <div class="text-gray-400 body-small py-2">No threads added yet</div>
+      } @else {
+      <div class="messages-area" #messagesArea style="max-height: 300px; overflow-y: auto;"
+        (scroll)="onMessagesScroll($event)">
+        @for (message of questionMessages; track message.id) {
+        <div class="thread-container">
+          <div class="message-row" [attr.data-message-type]="message.messageType"
+            [ngClass]="{'message-row--self': isCurrentUser(message), 'message-row--other': !isCurrentUser(message)}"
+            [attr.data-message-id]="message.id"
+            (mouseenter)="hoveredMessageId = message.id"
+            (mouseleave)="hoveredMessageId = null">
+
+            @if (hoveredMessageId === message.id && !message.isDeleted) {
+            <div class="message-actions">
+              <button mat-icon-button (click)="startQuestionReply(message)"
+                class="shadow-none bg-transparent mat-md-fab-btn" title="Reply">
+                <mat-icon class="material-symbols-outlined">reply</mat-icon>
+              </button>
+              @if (isMessageOwner(message)) {
+              <button mat-icon-button (click)="startEdit(message.id)"
+                class="shadow-none bg-transparent mat-md-fab-btn" title="Edit">
+                <mat-icon class="material-symbols-outlined">edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="deleteQuestionMessage(message.id)"
+                class="shadow-none bg-transparent mat-md-fab-btn" title="Delete">
+                <mat-icon class="material-symbols-outlined">delete</mat-icon>
+              </button>
+              }
+            </div>
+            }
+
+            <div class="message-card">
+              <div class="message-header">
+                <span class="message-sender">{{ message.sender }}</span>
+                <span class="message-badge"
+                  [ngClass]="{'message-badge--response': message.messageType === 'Response','message-badge--remark': message.messageType === 'Remark'}">
+                  {{ message.messageType }}
+                </span>
+                <span class="message-time">{{ message.timestamp | date: 'dd MMM yyyy, hh:mm a' }}</span>
+              </div>
+              @if (message.text) {
+              <div class="message-body message-content" [innerHTML]="message.text | safeHtml"></div>
+              }
+              @if (message.attachments?.length) {
+              <div class="message-attachments">
+                @for (att of message.attachments; track att.id) {
+                <div class="message-attachment" (click)="downloadAttachment(att)" style="cursor: pointer;">
+                  <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+                  <span class="message-attachment-name" [title]="att.name">{{ att.name }}</span>
+                </div>
+                }
+              </div>
+              }
+            </div>
+          </div>
+
+          @if (message.replies && message.replies.length > 0) {
+          <div class="replies-container">
+            @if (shouldShowExpandButton(message)) {
+            <button class="expand-replies-button" (click)="toggleRepliesExpansion(message.id)">
+              <span>+ {{ getHiddenRepliesCount(message) }} more replies</span>
+            </button>
+            }
+            @for (reply of getVisibleReplies(message); track reply.id) {
+            <div class="message-row reply-message"
+              [attr.data-message-type]="reply.messageType"
+              [attr.data-message-id]="reply.id"
+              (mouseenter)="hoveredMessageId = reply.id"
+              (mouseleave)="hoveredMessageId = null">
+
+              @if (hoveredMessageId === reply.id && !reply.isDeleted) {
+              <div class="message-actions">
+                <button mat-icon-button (click)="startQuestionReply(reply)"
+                  class="shadow-none bg-transparent mat-md-fab-btn" title="Reply">
+                  <mat-icon class="material-symbols-outlined">reply</mat-icon>
+                </button>
+                @if (isMessageOwner(reply)) {
+                <button mat-icon-button (click)="startEdit(reply.id)"
+                  class="shadow-none bg-transparent mat-md-fab-btn" title="Edit">
+                  <mat-icon class="material-symbols-outlined">edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteQuestionMessage(reply.id)"
+                  class="shadow-none bg-transparent mat-md-fab-btn" title="Delete">
+                  <mat-icon class="material-symbols-outlined">delete</mat-icon>
+                </button>
+                }
+              </div>
+              }
+
+              <div class="message-card">
+                <div class="message-header">
+                  <span class="message-sender">{{ reply.sender }}</span>
+                  <span class="message-badge"
+                    [ngClass]="{'message-badge--response': reply.messageType === 'Response',
+                                'message-badge--remark': reply.messageType === 'Remark'}">
+                    {{ reply.messageType }}
+                  </span>
+                  <span class="message-time">{{ reply.timestamp | date: 'dd MMM yyyy, hh:mm a' }}</span>
+                </div>
+                @if (reply.text) {
+                <div class="message-body message-content" [innerHTML]="reply.text | safeHtml"></div>
+                }
+                @if (reply.attachments?.length) {
+                <div class="message-attachments">
+                  @for (att of reply.attachments; track att.id) {
+                  <div class="message-attachment" (click)="downloadAttachment(att)" style="cursor: pointer;">
+                    <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+                    <span class="message-attachment-name" [title]="att.name">{{ att.name }}</span>
+                  </div>
+                  }
+                </div>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+
+    <div class="chat-input-wrap">
+
+      @if (questionIsReplyMode && questionReplyingToMessage) {
+      <div class="reply-banner">
+        <div class="reply-banner-content">
+          <div class="reply-info">
+            <div class="reply-header">
+              <span class="reply-sender">{{ questionReplyingToMessage.sender }}</span>
+              <span class="reply-timestamp">{{ questionReplyingToMessage.timestamp | date: 'dd MMM yyyy, hh:mm a' }}</span>
+            </div>
+            <p class="reply-preview">{{ questionReplyingToMessageText }}</p>
+          </div>
+          <button mat-icon-button class="reply-close-btn" (click)="cancelQuestionReply()" title="Cancel reply">
+            <mat-icon class="material-symbols-outlined">close</mat-icon>
+          </button>
+        </div>
+      </div>
+      }
+
+      <div class="tiptap-wrapper-with-buttons" [class.toolbar-expanded]="questionShowToolbar"
+        [class.has-files]="questionSelectedFiles.length > 0"
+        [class.has-reply]="questionIsReplyMode">
+
+        <div class="tiptap-toolbar">
+          <div class="toolbar-group">
+            <button type="button" class="toolbar-button"
+              [class.is-active]="isQuestionEditorActive('bold')"
+              (click)="toggleQuestionFormat('bold')" title="Bold">
+              <mat-icon class="toolbar-icon material-symbols-outlined">format_bold</mat-icon>
+            </button>
+            <button type="button" class="toolbar-button"
+              [class.is-active]="isQuestionEditorActive('italic')"
+              (click)="toggleQuestionFormat('italic')" title="Italic">
+              <mat-icon class="toolbar-icon material-symbols-outlined">format_italic</mat-icon>
+            </button>
+            <button type="button" class="toolbar-button"
+              [class.is-active]="isQuestionEditorActive('underline')"
+              (click)="toggleQuestionFormat('underline')" title="Underline">
+              <mat-icon class="toolbar-icon material-symbols-outlined">format_underlined</mat-icon>
+            </button>
+          </div>
+          <div class="toolbar-divider"></div>
+          <div class="toolbar-group">
+            <button type="button" class="toolbar-button"
+              [class.is-active]="isQuestionEditorActive('bulletList')"
+              (click)="toggleQuestionFormat('bulletList')" title="Bullet list">
+              <mat-icon class="toolbar-icon material-symbols-outlined">format_list_bulleted</mat-icon>
+            </button>
+            <button type="button" class="toolbar-button"
+              [class.is-active]="isQuestionEditorActive('orderedList')"
+              (click)="toggleQuestionFormat('orderedList')" title="Numbered list">
+              <mat-icon class="toolbar-icon material-symbols-outlined">format_list_numbered</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div #questionEditorContainer class="tiptap-editor-container"></div>
+
+        <div class="selected-files-preview-internal">
+          @for (file of questionSelectedFiles; track file.name; let idx = $index) {
+          <div class="file-preview-card">
+            <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+            <span class="file-name" [title]="file.name">{{ file.name }}</span>
+            <button mat-icon-button class="remove-file-button" (click)="removeQuestionSelectedFile(idx)" title="Remove">
+              <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+          </div>
+          }
+        </div>
+
+        <div class="input-actions">
+          <button mat-icon-button class="action-button format-button"
+            [class.active]="questionShowToolbar" (click)="toggleQuestionToolbar()"
+            title="Toggle formatting" disableRipple>
+            <mat-icon class="mat-md-icon material-symbols-outlined">drive_file_rename_outline</mat-icon>
+          </button>
+          <button mat-icon-button class="action-button" (click)="attachQuestionFiles()"
+            title="Attach files" disableRipple>
+            <mat-icon class="mat-md-icon material-symbols-outlined">attach_file</mat-icon>
+          </button>
+
+          @if (isEditMode) {
+          <div class="flex gap-2">
+            <button mat-icon-button (click)="cancelEdit()" class="action-button" title="Cancel">
+              <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+            </button>
+            <button mat-icon-button (click)="sendQuestionMessage()"
+              [disabled]="isSendingMessage" class="action-button send-button"
+              title="Update" disableRipple>
+              <mat-icon class="mat-md-icon material-symbols-outlined">
+                {{ isSendingMessage ? 'schedule' : 'send' }}
+              </mat-icon>
+            </button>
+          </div>
+          } @else {
+          <button class="done-btn" (click)="sendQuestionMessage()"
+            [disabled]="questionIsSendingMessage">Done</button>
+          }
+        </div>
+
+      </div>
+
+    </div>
+    }
+  </div>
+  }
+
+</div>

@@ -1,0 +1,23 @@
+.retention-field .retention-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 4px;
+}
+
+.prefix-input {
+  width: 100px;
+  padding: 0 !important;
+  margin-left: 5px !important;
+  border: none;
+  outline: none;
+  font: inherit;
+  background: transparent;
+  text-align: start;
+}
+
+.mat-form-field-infix {
+  display: flex;
+  padding: 0;
+  gap: 4px;
+}

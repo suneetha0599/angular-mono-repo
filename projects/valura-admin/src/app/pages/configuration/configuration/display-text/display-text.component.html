@@ -1,0 +1,300 @@
+<div class="d-flex flex-column mt-2 h-100">
+  <div class="flex flex-1 overflow-hidden">
+    <aside class="w-65 bg-gray-50 flex flex-col p-3 pb-3" style="margin-bottom: 16px; margin-left: 10px; padding-top: 6px;">
+      <div class="flex justify-end pb-2">
+        <button mat-button class="flex items-center text-sm" (click)="addNewPage()">
+          <mat-icon class="mr-2 material-symbols-outlined">add</mat-icon>
+          Add Page
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-auto px-2 pb-4">
+          @if (isLoading) {
+
+          <div class="space-y-1 px-2 py-2">
+            @for (item of [1,2,3,4,5,6]; track item) {
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg">
+              <div class="flex items-center flex-1 gap-3">
+                <div class="shimmer-box h-4 w-3/4 rounded"></div>
+              </div>
+              <div class="shimmer-box h-6 w-6 rounded-full"></div>
+            </div>
+            }
+          </div>
+          } @else if (pages.length === 0) {
+          <div class="text-center text-gray-500 text-sm py-8">
+            No pages available.
+          </div>
+          } @else {
+          <div class="space-y-1" cdkDropList (cdkDropListDropped)="onPageDrop($event)">
+            @for (page of pages; track page.id) {
+            <div cdkDrag class="group flex items-center justify-between px-3 py-2 rounded-lg cursor-move transition-colors duration-150
+           hover:bg-[#1C2B7010]" [class.bg-[#1C2B7010]]="selectedPageId === page.id"
+              [class.text-[#1C2B70]]="selectedPageId === page.id" [class.font-medium]="selectedPageId === page.id"
+              (click)="selectPage(page.id)">
+              <span class="text-sm truncate flex-1 pr-2" [class.text-[#1C2B70]]="selectedPageId === page.id">
+                {{ page.title }}
+              </span>
+
+              <button mat-icon-button [matMenuTriggerFor]="pageMenu" (click)="$event.stopPropagation()"
+                class="w-8 h-8 text-gray-500 hover:bg-gray-200 rounded-full transition-colors">
+                <mat-icon
+                  class="mat-md-icon text-gray-400 opacity-70 cursor-pointer material-symbols-outlined">more_vert</mat-icon>
+              </button>
+
+              <mat-menu #pageMenu="matMenu">
+
+                <button mat-menu-item (click)="deletePage(page)" class="text-red-600">
+                  <mat-icon
+                    class="text-primary material-symbols-outlined mat-md-icon cursor-pointer text-grey">delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </div>
+            }
+          </div>
+          }
+      </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col pt-0" style="padding-left: 1px; padding-right: 12px; padding-bottom: 12px;">
+        @if (isLoading) {
+
+        <div class="flex flex-col h-full">
+          <section class="pl-4">
+
+            <div class="shimmer-box h-6 w-40 rounded mb-3"></div>
+            <div class="w-full mb-4">
+              <div class="shimmer-box h-4 w-20 rounded mb-2"></div>
+              <div class="w-full px-3 py-3 border border-gray-200 rounded min-h-[56px] bg-gray-50">
+                <div class="shimmer-box h-4 w-2/3 rounded"></div>
+              </div>
+            </div>
+          </section>
+
+
+          <section class="overflow-hidden flex flex-col editor-section flex-1">
+            <div class="flex-1 pl-4 overflow-hidden">
+              <div class="h-full border border-gray-200 rounded bg-white">
+
+                <div class="border-b border-gray-200 bg-gray-50 px-3 py-2">
+                  <div class="flex gap-2 items-center">
+                    @for (tool of [1,2,3,4,5,6,7,8,9,10]; track tool) {
+                    <div class="shimmer-box h-7 w-7 rounded"></div>
+                    }
+                  </div>
+                </div>
+
+
+                <div class="p-4 space-y-3">
+                  @for (line of [1,2,3,4,5,6,7,8]; track line) {
+                  <div class="shimmer-box h-4 rounded"
+                    [style.width]="line % 3 === 0 ? '85%' : (line % 2 === 0 ? '95%' : '90%')"></div>
+                  }
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        } @else if (selectedPageId || isCreatingNewPage) {
+        <form [formGroup]="pageForm" class="flex flex-col h-full" (ngSubmit)="onSave()">
+          <section class="pl-4">
+            <h3 class="mb-3 mt-3 label-large !text-lg text-gray-900 font-medium">
+              {{ isCreatingNewPage ? 'New Page' : 'Page Information' }}
+            </h3>
+            <mat-form-field appearance="outline" class="w-full mat-sm-input enabled-mat-input">
+              <mat-label>Page Title</mat-label>
+              <input matInput formControlName="pageTitle" />
+              @if (pageForm.get('pageTitle')?.hasError('required') && pageForm.get('pageTitle')?.touched) {
+              <mat-error>Page Title is required</mat-error>
+              }
+            </mat-form-field>
+          </section>
+
+          <section class="overflow-hidden flex flex-col editor-section flex-1">
+            <div class="flex-1 pl-4">
+              <div class="editor-wrapper h-full">
+
+                <div class="tiptap-toolbar px-3 py-2">
+
+                  <div class="toolbar-group">
+                    <button type="button" class="toolbar-button" [disabled]="!canUndo()" (click)="undo()" title="Undo">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">undo</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [disabled]="!canRedo()" (click)="redo()" title="Redo">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">redo</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+                  <div class="toolbar-group">
+                    <mat-select
+                      class="toolbar-select font-select"
+                      [(value)]="selectedFontFamily"
+                      (selectionChange)="onFontFamilyChange($event.value)"
+                      placeholder="Font"
+                      panelClass="custom-font-select-panel">
+                      <mat-select-trigger [style.font-family]="selectedFontFamily">
+                        {{ getFontFamilyLabel(selectedFontFamily) }}
+                      </mat-select-trigger>
+                      @for (font of fontFamilies; track font.value) {
+                        <mat-option
+                          [value]="font.value"
+                          [style.font-family]="font.value"
+                          class="custom-font-option">
+                          <div class="option-content">
+                            <span class="option-text">{{ font.label }}</span>
+                            @if (selectedFontFamily === font.value) {
+                              <mat-icon class="checkmark-icon material-symbols-outlined">check</mat-icon>
+                            }
+                          </div>
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </div>
+
+                  <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+                  <div class="toolbar-group">
+                    <mat-select
+                      class="toolbar-select size-select"
+                      [(value)]="selectedFontSize"
+                      (selectionChange)="onFontSizeChange($event.value)"
+                      placeholder="Size"
+                      panelClass="custom-font-select-panel">
+                      <mat-select-trigger>
+                        {{ getFontSizeLabel(selectedFontSize) }}
+                      </mat-select-trigger>
+                      @for (size of fontSizes; track size.value) {
+                        <mat-option
+                          [value]="size.value"
+                          class="custom-font-option">
+                          <div class="option-content">
+                            <span class="option-text">{{ size.label }}</span>
+                            @if (selectedFontSize === size.value) {
+                              <mat-icon class="checkmark-icon material-symbols-outlined">check</mat-icon>
+                            }
+                          </div>
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </div>
+
+                  <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+                  <div class="toolbar-group">
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('bold')"
+                      (click)="toggleBold()" title="Bold">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_bold</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('italic')"
+                      (click)="toggleItalic()" title="Italic">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_italic</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('underline')"
+                      (click)="toggleUnderline()" title="Underline">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_underlined</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+                  <div class="toolbar-group">
+                    <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('left')"
+                      (click)="setTextAlign('left')" title="Align Left">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_left</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('center')"
+                      (click)="setTextAlign('center')" title="Align Center">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_center</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('right')"
+                      (click)="setTextAlign('right')" title="Align Right">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_right</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isAlignActive('justify')"
+                      (click)="setTextAlign('justify')" title="Justify">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_align_justify</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+                  <div class="toolbar-group">
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('bulletList')"
+                      (click)="toggleBulletList()" title="Bullet List">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_list_bulleted</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('orderedList')"
+                      (click)="toggleOrderedList()" title="Numbered List">
+                      <mat-icon class="toolbar-icon material-symbols-outlined !text-lg">format_list_numbered</mat-icon>
+                    </button>
+                  </div>
+
+                  <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+
+                  <div class="toolbar-group">
+                    <button type="button" class="toolbar-button" (click)="outdent()" title="Decrease Indent">
+                      <mat-icon
+                        class="toolbar-icon material-symbols-outlined !text-lg">format_indent_decrease</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" (click)="indent()" title="Increase Indent">
+                      <mat-icon
+                        class="toolbar-icon material-symbols-outlined !text-lg">format_indent_increase</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+
+                <div #editorContainer class="tiptap-editor-container"></div>
+
+                @if (pageForm.get('pageContent')?.invalid && pageForm.get('pageContent')?.touched) {
+                <div class="page-content-error">Page content is required</div>
+                }
+              </div>
+            </div>
+          </section>
+
+
+          <section class="flex-shrink-0 px-4 pt-3">
+            @if (hasFormChanged) {
+            <div class="flex justify-end gap-2">
+              <loading-button type="secondary" (onButtonClick)="onCancel()">
+                Cancel
+              </loading-button>
+              <loading-button type="primary" (onButtonClick)="onSave()" [loading]="isSaving">
+                {{ isCreatingNewPage ? 'Create' : 'Update' }}
+              </loading-button>
+            </div>
+            }
+          </section>
+        </form>
+        } @else if (!isLoading) {
+        <div class="flex-1 flex items-center justify-center">
+          <div class="text-center max-w-md">
+            <mat-icon class="text-gray-300 text-8xl mb-4 material-symbols-outlined">description</mat-icon>
+            <p class="text-gray-600 text-xl font-medium mb-2">No page selected</p>
+            <p class="text-gray-500 text-base">
+              Select a page from the sidebar to view and edit its content
+            </p>
+          </div>
+        </div>
+        }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+@use "../../../styles/custom/colors.scss" as colors;
+@use "../../../styles/custom/colors.scss" as us;
+
+.fontColor {
+    color: us.$primary;
+}
+
+::ng-deep .mdc-notched-outline>* {
+    border: none !important;
+}
+
+.paginator {
+    background-color: colors.$body-bg;
+}
+
+.mat-mdc-header-cell {
+    border-bottom-color: colors.$med-grey;
+
+    &.sticky-actions {
+        border-left: 1px solid #d1d5db !important;
+        border-bottom: none !important;
+    }
+}
+
+.mat-mdc-cell {
+    border: none !important;
+
+    &.sticky-actions {
+        border-left: 1px solid #d1d5db !important;
+        position: sticky !important;
+    }
+}
+
+.mat-mdc-row:nth-child(even) {
+    background-color: colors.$bg-light-grey;
+}
+
+.mat-mdc-row:nth-child(odd) {
+    background-color: colors.$body-bg;
+}

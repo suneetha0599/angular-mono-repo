@@ -1,0 +1,70 @@
+.department-table {
+  width: 100%;
+
+  .sno-col {
+    width: 80px;
+  }
+
+  .name-col {
+    width: 250px;
+  }
+
+  .description-col {
+    width: auto;
+  }
+
+  .actions-col {
+    width: 100px;
+  }
+
+  .department-badge {
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .shimmer-row {
+    pointer-events: none;
+  }
+
+  .shimmer-line {
+    height: 16px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+
+  .shimmer-small {
+    width: 40px;
+  }
+
+  .shimmer-medium {
+    width: 150px;
+  }
+
+  .shimmer-large {
+    width: 200px;
+  }
+
+  .shimmer-extra-large {
+    width: 300px;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
+
+.add-department-btn {
+  min-width: 150px;
+}

@@ -1,0 +1,881 @@
+<!-- STAGE 2 -->
+@if(stage == RequestDisplayStage.REQUEST_VERIFICATION){
+<div class="col w-100 h-100 overflow-auto bg-white border rounded border-white p-3 py-0 flex flex-col scroll-w-0">
+  <div class="w-100 h-100 position-relative">
+    <ng-container *ngTemplateOutlet="topRightContent; context:{addButtonLabel : addButtonLabel}"></ng-container>
+    <mat-tab-group disableRipple animationDuration="300ms"
+      class="custom-tab-group request-stage-tab mat-tab-100 mat-tab-scroll-0 mat-tab-flex-0"
+      (selectedIndexChange)="onTabChange($event)" [selectedIndex]="selectedTabIndex">
+      @for (reqTab of VERIFICATION_TABS; track reqTab.id; let i = $index) {
+      <mat-tab>
+        <ng-template mat-tab-label class="px-0">
+          <span class="title-small">{{reqTab.label}}</span>
+        </ng-template>
+        <ng-template matTabContent>
+          @if(reqTab.key == RequestStageTab.VERIFICATION_STAGE_DETAIL){
+          <!-- Verification details  tab-->
+          <div class="d-flex flex-column w-100 h-100">
+            <ng-container *ngTemplateOutlet="requestInfoMessageTemplate; context:{}"></ng-container>
+            <div class="col w-100 h-100 overflow-auto scroll-w-0">
+              <div class="my-4">
+                <div class="grid grid-cols-10 gap-3">
+                  @if(isThirdPartyRequest){
+                  <div class="col-span-5 mb-2">
+                    <div class="label-small text-grey">
+                      Third-Party Mode of Verification
+                    </div>
+                    <span class="body-large">
+                      {{thirdPartyVerificationDetails ? thirdPartyVerificationDetails.modeOfVerification ||
+                      '-':'-'}}
+                    </span>
+                  </div>
+
+                  <div class="col-span-5 mb-2">
+                    <div class="label-small text-grey">Verified By</div>
+                    <span class="body-large">
+                      {{thirdPartyVerificationDetails ? thirdPartyVerificationDetails.identityVerifiedBy.displayName ||
+                      '-':'-'}}
+                    </span>
+                  </div>
+
+                  <!-- @if(thirdPartyVerificationDetails && thirdPartyVerificationDetails.remarks) { -->
+                  <div class="col-span-10 mb-2">
+                    <div class="label-small text-grey">Remarks</div>
+                    <span class="body-large">
+                      {{thirdPartyVerificationDetails ? thirdPartyVerificationDetails.remarks || '-':'-'}}
+                    </span>
+                  </div>
+                  <!-- } -->
+                  }
+
+                  <div class="col-span-5 mb-2">
+                    <div class="label-small text-grey">
+                      Data Subject Identified Through
+                    </div>
+                    <span class="body-large">
+                      {{dsVerificationDetails ? dsVerificationDetails.modeOfVerification || '-':'-'}}
+                    </span>
+                  </div>
+
+                  <div class="col-span-5 mb-2">
+                    <div class="label-small text-grey">Verified By</div>
+                    <span class="body-large">
+                      {{dsVerificationDetails ? dsVerificationDetails.identityVerifiedBy.displayName || '-':'-'}}
+                    </span>
+                  </div>
+
+                  <!-- @if(dsVerificationDetails && dsVerificationDetails.remarks) { -->
+                  <div class="col-span-10 mb-2">
+                    <div class="label-small text-grey">Remarks</div>
+                    <span class="body-large">
+                      {{dsVerificationDetails ? dsVerificationDetails.remarks || '-':'-'}}
+                    </span>
+                  </div>
+                  <!-- } -->
+
+                </div>
+              </div>
+            </div>
+            @if(positiveButtonLabel || negativeButtonLabel){
+            <div class="flex justify-end z-[1] pt-3 pb-3">
+              <div>
+                <ng-container
+                  *ngTemplateOutlet="ngTemplateDoneButton; context:{ primaryBtnDisabled : false, secondaryBtnDisabled : false }">
+                </ng-container>
+              </div>
+            </div>
+            }
+          </div>
+          }
+          @else if(reqTab.key == RequestStageTab.CONVERSATION){
+          <ng-container *ngTemplateOutlet="conversationTabTemplate"></ng-container>
+          }
+          @else if(reqTab.key == RequestStageTab.ATTACHMENT){
+          <ng-container *ngTemplateOutlet="attachmentsTabTemplate"></ng-container>
+          }
+          @else if(reqTab.key == RequestStageTab.TASKS){
+          <!-- Task listing tab -->
+          <div class="d-flex flex-column w-100 h-100 overflow-hidden">
+            <div class="col w-100 h-100 overflow-auto scroll-w-0">
+              @if(requestTaskList.length>0){
+              <ng-container
+                *ngTemplateOutlet="ngTemplateTable; context:{dataSource: requestTaskDatasource, tableHeaders:tableHeaders, displayedHeaders:displayedHeaders}">
+              </ng-container>
+              } @else{
+              @if(!taskLoading){
+              <item-not-found [imgHeight]="'200px'"></item-not-found>
+              }
+              }
+            </div>
+            @if (totalItems> 10) {
+            <ng-container
+              *ngTemplateOutlet="ngTemplatePagination; context:{pageSize:pageSize, totalItems:totalItems}"></ng-container>
+            }
+          </div>
+          }
+        </ng-template>
+      </mat-tab>
+      }
+    </mat-tab-group>
+  </div>
+</div>
+}
+<!-- STAGE 2 -->
+@else if(stage == RequestDisplayStage.REQUEST_VALIDATION){
+<div class="col w-100 h-100 overflow-hidden bg-white border rounded border-white p-3 py-0 flex flex-col scroll-w-0">
+  <div class="h-100 position-relative">
+    <div class="w-100 h-100">
+      <div class="position-relative h-100">
+        <ng-container *ngTemplateOutlet="topRightContent; context:{addButtonLabel : addButtonLabel}"></ng-container>
+
+        <mat-tab-group disableRipple animationDuration="300ms"
+          class="custom-tab-group request-stage-tab mat-tab-100 mat-tab-scroll-0 mat-tab-flex-0"
+          (selectedIndexChange)="onTabChange($event)" [selectedIndex]="selectedTabIndex">
+          @for (reqTab of VALIDATION_TABS; track reqTab.id; let i = $index) {
+          <mat-tab>
+            <ng-template mat-tab-label class="px-0">
+              <span class="title-small">{{reqTab.label}}</span>
+            </ng-template>
+            <ng-template matTabContent>
+              @if(reqTab.key == RequestStageTab.VALIDATION_STAGE_DETAIL){
+              @if(requestDetailForm){
+              <div class="d-flex flex-column w-100 h-100">
+                <ng-container *ngTemplateOutlet="requestInfoMessageTemplate; context:{}"></ng-container>
+                <div class="col w-100 h-100 overflow-auto mt-2 scroll-w-0" [formGroup]="requestDetailForm">
+                  <div formGroupName="requestValidation">
+                    @for(validationSection of validationSectionControls; track validationSection; let i = $index){
+                    <div>
+                      @if (validationSection.value.showSectionName) {
+                      <div class="label-large mb-2">{{validationSection.value.sectionName}}</div>
+                      }
+                      @for(validationQuestion of getValidationQuestionsControls(i); track validationQuestion; let i =
+                      $index){
+                      <ng-container
+                        *ngTemplateOutlet="ngTemplateValidationQuestions; context:{ validationQuestion: validationQuestion }">
+                      </ng-container>
+                      }
+                    </div>
+                    }
+                    <div class="mb-2">
+                      <div class="grid grid-cols-1 gap-4 mt-3">
+                        <mat-checkbox class="!text-sm accent-blue-900 enabled-mat-checkbox"
+                          formControlName="documentReviewed" (change)="documentReviewedOnChange($event,true)">
+                          I have completed the review of this request and confirm that it complies with all applicable
+                          protocols
+                          and regulatory requirements.
+                        </mat-checkbox>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-end  z-[1]">
+                  @if(requestValidation){
+                  <ng-container
+                    *ngTemplateOutlet="ngTemplateDoneButton; context:{ primaryBtnDisabled : requestValidation.invalid, secondaryBtnDisabled :documentReviewed.invalid }">
+                  </ng-container>
+                  }
+                </div>
+              </div>
+              }
+              }
+              @else if(reqTab.key == RequestStageTab.CONVERSATION){
+              <ng-container *ngTemplateOutlet="conversationTabTemplate"></ng-container>
+              }
+              @else if(reqTab.key == RequestStageTab.ATTACHMENT){
+              <ng-container *ngTemplateOutlet="attachmentsTabTemplate"></ng-container>
+              }
+              @else if(reqTab.key == RequestStageTab.TASKS){
+              <!-- Task listing tab -->
+              <div class="d-flex flex-column w-100 h-100 overflow-hidden">
+                <div class="col w-100 h-100 overflow-auto mt-2 scroll-w-0">
+                  @if(requestTaskList.length>0){
+                  <ng-container
+                    *ngTemplateOutlet="ngTemplateTable; context:{dataSource: requestTaskDatasource, tableHeaders:tableHeaders, displayedHeaders:displayedHeaders}">
+                  </ng-container>
+                  } @else{
+                  @if(!taskLoading){
+                  <item-not-found [imgHeight]="'200px'"></item-not-found>
+                  }
+                  }
+                </div>
+                @if(totalItems>10){
+                <ng-container
+                  *ngTemplateOutlet="ngTemplatePagination; context:{pageSize:pageSize, totalItems:totalItems}">
+                </ng-container>
+                }
+
+              </div>
+              }
+            </ng-template>
+          </mat-tab>
+          }
+        </mat-tab-group>
+      </div>
+    </div>
+  </div>
+</div>
+}
+<!-- STAGE 3 -->
+@else if(stage == RequestDisplayStage.DATA_DISCOVERY){
+<div class="col w-100 h-100 overflow-auto bg-white border rounded border-white p-3 py-0 flex flex-col scroll-w-0">
+  <div class="w-100 h-100 position-relative">
+    <ng-container *ngTemplateOutlet="topRightContent; context:{addButtonLabel : addButtonLabel}"></ng-container>
+    <mat-tab-group disableRipple animationDuration="300ms"
+      class="custom-tab-group request-stage-tab mat-tab-100 mat-tab-scroll-0 mat-tab-flex-0"
+      (selectedIndexChange)="onTabChange($event)" [selectedIndex]="selectedTabIndex">
+      @for (reqTab of DATA_MAPPING_TABS; track reqTab.id; let i = $index) {
+      <mat-tab>
+        <ng-template mat-tab-label class="px-0">
+          <span class="title-small">{{reqTab.label}}</span>
+        </ng-template>
+        <ng-template matTabContent>
+          @if(reqTab.key == RequestStageTab.DATA_MAPPING_STAGE_DETAIL){
+          <!-- Data discovery tab-->
+          <div class="d-flex flex-column w-100 h-100">
+            <ng-container *ngTemplateOutlet="requestInfoMessageTemplate; context:{}"></ng-container>
+            <div class="col w-100 h-100 overflow-auto scroll-w-0">
+              @if(selectedRightTab == RequestStageTab.DATA_MAPPING_STAGE_DETAIL){
+              <ng-container *ngTemplateOutlet="ngTemplateExpandableTable; context:{
+                     dataSource: dataDiscoveryList,
+                     tableHeaders: DATA_DISCOVERY_HEADER,
+                     displayedHeaders: displayedHeaders,
+                     expandedElements: expandedElements,
+                     expandableTemplate: this.dataDiscoveryExpandedTemplate
+                     }">
+              </ng-container>
+              }
+            </div>
+            @if(positiveButtonLabel || negativeButtonLabel){
+            <div class="flex justify-end z-[1] pt-3 pb-3">
+              <div>
+                <ng-container
+                  *ngTemplateOutlet="ngTemplateDoneButton; context:{ primaryBtnDisabled : false, secondaryBtnDisabled : false}">
+                </ng-container>
+              </div>
+            </div>
+            }
+          </div>
+          }
+          @else if(reqTab.key == RequestStageTab.CONVERSATION){
+          <ng-container *ngTemplateOutlet="conversationTabTemplate"></ng-container>
+          }
+          @else if(reqTab.key == RequestStageTab.ATTACHMENT){
+          <ng-container *ngTemplateOutlet="attachmentsTabTemplate"></ng-container>
+          }
+          @else if(reqTab.key == RequestStageTab.TASKS){
+          <!-- Task listing tab -->
+          <div class="d-flex flex-column w-100 h-100 overflow-hidden">
+            <div class="col w-100 h-100 overflow-auto scroll-w-0">
+              @if(selectedRightTab == RequestStageTab.TASKS){
+              @if(requestTaskList.length>0){
+              <ng-container
+                *ngTemplateOutlet="ngTemplateTable; context:{dataSource: requestTaskDatasource, tableHeaders:tableHeaders, displayedHeaders:displayedHeaders}">
+              </ng-container>
+              } @else{
+              @if(!taskLoading){
+              <item-not-found [imgHeight]="'200px'"></item-not-found>
+              }
+              }
+              }
+            </div>
+            @if(totalItems>10){
+            <ng-container *ngTemplateOutlet="ngTemplatePagination; context:{pageSize:pageSize, totalItems:totalItems}">
+            </ng-container>
+            }
+
+          </div>
+          }
+        </ng-template>
+      </mat-tab>
+      }
+    </mat-tab-group>
+  </div>
+</div>
+}
+<!-- STAGE 4-->
+@else if(stage == RequestDisplayStage.REQUEST_FULFILLMENT){
+<div class="col w-100 h-100 overflow-auto bg-white border rounded border-white p-3 py-0 flex flex-col scroll-w-0">
+  <div class="w-100 h-100 position-relative">
+    <ng-container *ngTemplateOutlet="topRightContent; context:{addButtonLabel : addButtonLabel}"></ng-container>
+    <mat-tab-group disableRipple animationDuration="300ms"
+      class="custom-tab-group request-stage-tab mat-tab-100 mat-tab-scroll-0 mat-tab-flex-0"
+      (selectedIndexChange)="onTabChange($event)" [selectedIndex]="selectedTabIndex">
+      @for (reqTab of FULFILLMENT_TABS; track reqTab.id; let i = $index) {
+      <mat-tab>
+        <ng-template mat-tab-label class="px-0">
+          <span class="title-small">{{reqTab.label}}</span>
+        </ng-template>
+        <ng-template matTabContent>
+          @if(reqTab.key == RequestStageTab.DATA_FULFILLMENT_STAGE_DETAIL){
+          <div class="d-flex flex-column w-100 h-100 overflow-hidden">
+            <div
+              class="col w-100 h-100 overflow-hidden bg-white border rounded border-white p-3 flex flex-col scroll-w-0">
+            </div>
+            <ng-container [formGroup]="requestDetailForm">
+              <div class="flex justify-between items-center mt-1 pb-3" formGroupName="requestFulfillment">
+                <mat-checkbox class="!text-sm accent-blue-900 enabled-mat-checkbox"
+                  formControlName="requestFulfillmentVerified" (change)="documentReviewedOnChange($event)">
+                  I have checked and verified that the request has been successfully fulfilled.
+                </mat-checkbox>
+                <div class="flex justify-end">
+                  <ng-container
+                    *ngTemplateOutlet="ngTemplateDoneButton;  context:{  primaryBtnDisabled : requestFulfillment.invalid, secondaryBtnDisabled : false }">
+                  </ng-container>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+          }
+          @else if(reqTab.key == RequestStageTab.CONVERSATION){
+          <ng-container *ngTemplateOutlet="conversationTabTemplate"></ng-container>
+          }
+          @else if(reqTab.key == RequestStageTab.ATTACHMENT){
+          <ng-container *ngTemplateOutlet="attachmentsTabTemplate"></ng-container>
+          }
+          @else if(reqTab.key == RequestStageTab.TASKS){
+          <!-- Task listing tab -->
+          <div class="d-flex flex-column w-100 h-100 overflow-hidden">
+            <div
+              class="col w-100 h-100 overflow-hidden bg-white border rounded border-white p-3 flex flex-col scroll-w-0">
+              <!-- Table header with fullscreen toggle -->
+              @if(isImportNeeded && !dsrRequestDetails.hideImportNeeded){
+              <ng-container *ngTemplateOutlet="requestIsImportNeededTemplate; context:{}"></ng-container>
+              }
+              <!-- Task title box -->
+              <div class="col w-100 h-100 overflow-auto mt-2">
+                @if(requestTaskList.length>0){
+                <ng-container
+                  *ngTemplateOutlet="ngTemplateTable; context:{dataSource: requestTaskDatasource, tableHeaders:tableHeaders, displayedHeaders:displayedHeaders}">
+                </ng-container>
+                } @else{
+                @if(!taskLoading){
+                <item-not-found [imgHeight]="'200px'"></item-not-found>
+                }
+                }
+              </div>
+              @if(totalItems>10){
+              <ng-container
+                *ngTemplateOutlet="ngTemplatePagination; context:{pageSize:pageSize, totalItems:totalItems}">
+              </ng-container>
+              }
+
+            </div>
+          </div>
+          }
+        </ng-template>
+      </mat-tab>
+      }
+    </mat-tab-group>
+  </div>
+</div>
+}
+<!-- STAGE 5 -->
+@else if(stage == RequestDisplayStage.AUDIT_AND_CLOSE){
+<div class="col w-100 h-100 overflow-hidden bg-white border rounded border-white p-3 flex flex-col scroll-w-0">
+  <div class="flex justify-between items-center mb-3">
+    <div class="label-large  pt-0">Audit and Close</div>
+    <ng-container *ngTemplateOutlet="topRightContent; context:{}"></ng-container>
+  </div>
+
+  <div class="flex-1 overflow-auto pr-4 space-y-8 relative no-scrollbar">
+    <app-activity-stepper [entityId]="requestRid" [auditLogModule]="auditLogModule" [entityType]="entityType" />
+  </div>
+  <div class="flex justify-end mt-3">
+    <div class="">
+      <ng-container
+        *ngTemplateOutlet="ngTemplateDoneButton;  context:{  primaryBtnDisabled : false, secondaryBtnDisabled : false}">
+      </ng-container>
+    </div>
+  </div>
+</div>
+}
+<!-- STAGE 6 -->
+@else if(stage == RequestDisplayStage.ACTIVITY_LOG) {
+<div class="col w-100 h-100 overflow-hidden bg-white border rounded border-white p-4 flex flex-col scroll-w-0">
+  <!-- Header -->
+  <div class="mb-3">
+    <div class="label-large pt-0">Activity log</div>
+  </div>
+  <!-- Steps log section -->
+  <div class="flex-1 overflow-auto pr-4 space-y-8 relative no-scrollbar">
+    <!-- <app-activity-stepper [entityId]="requestRid"  /> -->
+  </div>
+  <!-- Footer export button -->
+  <div class="pt-4">
+    <div class="flex justify-end items-center">
+      <!-- <loading-button type="primary">Export Data</loading-button> -->
+    </div>
+  </div>
+</div>
+}
+<!-- Table -->
+<ng-template #ngTemplateTable let-dataSource="dataSource" let-tableHeaders="tableHeaders"
+  let-displayedHeaders="displayedHeaders">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100 custom-table table table-md-row"
+    (matSortChange)="onSortChange($event)">
+    @for (header of tableHeaders; track header.id;let isFirst=$first) {
+    <ng-container [matColumnDef]="header.columnDef" [stickyEnd]="header.stickyEnd ?? false">
+      <!-- HEADER -->
+      <ng-container
+        *ngIf="header.columnDef === 'assigneeToUserName' || header.columnDef === 'actions'; else sortableHeader">
+        <th mat-header-cell *matHeaderCellDef [class]="'px-4 title-small whitespace-nowrap header-bg z-1'"
+          [style.width]="header.width" disableClear="true">
+          <ng-container>
+            <span class="text-grey title-small">{{ header.headerName }}</span>
+          </ng-container>
+        </th>
+      </ng-container>
+      <ng-template #sortableHeader>
+        <th mat-header-cell *matHeaderCellDef [mat-sort-header]="header.sortable ? header.columnDef : null"
+          [class]="'px-4 title-small whitespace-nowrap header-bg z-1'" [style.width]="header.width" disableClear="true">
+
+          <ng-container>
+            <span class="text-grey title-small">{{ header.headerName }}</span>
+          </ng-container>
+        </th>
+      </ng-template>
+      <!-- CELL -->
+      @switch (header.key) {
+      @case(HEADER_NAME){
+      <td mat-cell *matCellDef="let row;let i=index" class="px-4 whitespace-nowrap" (click)="viewTaskDetail(row,i)">
+        <span class="label-large text-primary pointer">{{ row[header.columnDef]}}</span>
+      </td>
+      }
+      @case (HEADER_STATUS) {
+
+      <td mat-cell *matCellDef="let row" class="px-0">
+        <div class="rounded-[8px] status p-2 d-flex align-items-center justify-content-center label-large"
+          [style.width]="header.width"
+          [ngStyle]="{ 'background-color': getStatusColors(row.state), color: getStatusTextColors(row.state)}">
+          <span>{{ getStatusText(row.status) }}</span>
+        </div>
+      </td>
+      }
+      @case (HEADER_DATE) {
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        <span class="body-large">{{ row[header.columnDef] | date:'dd.MM.yyyy' }}</span>
+      </td>
+      }
+      @case (PRIORITY) {
+      <td mat-cell *matCellDef="let element" class="px-3 whitespace-nowrap">
+        <span class="label-large flex items-center" [ngStyle]="{ color: getPriorityTextColor(element.priority) }">
+
+          <mat-icon class="material-symbols-outlined !text-base">
+            {{ getPriorityIcon(element.priority) }}
+          </mat-icon>
+
+          {{ getPriority(element.priority) }}
+        </span>
+      </td>
+      }
+      @case (LOE) {
+      <td mat-cell *matCellDef="let element" class="px-3 whitespace-nowrap">
+        <span class="label-large">
+          {{ getEffortLevel(element.levelOfEffort) }}
+        </span>
+      </td>
+      }
+
+      @case(HEADER_ACTION){
+      <td mat-cell *matCellDef="let row" class="px-3 whitespace-nowrap">
+        <button matIconButton [matMenuTriggerFor]="menu" [disabled]="!showActionMenu || row.state === 'CLOSED'">
+          <mat-icon class="mat-md-icon material-symbols-outlined" [ngClass]="{
+                  'text-gray-400 opacity-50': (!showActionMenu || row.state === 'CLOSED'),
+                  'text-primary': (showActionMenu && row.state !== 'CLOSED')
+                }">
+            more_vert
+          </mat-icon>
+        </button>
+        <mat-menu class="action-panel" #menu="matMenu" xPosition="before">
+          @if(showActionMenu && row.state !== 'CLOSED'){
+          <button mat-menu-item (click)="openTaskDetails(row)">
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="deleteTask(row)">
+            <span>Delete</span>
+          </button>
+          }
+        </mat-menu>
+      </td>
+      }
+      @default {
+      <td mat-cell *matCellDef="let row" class="whitespace-nowrap position-relative"
+        [ngClass]="{'ps-4 pe-0': row.parentTaskId && isFirst, 'px-4': !(row.parentTaskId && isFirst)}">
+        @if(row.parentTaskId && isFirst){
+        <div class="position-absolute top-0 bottom-0 child-row"></div>
+        <div class="inner-row position-relative ">
+          {{ '&nbsp;'}}
+        </div>
+        }
+        @else{
+        <div class="body-large">{{ row[header.columnDef]? row[header.columnDef]:'-' }}</div>
+        }
+      </td>
+      }
+      }
+    </ng-container>
+    }
+    <!-- Rows -->
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true" class="bg-gray-100 title-small">
+    </tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders;"></tr>
+  </table>
+</ng-template>
+
+<!-- Done Button -->
+<ng-template #ngTemplateDoneButton let-primaryBtnDisabled="primaryBtnDisabled"
+  let-secondaryBtnDisabled="secondaryBtnDisabled">
+  @if(negativeButtonLabel){
+  <loading-button type="secondary" class="me-2" [disabled]="secondaryBtnDisabled"
+    (onButtonClick)="onSecondaryButtonClick()">
+    {{negativeButtonLabel}}
+  </loading-button>
+  }
+  @if(positiveButtonLabel){
+  <loading-button type="primary" [loading]="isDoneLoading" [disabled]="isDoneLoading || primaryBtnDisabled"
+    (onButtonClick)="onDoneClick()" matTooltipPosition="above">
+    {{positiveButtonLabel}}
+  </loading-button>
+  }
+</ng-template>
+
+<!-- Validation Questions -->
+<ng-template #ngTemplateValidationQuestions let-validationQuestion="validationQuestion">
+  <div class="mb-2" [formGroup]="validationQuestion">
+    @if(validationQuestion.value.question){
+    @switch (validationQuestion.value.questionType) {
+    @case (RequestValidationQuestionsTypes.CHECKBOX) {
+    <div class="mt-3">
+      <span class="label-large-normal question-inline">
+        <span [splitByDirectives]="validationQuestion.value.question"></span>
+
+        @if (validationQuestion.value.helper?.trim()) {
+        <mat-icon class="info-icn material-symbols-outlined" [matTooltip]="validationQuestion.value.helper"
+          matTooltipClass="material-tooltip" matTooltipPosition="right">
+          info
+        </mat-icon>
+        }
+      </span>
+    </div>
+
+    @if (validationQuestion.value.provision?.trim()) {
+    <div class="body-small text-gray-600">
+      {{ validationQuestion.value.provision }}
+    </div>
+    }
+    <div class="grid grid-cols-1 gap-4 mt-3">
+      <mat-checkbox class="!text-sm accent-blue-900 enabled-mat-checkbox" (change)="clearRemarks(validationQuestion)"
+        formControlName="answer">{{validationQuestion.value.typeOfOptions}}</mat-checkbox>
+    </div>
+    }
+    @case (RequestValidationQuestionsTypes.RADIO_BUTTON){
+    <ng-container *ngTemplateOutlet="ngTemplateRadioButton;context:{ validationQuestion : validationQuestion}">
+    </ng-container>
+    }
+    @case (RequestValidationQuestionsTypes.DROPDOWN){
+    <ng-container *ngTemplateOutlet="ngTemplateRadioButton;context:{ validationQuestion : validationQuestion}">
+    </ng-container>
+    }
+    @case (RequestValidationQuestionsTypes.TEXT_FIELD){
+    <ng-container *ngTemplateOutlet="ngTemplateNotes;context:{ validationQuestion : validationQuestion}">
+    </ng-container>
+    }
+    @case (RequestValidationQuestionsTypes.TEXT_AREA){
+    <ng-container *ngTemplateOutlet="ngTemplateNotes;context:{ validationQuestion : validationQuestion}">
+    </ng-container>
+    }
+    @default {
+    <!-- <div class="label-large-normal mt-3" [splitByDirectives]="validationQuestion.value.question"></div> //https://devappsys.atlassian.net/browse/VAL-408
+    <div class="grid grid-cols-1 gap-4 mt-3">
+      <mat-form-field appearance="outline" class="mat-mdc-mb-0 enabled-mat-input">
+        <textarea matInput formControlName="answer"></textarea>
+      </mat-form-field>
+    </div> -->
+    }
+    }}
+
+    @if(showRemarksOption(validationQuestion)){
+    <div class="label-large-normal mt-1">Reason</div>
+    <mat-form-field appearance="outline" class="mt-2 mat-md-input enabled-mat-input">
+      <input title="remarks" matInput formControlName="remarks" />
+    </mat-form-field>
+    }
+  </div>
+</ng-template>
+
+<!-- Pagination -->
+<ng-template #ngTemplatePagination let-pageSize="pageSize" let-totalItems="totalItems">
+  <div class="bg-white z-10 mat-md-input">
+    <mat-paginator #paginator class="bg-white" [pageSize]="pageSize" [length]="totalItems" (page)="onPageChange($event)"
+      [pageSizeOptions]="[10, 50, 100]" aria-label="Select page"></mat-paginator>
+  </div>
+</ng-template>
+
+<ng-template #ngTemplateExpandableTable let-dataSource="dataSource" let-tableHeaders="tableHeaders"
+  let-displayedHeaders="displayedHeaders" let-expandedElements="expandedElements"
+  let-expandableTemplate="expandableTemplate">
+  <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows
+    class="mat-elevation-z8 w-100 custom-table table table-md-row">
+    @for (header of tableHeaders; track header.id) {
+    <ng-container [matColumnDef]="header.columnDef" [stickyEnd]="header.stickyEnd ?? false">
+      <th mat-header-cell *matHeaderCellDef [mat-sort-header]="header.sortable ? header.columnDef : null"
+        class="px-4 whitespace-nowrap">
+        <span class="text-grey title-small">{{ header.headerName }}</span>
+      </th>
+      @switch (header.key) {
+      @case(HEADER_EXPAND) {
+      <td mat-cell *matCellDef="let element" class="px-4 whitespace-nowrap">
+        <button class="medium-icon" mat-icon-button (click)="toggleRow(element)" [disabled]="!canExpand(element)">
+          <mat-icon class="text-primary material-symbols-outlined">
+            {{ isExpanded(element) ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
+          </mat-icon>
+        </button>
+      </td>
+      }
+      @case(HEADER_NAME) {
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap" (click)="openTaskDetails(row)">
+        <span class="label-large text-primary pointer">{{ row[header.columnDef]}}</span>
+      </td>
+      }
+      @case(HEADER_CATEGORY){
+      <td mat-cell *matCellDef="let row">
+        <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+          class="link-button text-decoration-none label-large btn-font-normal"
+          (click)="showCategoryDetails(row.categoryMappings)" [disabled]="!showDetail(row.categoryMappings)">
+          {{ getCategoryName(row.categoryMappings) }}
+        </button>
+      </td>
+      }
+      @case (HEADER_STATUS) {
+      <td mat-cell *matCellDef="let element">
+        <div class="rounded-[8px] p-2 d-flex align-items-center justify-content-center label-large"
+          [ngStyle]="{'background-color': getStatusColors(element.status)}">
+          {{ getStatusText(element.status) }}
+        </div>
+      </td>
+      }
+      @case (HEADER_DATE) {
+      <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+        <span class="body-large">{{ row[header.columnDef] | date:'dd.MM.yyyy' }}</span>
+      </td>
+      }
+      @case(HEADER_ACTION) {
+      <td mat-cell *matCellDef="let row" class="px-3 whitespace-nowrap">
+        <button matIconButton [matMenuTriggerFor]="menu">
+          <mat-icon class="mat-md-icon text-primary material-symbols-outlined">more_vert</mat-icon>
+        </button>
+        <mat-menu class="action-panel" #menu="matMenu" xPosition="before">
+          <button mat-menu-item (click)="deleteTask(row)">
+            <span>Delete Task</span>
+          </button>
+        </mat-menu>
+      </td>
+      }
+      @default {
+      <td mat-cell *matCellDef="let row" class="whitespace-nowrap position-relative px-4">
+        <div class="body-large">{{ row[header.columnDef] || 'N/A' }}</div>
+      </td>
+      }
+      }
+    </ng-container>
+    }
+    <ng-container matColumnDef="expandedDetail">
+      <td mat-cell *matCellDef="let element" [attr.colspan]="displayedHeaders.length" class="expanded-cell">
+        <div class="expanded-content" [@detailExpand]="isExpanded(element) ? 'expanded' : 'collapsed'">
+          <ng-container *ngTemplateOutlet="expandableTemplate; context: { $implicit: element, element: element }">
+          </ng-container>
+        </div>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true" class="bg-gray-100 title-small"></tr>
+    <tr mat-row *matRowDef="let element; columns: displayedHeaders;" [class.highlight-section]="isExpanded(element)">
+    </tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']; when: isExpandedRow" class="expanded-row"></tr>
+  </table>
+</ng-template>
+
+<ng-template #dataDiscoveryExpandedTemplate let-element>
+  <div class="p-4">
+    <table mat-table [dataSource]="element.assetInvolvedList" class="data-discovery-expanded-table w-full">
+      <ng-container matColumnDef="assetName">
+        <th mat-header-cell *matHeaderCellDef>Asset Name</th>
+        <td mat-cell *matCellDef="let asset">{{ asset.assetName || 'N/A' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="assetType">
+        <th mat-header-cell *matHeaderCellDef>Asset Type</th>
+        <td mat-cell *matCellDef="let asset">{{ asset.assetType || 'N/A' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="purpose">
+        <th mat-header-cell *matHeaderCellDef>Purpose</th>
+        <td mat-cell *matCellDef="let asset">
+          <button [matMenuTriggerFor]="detailMenu" mat-button color="primary"
+            class="link-button text-decoration-none label-large btn-font-normal"
+            (click)="showPurposeDetails(asset.purpose)" [disabled]="!showDetail(asset.purpose)">
+            {{ getAssetPurposeName(asset.purpose) }}
+          </button>
+        </td>
+        <td mat-cell *matCellDef="let asset">{{ asset.purpose || 'N/A' }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="[ 'assetName', 'assetType', 'purpose']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['assetName', 'assetType', 'purpose'];"></tr>
+    </table>
+  </div>
+</ng-template>
+
+<ng-template #topRightContent let-addButtonLabel="addButtonLabel">
+  <div class="position-absolute right-0 z-2 mt-2 flex items-center gap-2">
+    @if(addButtonLabel && taskTabIsSelected){
+    <loading-button type="secondary" (onButtonClick)="onAdd()">{{addButtonLabel}}</loading-button>
+    }
+    @if(stage == RequestDisplayStage.REQUEST_FULFILLMENT && isImportNeeded){
+    <button (click)="syncData()" mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" mat-tooltip="Sync Data"
+      matTooltipClass="material-tooltip">
+      <mat-icon class="material-symbols-outlined">
+        sync
+      </mat-icon>
+    </button>
+    }
+
+    <button (click)="toggleFullScreen()" mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn">
+      <mat-icon class="material-symbols-outlined">
+        {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
+      </mat-icon>
+    </button>
+
+  </div>
+</ng-template>
+
+<ng-template #requestInfoMessageTemplate>
+  @if(requestInfoMessage){
+  <div class=" text-sm rounded px-2 py-2 my-1 w-100 border warning-warpper">
+    <div class=" flex justify-between">
+      <div class="d-flex">
+        <mat-icon class="warning-icon my-auto material-symbols-outlined" color="primary">warning</mat-icon>
+        <div class="ms-2 label-large warning-text">{{requestInfoMessage}}</div>
+      </div>
+      <div class="my-auto pointer" (click)="hideRequestInfo()">
+        <mat-icon class="warning-icon my-auto material-symbols-outlined" color="primary">close</mat-icon>
+      </div>
+    </div>
+  </div>
+  }
+</ng-template>
+
+<ng-template #requestIsImportNeededTemplate>
+  <div class=" text-sm rounded px-2 py-1 my-1 w-100 border warning-warpper">
+    <div class=" flex justify-between">
+      <div class="d-flex">
+        <mat-icon class="warning-icon my-auto material-symbols-outlined" color="primary">warning</mat-icon>
+        <div class="ms-2 label-large warning-text">Import Needed</div>
+        <div class="ms-3 label-large pointer text-primary" (click)="onDownload()">View details</div>
+      </div>
+      <div class="my-auto pointer" (click)="hideImportNeeded()">
+        <mat-icon class="warning-icon my-auto material-symbols-outlined" color="primary">close</mat-icon>
+      </div>
+    </div>
+  </div>
+
+</ng-template>
+
+<ng-template #ngTemplateRadioButton let-validationQuestion="validationQuestion">
+  <div class="mb-2" [formGroup]="validationQuestion">
+    <div class="mt-3">
+      <span class="label-large-normal question-inline">
+        <span [splitByDirectives]="validationQuestion.value.question"></span>
+
+        @if (validationQuestion.value.helper?.trim()) {
+        <mat-icon class="info-icn material-symbols-outlined" [matTooltip]="validationQuestion.value.helper"
+          matTooltipClass="material-tooltip" matTooltipPosition="right">
+          info
+        </mat-icon>
+        }
+      </span>
+    </div>
+
+    @if (validationQuestion.value.provision?.trim()) {
+    <div class="body-small text-gray-600">
+      {{ validationQuestion.value.provision }}
+    </div>
+    }
+    <div class="grid grid-cols-1 gap-4 mt-3">
+      <mat-radio-group class="enabled-mat-radio" formControlName="answer" (change)="clearRemarks(validationQuestion)">
+        @for (option of validationQuestion.value.typeOfOptions; track option; let i = $index){
+        <mat-radio-button class="me-3" color="primary" [value]="option">
+          <span class="label-large-normal">{{option}}</span>
+        </mat-radio-button>
+        }
+      </mat-radio-group>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #ngTemplateNotes let-validationQuestion="validationQuestion">
+  <div class="mt-3">
+    <span class="label-large-normal">Note: </span>
+    <span class="label-large-normal question-inline">
+      <span [splitByDirectives]="validationQuestion.value.question"></span>
+
+      @if (validationQuestion.value.helper?.trim()) {
+      <mat-icon class="info-icn material-symbols-outlined" [matTooltip]="validationQuestion.value.helper"
+        matTooltipClass="material-tooltip" matTooltipPosition="right">
+        info
+      </mat-icon>
+      }
+    </span>
+
+    @if (validationQuestion.value.provision?.trim()) {
+    <div class="body-small text-gray-600">
+      {{ validationQuestion.value.provision }}
+    </div>
+    }
+  </div>
+</ng-template>
+
+<ng-template #conversationTabTemplate>
+  <app-conversation-screen [requestRid]="requestRid" [refreshMessageUpdates]="refreshMessageUpdates"
+    [isRequestClosed]="isRequestClosed" (attachmentsUpdated)="handleAttachmentsUpdate($event)"
+    [highlightMessageId]="highlightMessageId">
+  </app-conversation-screen>
+</ng-template>
+
+<ng-template #attachmentsTabTemplate>
+  <div class="attachments-tab d-flex flex-column w-100 h-100">
+    <div class="flex-1 overflow-y-auto p-3 bg-gray-100 m-3 mt-1 mb-0 custom-scrollbar">
+      @if(attachmentsList.length === 0) {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-center">
+          <mat-icon class="material-symbols-outlined text-gray-300 text-6xl mb-2">attach_file</mat-icon>
+          <p class="text-gray-400 text-sm">No attachments</p>
+        </div>
+      </div>
+      } @else {
+      <div class="space-y-3">
+        @for(attachment of attachmentsList; track i;let i = $index) {
+        <div
+          class="p-4 bg-white rounded-lg border border-gray-200 flex items-center cursor-pointer hover:bg-gray-50 transition-colors"
+          (click)="onDocNameClick(attachment)">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <mat-icon class="material-symbols-outlined text-gray-600 flex-shrink-0">attach_file</mat-icon>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-900 truncate" [title]="attachment.name">{{attachment.name}}</p>
+              <p class="text-xs text-gray-500 truncate"> {{attachment.uploadedBy}} •
+                {{attachment.uploadedOn}}</p>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</ng-template>
+
+<input #fileInput type="file" multiple (change)="onFileSelected($event)" style="display: none;" />
+
+<mat-menu class="action-panel" #detailMenu="matMenu">
+  <ul class="px-2 m-2 ms-3 menu-more-detail">
+    @for(detail of detailList; track i; let i=$index) {
+    <li class="mb-1 body-large">{{detail}}</li>
+    }
+  </ul>
+</mat-menu>

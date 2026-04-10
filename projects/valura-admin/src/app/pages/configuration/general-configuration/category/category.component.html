@@ -1,0 +1,81 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+
+    @if(!requestLoading && hasApiError){
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    }
+    @else if(isEmptyRequest){
+    <item-not-found [imgHeight]="'200px'" [heading]=errorTitle>
+    </item-not-found>
+    }
+    @else{
+    <ng-container *ngTemplateOutlet="ngTemplateTable; context: {}">
+    </ng-container>
+    }
+  </div>
+</div>
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="loading ? shimmerRows : dataSource"
+    class="mat-elevation-z8 w-100 custom-table table table-layout-fixed" matSort (matSortChange)="onSortChange($event)">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 40%">
+        Name
+      </th>
+      <td mat-cell *matCellDef="let element" style="width: 50%">
+        <div class="d-flex">
+          @if (loading) {
+          <div class="shimmer-line shimmer-large"></div>
+          } @else {
+          <span class="" [appEllipsisTooltip]="element.name" [colorType]="dataCategoryFullAcess ? 'primary':'default'"
+            [matTooltip]="element.name" matTooltipPosition="below" matTooltipClass="material-tooltip"
+            (click)="dataCategoryFullAcess && onViewClick(element)">
+            {{ element.name }}
+          </span>
+          }
+        </div>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 60%">
+        Description
+      </th>
+      <td mat-cell *matCellDef="let element" style="width: 40%">
+        <div class="d-flex">
+          @if (loading) {
+          <div class="shimmer-line shimmer-large"></div>
+          } @else {
+          <span class="" [appEllipsisTooltip]="element.description" [colorType]="'default'"
+            [matTooltip]="element.description" matTooltipPosition="below" matTooltipClass="material-tooltip">
+            {{ element.description }}
+          </span>
+          }
+        </div>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="action">
+      <th mat-header-cell *matHeaderCellDef [style.width]="'10%'">Actions</th>
+      <td mat-cell *matCellDef="let element">
+        @if (loading) {
+        <div class="shimmer-line shimmer-large"></div>
+        } @else {
+        <div class="d-flex gap-2">
+          <mat-icon class="material-symbols-outlined mat-md-icon" [class.text-primary]="dataCategoryFullAcess"
+            [class.text-grey]="!dataCategoryFullAcess" [class.cursor-pointer]="dataCategoryFullAcess"
+            [style.opacity]="dataCategoryFullAcess ? '1' : '0.4'"
+            (click)="dataCategoryFullAcess && onEditClick(element)" title="Edit">
+            edit
+          </mat-icon>
+          <mat-icon class="material-symbols-outlined mat-md-icon" [class.text-primary]="dataCategoryFullAcess"
+            [class.text-grey]="!dataCategoryFullAcess" [class.cursor-pointer]="dataCategoryFullAcess"
+            [style.opacity]="dataCategoryFullAcess ? '1' : '0.4'"
+            (click)="dataCategoryFullAcess && onDeleteClick(element)" title="Delete">
+            delete
+          </mat-icon>
+        </div>
+        }
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="table-header"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</ng-template>

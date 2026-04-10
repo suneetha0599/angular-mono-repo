@@ -1,0 +1,82 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+    <div class="mb-3 d-flex justify-between">
+        <div class="d-flex">
+            <button (click)="goBack()"
+                class="my-auto w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+                <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+            </button>
+            <div class="headline-medium ms-2 my-auto">{{pageTitle}}</div>
+        </div>
+        <div>
+            @if(!actionLoading){
+            @if(!formIsPublished){
+            <ng-template
+                *ngTemplateOutlet="publishAction;context: {publishBtnLabel : publishBtnLabel, publishBtnLoadingText : publishBtnLabel, showDraft: formIsUpdated}">
+            </ng-template>
+            }
+            @else if(showPublishSection){
+            <div class="d-flex">
+                <ng-template *ngTemplateOutlet="publishTemplate;context: {}"></ng-template>
+            </div>
+            }
+            @else if(formIsUpdated){
+            <ng-template
+                *ngTemplateOutlet="publishAction;context: {publishBtnLabel : publishBtnLabel, publishBtnLoadingText : publishBtnLabel, showDraft: true}">
+            </ng-template>
+            }
+            @else if(isDraftDetails){
+            <ng-template
+                *ngTemplateOutlet="publishAction;context: {publishBtnLabel : publishBtnLabel, publishBtnLoadingText : publishBtnLabel, showDraft: formIsUpdated}">
+            </ng-template>
+            }
+            }
+        </div>
+    </div>
+    <div class="d-flex flex-column justify-center overflow-hidden bg-white rounded-xl view-wrapper p-3">
+
+        <div>
+            <div class="headline-large-bold my-2 !text-center">
+                <span class="text-primary">{{ title }}</span>
+            </div>
+            <div class="text-center text-gray-500 title-medium">
+                {{ subTitle }}
+            </div>
+            <div class="mt-4 mb-4">
+                <mat-divider class="mx-4"></mat-divider>
+            </div>
+        </div>
+        <div class="d-flex w-100 justify-center position-relative overflow-auto">
+            <div class="w-[760px] position-relative overflow-auto no-scrollbar">
+                <dsr-form [formConfiguration]="formConfiguration" [viewType]="RequestFormViewType.FORM_CONFIGURATION">
+                </dsr-form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<ng-template #publishTemplate>
+    <mat-icon class="!text-green-600 text-2xl self-center material-symbols-outlined mat-md-icon">check_circle</mat-icon>
+    <div class="mx-1 !text-green-600 body-large my-auto">Published</div>
+    <loading-button type="primary" class="ms-2" [isIconOnlyButton]="true" (onButtonClick)="onCopy()">
+        <mat-icon class="material-symbols-outlined text-light mat-md-icon">content_copy</mat-icon>
+    </loading-button>
+</ng-template>
+
+<ng-template #publishAction let-publishBtnLabel="publishBtnLabel" let-publishBtnLoadingText="publishBtnLoadingText"
+    let-showDraft="showDraft">
+    <div class="d-flex">
+        <!-- <ng-template *ngTemplateOutlet="publishTemplate;context: {}"></ng-template> -->
+        <loading-button type="primary" class="ms-2" [loading]="isLoading" [loadingText]="publishBtnLoadingText"
+            (onButtonClick)="onPublishForm()">
+            <span>{{publishBtnLabel}}</span>
+        </loading-button>
+        @if(showDraft){
+        <loading-button type="secondary" class="ms-2" [loading]="draftLoading" [loadingText]="'Draft'"
+            (onButtonClick)="onDraft()" [disabled]="isFinalSaved">
+            <span>Save Draft</span>
+        </loading-button>
+        }
+    </div>
+</ng-template>

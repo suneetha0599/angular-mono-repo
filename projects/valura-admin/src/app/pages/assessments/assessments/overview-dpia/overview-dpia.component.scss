@@ -1,0 +1,125 @@
+@use "../../../../../styles/custom/typography.scss" as typography;
+@use "../../../../../styles/custom/colors.scss" as colors;
+
+.content {
+  width: 98%;
+  max-height: 100vh;
+  height: 57vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.title {
+  font-size: typography.$fs-13;
+}
+
+.select-cdk-scroll {
+  scrollbar-width: none;
+  overflow-x: hidden !important;
+}
+
+.template-dropdown {
+  max-height: none !important;
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+::ng-deep .chips .mat-mdc-chip.mdc-evolution-chip--selected {
+  background-color: colors.$table-primary !important;
+}
+
+::ng-deep .mat-mdc-chip.mdc-evolution-chip--selected .mdc-evolution-chip__text-label {
+  color: colors.$primary !important;
+}
+
+::ng-deep .chips .mat-mdc-chip.mdc-evolution-chip--selected .mdc-evolution-chip__checkmark,
+::ng-deep .chips .mat-mdc-chip.mdc-evolution-chip--selected mat-icon {
+  color: colors.$primary !important;
+  fill: colors.$primary !important;
+}
+
+::ng-deep .sticky-search-field .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+::ng-deep .custom-select-panel {
+  background-color: #E9EFEE !important;
+}
+
+.empty-state {
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.create-new {
+  cursor: pointer;
+}
+
+.create-new:hover {
+  text-decoration: underline;
+}
+
+::ng-deep .custom-select-panel {
+  background-color: #E9EFEE !important;
+}
+
+.sticky-search-container {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #E9EFEE;
+  padding: 8px 8px 4px 8px;
+}
+
+::ng-deep .custom-select-panel .search-field .mat-mdc-text-field-wrapper {
+  background-color: #ffffff !important;
+  border-radius: 8px;
+}
+
+::ng-deep .custom-select-panel .search-field .mdc-notched-outline {
+  background: transparent !important;
+}
+
+::ng-deep .custom-select-panel .search-field .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+::ng-deep .sticky-search-field .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+::ng-deep .custom-select-panel {
+  background-color: #E9EFEE !important;
+}
+
+.search-wrapper {
+  background: #E9EFEE;
+}
+
+::ng-deep .cdk-virtual-scroll-content-wrapper {
+  padding-top: 4px;
+}
+
+// ::ng-deep .mat-mdc-select-panel {
+//    overflow: hidden !important;
+// }
+
+.w-71 {
+  width: 71% !important;
+}
+
+.disabled-option {
+  opacity: 0.6;
+  pointer-events: none;
+}

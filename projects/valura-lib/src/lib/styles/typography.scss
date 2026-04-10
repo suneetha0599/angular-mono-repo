@@ -1,0 +1,52 @@
+$font-family-sans-serif: 'Source Sans 3';
+$font-family-monospace: 'Source Sans 3';
+
+//font size
+$fs-10: 10px;
+$fs-12: 12px;
+$fs-13: 13px;
+$fs-14: 14px;
+$fs-15: 15px;
+$fs-16: 16px;
+$fs-22: 22px;
+$fs-24: 24px;
+
+//font-weight
+$fw-400: 400;
+$fw-500: 500;
+$fw-600: 600;
+
+.fs-sm-light {
+    font-size: $fs-12 !important;
+    font-weight: $fw-400 !important;
+}
+
+.fs-xsm-light {
+    font-size: $fs-13 !important;
+    font-weight: $fw-400 !important;
+}
+
+.fs-md-med {
+    font-size: $fs-14 !important;
+    font-weight: $fw-500 !important;
+}
+
+.fs-sm-med {
+    font-size: $fs-13 !important;
+    font-weight: $fw-500 !important;
+}
+
+.fs-xmd-med {
+    font-size: $fs-15 !important;
+    font-weight: $fw-500 !important;
+}
+
+.fs-xxmd-med {
+    font-size: $fs-16 !important;
+    font-weight: $fw-500 !important;
+}
+
+.fs-lg-med {
+    font-size: $fs-22 !important;
+    font-weight: $fw-500 !important;
+}

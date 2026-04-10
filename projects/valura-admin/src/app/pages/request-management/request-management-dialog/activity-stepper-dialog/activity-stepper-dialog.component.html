@@ -1,0 +1,12 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{ dialogTitle }}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="mt-1 pt-2 d-flex items-center close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 mt-1 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <app-activity-stepper [showHeader]="false" [entityId]="entityId" [auditLogModule]="auditLogModule"
+    [entityType]="entityType" [userAuditLog]="userAuditLog" [userId]="userId"></app-activity-stepper>
+</div>

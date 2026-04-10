@@ -1,0 +1,294 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="d-flex justify-between">
+      <div class="headline-medium my-auto">Collection Point</div>
+    </div>
+  </div>
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+          [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="applyTabFilter($event.index)">
+          @for(tab of tabHeaderDetails; track tab.key;) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>{{tab.name}}</span>
+              <span class="body-small badge ml-2 fw-600 text-light rounded-pill px-2 py-1"
+                style="font-size: 0.75rem; height: 1.5rem; border-radius: 0.75rem;">
+                {{totalItems}}
+              </span>
+            </ng-template>
+            <div class="h-full flex flex-col overflow-hidden">
+              <ng-container *ngTemplateOutlet="filtersTemplate"></ng-container>
+              <div #scrollContainer class="flex-1 overflow-auto rounded-lg no-scrollbar">
+                @if(showRequestList){
+                <ng-container *ngTemplateOutlet="ngTemplateTable; context:{}">
+                </ng-container>}
+                @else{ @if(!isLoading && hasApiError){
+                <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+                }
+                @else if(!isLoading){
+                <item-not-found [imgHeight]="'200px'" [heading]=errorTitle></item-not-found>
+                } }
+              </div>
+              <div class="bg-white z-10">
+                <mat-paginator #paginator class="bg-white pagination" [pageSize]="pageSize" [length]="totalItems"
+                  (page)="onPageChange($event)" [pageSizeOptions]="[10, 50, 100]" aria-label="Select page">
+                </mat-paginator>
+              </div>
+            </div>
+          </mat-tab>
+          }
+
+        </mat-tab-group>
+
+        <div class="absolute top-2 right-2 flex gap-2 z-3">
+
+          <!-- Right: Search + Filter Buttons -->
+          <div class="d-flex align-items-center gap-2 position-relative">
+            <div class="relative flex items-center justify-end search-container">
+              <!-- Expanding Search Field -->
+              <mat-form-field *ngIf="showSearch" appearance="outline"
+                class="mat-sm-input mat-round-input enabled-mat-input search-bar absolute right-[60px] transition-all duration-300"
+                [ngClass]="{'w-[250px] opacity-100': showSearch, 'w-0 opacity-0': !showSearch}">
+                <mat-icon class="material-symbols-outlined" matPrefix>search</mat-icon>
+                <input matInput [(ngModel)]="filterConfiguration.searchText" placeholder="Search..."
+                  [debounceTime]="1000" (ngModelDebounceChange)="onSearchChange()" />
+                <button *ngIf="filterConfiguration.searchText" matSuffix mat-icon-button class="close-btn"
+                  (click)="clearSearch()">
+                  <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+                </button>
+              </mat-form-field>
+
+              <!--Search Button  -->
+              <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn fixed-search-btn"
+                (click)="toggleSearch()">
+                <mat-icon class="material-symbols-outlined" color="primary">search</mat-icon>
+              </button>
+            </div>
+
+            <!-- Filter Button -->
+            <div class="position-relative">
+              @if(filterApplied){
+              <div class="position-absolute  right-[3px] top-[3px]">
+                <div class="custom-badge-count rounded-full"></div>
+              </div>
+              }
+              <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="searchFilter()">
+                <mat-icon class="material-symbols-outlined" color="primary">filter_list</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #filtersTemplate>
+  <!-- Left: Filters -->
+  <div class="d-flex align-items-center flex-wrap mt-2">
+    @if (selectedCollectionType) {
+    <div class="custom-multi-select d-flex align-items-center mr-2 mb-2">
+      <button mat-button class="dropdown-button w-100 px-2"
+        [matMenuTriggerFor]="showCollectionType ? collectionTypeMenu : null" #collectionTypeTrigger="matMenuTrigger">
+        @if(showCollectionType) {
+        <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+        }
+        <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showCollectionType }">
+          <div class="d-flex align-items-center w-full min-w-0">
+            <span class="overflow-hidden text-ellipsis max-w-[150px]">
+              Collection Type: {{ filterConfiguration.selectedCollectionType[0]?.label }}
+            </span>
+            @if(filterConfiguration.selectedCollectionType.length > 1) {
+            <span class="ml-1 shrink-0 rounded-full filter-badge">
+              +{{ filterConfiguration.selectedCollectionType.length - 1 }}
+            </span>
+            }
+          </div>
+          <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+            (click)="clearSelection('selectedCollectionType'); collectionTypeTrigger.closeMenu(); $event.stopPropagation()">
+            close
+          </mat-icon>
+        </div>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <mat-menu class="status-menu filter-menu" #collectionTypeMenu="matMenu" yPosition="below" xPosition="after"
+        (closed)="onCloseMenu('selectedCollectionType')" [overlapTrigger]="false">
+        <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 196px;">
+          <div class="menu-wrapper">
+            @for (type of collectionTypes; track type;) {
+            <button mat-menu-item (click)="toggleSelection('COLLECTION_TYPE', type)">
+              <mat-checkbox [checked]="filterConfiguration.tempselectedCollectionType.includes(type)">
+                {{ type.label }}
+              </mat-checkbox>
+            </button>
+            }
+          </div>
+          <div class="px-2 py-1 text-end">
+            <loading-button [smallButton]="true"
+              (onButtonClick)="onApplyOptionFilter('COLLECTION_TYPE', collectionTypeTrigger)">
+              Apply
+            </loading-button>
+          </div>
+        </div>
+      </mat-menu>
+    </div>
+    }
+
+    @if (selectedCollectionType) {
+    <div class="d-flex my-auto justify-content-center mb-2">
+      <button mat-button class="button" (click)="resetAllFilter()">
+        <mat-icon class="cursor-pointer material-symbols-outlined">close</mat-icon>
+        Clear all
+      </button>
+    </div>
+    }
+  </div>
+</ng-template>
+
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="isLoading ? shimmerDataSource : (dataSource.data.length === 0 ? [] : dataSource.data)"
+    matSort class="mat-elevation-z8 w-100 custom-table table" (matSortChange)="onSortChange($event)">
+
+    <ng-container matColumnDef="collectionPointID">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="title-small !text-center header-index"
+        style="width: 150px;" disableClear="true">
+        <ng-container *ngIf="!isLoading">
+          <span class="text-grey title-small !text-center whitespace-nowrap">Collection Point ID</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small ml-2"></div>
+        </ng-container>
+      </th>
+      <td mat-cell *matCellDef="let element" class="whitespace-nowrap" style="width: 150px;">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{ element.id }}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="collectionPointName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="title-small !text-center header-index">
+        <ng-container *ngIf="!isLoading">
+          <span class="text-grey title-small !text-center whitespace-nowrap" disableClear="true">
+            Collection Point Name
+          </span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small ml-2"></div>
+        </ng-container>
+      </th>
+      <td mat-cell *matCellDef="let element" class="whitespace-nowrap name-col">
+        <ng-container *ngIf="!isLoading">
+          <span class="label-large text-primary pointer truncate" (click)="viewCollectionPointDetails(element)">
+            {{ element.collectionPointName }}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="title-small !text-center header-index">
+        <ng-container *ngIf="!isLoading">
+          <span class="text-grey title-small !text-center whitespace-nowrap" disableClear="true">Collection Point
+            Type</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small ml-2"></div>
+        </ng-container>
+      </th>
+      <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{ element.type }}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="linkedBpa">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header disabled class="title-small !text-center header-index">
+        <ng-container *ngIf="!isLoading">
+          <span class="text-grey title-small !text-center whitespace-nowrap" disableClear="true">Linked Processing
+            Activities</span></ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small ml-2"></div>
+        </ng-container>
+      </th>
+      <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large" [ngClass]="{'text-primary': element.linkedBpa > 0}">
+            {{ element.linkedBpa > 0 ? element.linkedBpa : '-' }}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="pdElements">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header disabled class="title-small !text-center header-index">
+        <ng-container *ngIf="!isLoading">
+          <span class="text-grey title-small !text-center whitespace-nowrap" disableClear="true">
+            Personal Data Elements
+          </span></ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small ml-2"></div>
+        </ng-container>
+      </th>
+      <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large" [ngClass]="{'text-primary': element.pdElements > 0}">
+            {{ element.pdElements > 0 ? element.pdElements : '-' }}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="title-small !text-center header-index">
+        <ng-container *ngIf="!isLoading">
+          <span class="text-grey title-small !text-center whitespace-nowrap" disableClear="true">Status</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-small ml-2"></div>
+        </ng-container>
+      </th>
+      <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+        <ng-container *ngIf="!isLoading">
+          <span class="body-large">{{ element.status }}</span>
+        </ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="shimmer-line shimmer-large"></div>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.shimmer-row]="isLoading"></tr>
+  </table>
+</ng-template>
+
+
+<!-- Right Drawer -->
+<mat-drawer-container class="right-sidebar mat-md-drawer" [hasBackdrop]="true" autosize>
+  <mat-drawer #rightDrawer mode="over" position="end">
+    <app-collection-drawer [filterConfiguration]="filterConfiguration" (onClose)="rightDrawer.toggle()"
+      (onApply)="onApplyDrawerFilter($event)">
+    </app-collection-drawer>
+  </mat-drawer>
+</mat-drawer-container>

@@ -1,0 +1,59 @@
+
+.d-flex { display: flex; }
+.flex-column { flex-direction: column; }
+.flex-1 { flex: 1; min-height: 0; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+
+
+
+.shimmer-box,
+.shimmer-line {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+
+.email-body-error {
+  color: #c93025 !important;
+  font-size: 12px !important;
+  font-family: Roboto, "Helvetica Neue", sans-serif !important;
+ 
+  margin-left: 0 !important;
+  padding-left: 16px !important;
+  line-height: 1.125 !important;
+  display: block !important;
+  margin-bottom: 2px;
+ 
+}
+
+
+
+
+
+
+
+
+.sticky-form-section {
+  padding: 1rem;
+  padding-bottom: 0;
+  margin-bottom: 0.5rem;
+  background-color: white;
+  flex-shrink: 0;
+
+  
+ 
+}
+

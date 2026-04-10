@@ -1,0 +1,46 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+
+.sticky-searchbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: colors.$body-bg !important;
+}
+
+.sticky-searchbar input {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+::ng-deep .sticky-searchbar .search-select-panel .mat-mdc-select-panel {
+    padding-top: 0 !important;
+}
+
+::ng-deep .sticky-searchbar .mat-mdc-select-panel {
+    padding: 0 !important;
+}
+
+::ng-deep .sticky-searchbar .mat-mdc-optgroup-label {
+    background: colors.$body-bg !important;
+    padding: 4px !important;
+    width: 100% !important;
+} 
+
+::ng-deep .sticky-searchbar mat-mdc-optgroup-label .mdc-list-item__primary-text,
+::ng-deep .sticky-searchbar .mdc-list-item__primary-text {
+    width: 100% !important;
+}
+
+::ng-deep .search-select-panel.mat-mdc-select-panel {
+    padding: 0px !important;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}

@@ -1,0 +1,89 @@
+<div class="d-flex flex-column  overflow-hidden view-wrapper p-3">
+    <div class="flex justify-between">
+        <div class="my-auto title-medium">
+            Filter Assets
+        </div>
+        <div class="my-auto">
+            <button mat-icon-button (click)="closeDrawer()">
+                <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+        </div>
+    </div>
+    <div class="d-flex editor-wrapper overflow-hidden position-relative h-100 pb-0">
+        @if(filterConfiguration){
+        <div class="col w-100 h-100 overflow-auto overflow-x-hidden main-canvas">
+
+            <div>
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Asset Category</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempselectedAssetCategory" multiple>
+                            @if(filterConfiguration.tempselectedAssetCategory.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempselectedAssetCategory[0]?.name }}
+                                    (+{{(filterConfiguration.tempselectedAssetCategory.length || 0) - 1}}
+                                    {{filterConfiguration.tempselectedAssetCategory.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger> }
+                            @for (category of filterConfiguration.assetCategoryList; track $index) {
+                            <mat-option [value]="category">{{category.name}}</mat-option> }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div>
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Asset Type</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempselectedAssetType" multiple>
+                            @if(filterConfiguration.tempselectedAssetType.length > 2) {
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{ filterConfiguration.tempselectedAssetType[0]?.label }}
+                                    (+{{ (filterConfiguration.tempselectedAssetType.length || 0) - 1 }}
+                                    {{ filterConfiguration.tempselectedAssetType.length === 2 ? 'other' : 'others' }})
+                                </span>
+                            </mat-select-trigger>
+                            }
+                            @for (type of assetTypes; track $index) {
+                            <mat-option [value]="type">{{ type.label }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+            </div>
+
+            <div>
+                <div class="my-2">
+                    <mat-form-field appearance="outline" class="w-full mat-sm-input">
+                        <mat-label>Department</mat-label>
+                        <mat-select [(ngModel)]="filterConfiguration.tempselectedDepartment" multiple>
+                            @if(filterConfiguration.tempselectedDepartment.length>2){
+                            <mat-select-trigger>
+                                <span class="example-additional-selection">
+                                    {{filterConfiguration.tempselectedDepartment[0]?.name }}
+                                    (+{{(filterConfiguration.tempselectedDepartment.length || 0) - 1}}
+                                    {{filterConfiguration.tempselectedDepartment.length=== 2 ? 'other' :
+                                    'others'}})
+                                </span>
+                            </mat-select-trigger> }
+                            @for (category of filterConfiguration.departmentNameList; track $index) {
+                            <mat-option [value]="category">{{category.name}}</mat-option> }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="d-flex justify-end mt-2">
+        <div class="flex gap-2">
+            <loading-button type="secondary" (click)="onClose.emit()">Cancel</loading-button>
+            <loading-button (onButtonClick)="onApplyFilter()">Apply</loading-button>
+        </div>
+    </div>
+</div>

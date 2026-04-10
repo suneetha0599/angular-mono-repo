@@ -1,0 +1,77 @@
+<div class="d-flex flex-column h-100 overflow-hidden">
+    <div class="main pb-2 mb-2">
+        <div class="wrapper px-3 py-2 my-2">
+            <div class="text-primary fs-10 fw-medium">Assessment</div>
+            <div class="text-grey">Define the conditions that trigger the assessment.</div>
+        </div>
+    </div>
+    <div class="d-flex main-wrapper overflow-hidden position-relative h-100">
+        <div class="col w-100 rounded overflow-hidden position-relative h-full">
+
+            <!-- Action buttons-->
+            <div class="absolute actions d-flex align-items-center gap-2">
+                @if(showSearch) {
+                <mat-form-field appearance="outline"
+                    class="mat-sm-input mat-mdc-mb-0 mat-round-input enabled-mat-input search">
+                    <mat-icon class="mat-md-icon pe-2 material-symbols-outlined" matPrefix>search</mat-icon>
+                    <input matInput placeholder="Search..." [(ngModel)]="search" />
+                    @if(search) {
+                    <button matSuffix mat-icon-button class="close-btn mat-md-icon me-2" (click)="clearSearch()">
+                        <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+                    </button>
+                    }
+                </mat-form-field>
+                }
+                <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()">
+                    <mat-icon color="primary material-symbols-outlined">search</mat-icon>
+                </button>
+                <button mat-button (click)="onAddButtonClick()"
+                    class="bg-primary text-light fw-500 body-small create-request">
+                    <mat-icon class="mat-md-icon material-symbols-outlined">add</mat-icon>
+                    Add Trigger Point
+                </button>
+                <mat-icon class="mat-md-icon text-primary cursor-pointer material-symbols-outlined"
+                    [matMenuTriggerFor]="optionsMenu">
+                    more_vert
+                </mat-icon>
+                <mat-menu #optionsMenu="matMenu" class="text-sm assessment-menu">
+                    <button mat-menu-item (click)="onOption()">
+                        <span>Add Assessment</span>
+                    </button>
+                </mat-menu>
+            </div>
+            <div class="flex h-full overflow-hidden mt-6">
+                <div class="w-[250px] border-r border-gray-200 bg-gray-50 p-2">
+
+                    <div *ngFor="let tab of tabHeaderDetails; let i = index" (click)="onTabChange(i)"
+                        class="flex items-center gap-1 px-1 py-1 mb-1 rounded-md cursor-pointer text-sm font-medium transition-colors"
+                        [ngClass]="selectedTabIndex === i ? 'text-primary' : 'text-gray-500'">
+                        <span class="flex-1 min-w-0 truncate">
+                            {{ tab.name }}
+                        </span>
+                        <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn" matTooltip="Actions">
+                            <mat-icon
+                                class="mat-md-icon material-symbols-outlined text-primary mb-1">more_vert</mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item class="text-sm" (click)="editAssessment(tab)">
+                                <mat-icon
+                                    class="material-symbols-outlined mat-md-icon text-primary my-auto">edit</mat-icon>
+                                <span class="text-gray-700">Edit</span>
+                            </button>
+                            <button mat-menu-item class="text-sm" (click)="deleteAssessment(tab)">
+                                <mat-icon
+                                    class="material-symbols-outlined mat-md-icon text-primary my-auto">delete</mat-icon>
+                                <span class="text-gray-700">Delete</span>
+                            </button>
+                        </mat-menu>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-auto bg-white p-4">
+                    <app-assessment-types *ngIf="selectedTab" [tab]="selectedTab"
+                        [searchText]="search"></app-assessment-types>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,300 @@
+<div class="d-flex flex-column h-full overflow-hidden view-wrapper">
+
+
+  <div class="flex justify-between p-3 border-b border-gray-200">
+    <div class="my-auto title-medium">
+      {{ viewMode === 'EDIT' ? 'Edit Measure' : (viewMode === 'VIEW' ? 'View Measure' : 'Add Measure') }}
+    </div>
+    <div class="my-auto">
+      <button mat-icon-button (click)="closeDrawer()">
+        <mat-icon class="material-symbols-outlined">close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+
+  <div class="flex-1 overflow-y-auto p-3 space-y-3">
+    <mat-card class="px-3 py-1 rounded-xl border border-gray-200 shadow-none">
+      <div class="grid grid-cols-6 gap-4 items-center">
+        <div>
+          <div class="text-sm font-bold text-gray-600">Risk ID</div>
+          <div>{{ risk?.id }}</div>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-gray-600">Parameter</div>
+          <div>{{ risk?.parameterName }}</div>
+        </div>
+        <div class="col-span-3">
+          <div class="text-sm font-bold text-gray-600">Risk description</div>
+          <div class="text-gray-800">{{ risk?.description }}</div>
+        </div>
+        <div class="flex justify-end mb-4 pb-4">
+          <div class="px-3 py-1 rounded font-semibold font-medium" [ngClass]="{
+              'text-red-600 bg-red-100': risk?.riskLevel === 'HIGH',
+              'text-yellow-600 bg-yellow-100': risk?.riskLevel === 'MEDIUM',
+              'text-green-600 bg-green-100': risk?.riskLevel === 'LOW'
+            }">
+            {{ risk?.riskLevel }}
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+
+    <form [formGroup]="measureForm" class="flex flex-col mt-4">
+      <!-- <div>
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+           <mat-label class="label-large my-2">Measure Type</mat-label>
+          <mat-select formControlName="measureType">
+            <mat-option *ngFor="let option of riskOptions" [value]="option.key">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div> -->
+
+      <!-- @if(selectedRisk === 'MITIGATE') {
+      <div>
+
+        <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+            <mat-label class="label-large">Security Control</mat-label>
+          <input matInput class="body-medium" [(ngModel)]="searchTerm"
+            [ngModelOptions]="{standalone: true}" (ngModelChange)="onSearchControl($event)"
+            [matAutocomplete]="auto" placeholder="Security Control" />
+          <mat-autocomplete #auto="matAutocomplete"
+            (optionSelected)="selectControl($event.option.value)"
+            [displayWith]="displaySecurityName">
+            @for (security of filteredSecurityControlList; track security.id) {
+            <mat-option [value]="security">{{ security.name }}</mat-option>
+            }
+            @if(searchTerm && !isExistingControl(searchTerm)) {
+            <mat-option [value]="searchTerm"
+              (onSelectionChange)="onAddOption($event, searchTerm)" class="add-option">
+              + Add "{{ searchTerm }}"
+            </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-chip-set class="my-2">
+          @for (selected of (securityControl.value || []); track selected.id) {
+          <mat-chip [removable]="true" (removed)="removeControl(selected)">
+            {{ selected.name }}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+      }  -->
+
+      <div class="mt-2">
+        <app-custom-mat-textarea [control]="measureDescriptionControl" label="Mitigation measure" [minRows]="1"
+          [maxRows]="5">
+        </app-custom-mat-textarea>
+      </div>
+
+      <div class="flex items-start gap-2 text-sm text-gray-600 mb-2">
+        <mat-icon class="material-symbols-outlined mat-md-icon">auto_awesome</mat-icon>
+        <p>
+          Based on mitigation measure added, The following controls are added automatically.
+          You can always override this.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="mat-sm-xl-input mat-mdc-mb-0">
+          <mat-label class="label-large">Standard</mat-label>
+          <input title="standard" matInput class="label-large" formControlName="standard">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="mat-sm-xl-input mat-mdc-mb-0">
+          <mat-label class="label-large">Control category</mat-label>
+          <input title="controlCategory" matInput class="label-large" formControlName="controlCategory">
+        </mat-form-field>
+
+        <app-custom-mat-textarea label="Control description" [minRows]="1"
+          [maxRows]="5">
+        </app-custom-mat-textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+
+
+        <mat-form-field appearance="outline" class="mat-sm-xl-input mat-mdc-mb-0">
+          <mat-label class="label-large">Effect on risk</mat-label>
+          <mat-select formControlName="riskEffect" class="label-large">
+            @for(risk of riskEffects;track $index){
+            <mat-option [value]="risk.key">
+              {{ risk.label }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="mat-sm-xl-input mat-mdc-mb-0">
+          <mat-label class="label-large">Residual Risk</mat-label>
+          <mat-select formControlName="residualRisk" class="label-large">
+            @for(risk of residualRisk;track $index){
+            <mat-option [value]="risk.key">
+              {{ risk.label }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+      </div>
+
+    </form>
+  </div>
+
+
+  <div class="p-3 flex justify-start gap-4">
+    @if(!approvalStatus ){
+    <loading-button type="primary" (onButtonClick)="save()" [loading]="saveLoading" [loadingText]="'Save'"
+      [disabled]="!measureForm.valid">Save</loading-button>
+    }
+    @if(!approvalStatus && viewMode!='ADD' && approver ){
+    <loading-button type="secondary" (onButtonClick)="onApproveMeasure('APPROVED', risk?.id,measure?.id)"
+      [loadingText]="'Approve'" [loading]="approveLoading">Approve</loading-button>
+    <loading-button type="light" [basicButton]="true"
+      (onButtonClick)="onApproveMeasure('REJECTED', risk?.id ,measure?.id)" [loadingText]="'Reject'"
+      [loading]="rejectLoading">Reject</loading-button>
+    }
+  </div>
+
+
+
+</div>
+<!-- <div class="h-full overflow-y-auto">
+  <div class="p-3">
+
+
+   <header class="flex justify-between items-center mb-3">
+      <p class="text-xl font-medium text-gray-900 m-0"> {{ data.mode === 'EDIT' ? 'Edit Measure' : (data.mode === 'VIEW' ? 'View Measure' : 'Add Measure') }}</p>
+
+      <button (click)="closeDialog()" aria-label="Cancel dialog" class="flex items-center justify-center w-10 h-10
+                 rounded-full hover:bg-gray-200 transition-colors duration-200"
+        style="border-radius: 9999px !important;">
+        <mat-icon class="text-red-600 text-2xl leading-none">cancel</mat-icon>
+      </button>
+    </header>
+
+<mat-dialog-content class="p-3">
+  <mat-card class="px-3 py-1 rounded-xl border border-gray-200 shadow-none">
+      <div class="grid grid-cols-6 gap-4 items-center">
+        <div>
+          <div class="text-sm font-bold text-gray-600">Risk ID</div>
+          <div>{{ data.risk?.id }}</div>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-gray-600">Parameter</div>
+          <div>{{ data.risk?.parameterName }}</div>
+        </div>
+        <div class="col-span-3">
+          <div class="text-sm font-bold text-gray-600">Description</div>
+          <div class="text-gray-800">{{ data.risk?.description }}</div>
+        </div>
+        <div class="flex justify-end mb-4 pb-4">
+          <div class="px-3 py-1 rounded font-semibold font-medium"
+            [ngClass]="{
+              'text-red-600 bg-red-100': data.risk?.riskLevel === 'HIGH',
+              'text-yellow-600 bg-yellow-100': data.risk?.riskLevel === 'MEDIUM',
+              'text-green-600 bg-green-100': data.risk?.riskLevel === 'LOW'
+            }">
+            {{ data.risk?.riskLevel }}
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+  <form [formGroup]="measureForm">
+
+
+ <div class="mt-4">
+
+        <mat-form-field appearance="outline" class="w-full mat-sm-input">
+        <mat-label class="label-large">Measure Description</mat-label>
+          <textarea formControlName="measureDescription" matInput rows="2"
+         ></textarea>
+        </mat-form-field>
+      </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="justify-between gap-4">
+   @if(!approvalStatus ){
+    <loading-button type="primary" (onButtonClick)="save()">Save</loading-button>
+   }
+    @if(!approvalStatus && data.mode !='ADD' && data.approver ){
+ <loading-button type="secondary" (onButtonClick)="onApproveMeasure('APPROVED', data)">Approve</loading-button>
+ <loading-button type="light" [basicButton]="true" (onButtonClick)="onApproveMeasure('REJECTED', data)">Reject</loading-button>
+    }
+</mat-dialog-actions>
+</div>
+</div> -->
+
+
+<!-- <div class="grid grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="col-span-1 mat-sm-input mat-mdc-mb-0">
+                <mat-label>Mitigation measure</mat-label>
+                <textarea matInput rows="2" formControlName="MitigationMeasure">Limit access to payroll data using role-based access controls (RBAC);
+                            Regular access reviews NDA for external parties.</textarea>
+            </mat-form-field>
+        </div>
+        <div class="flex items-start gap-2 text-sm text-gray-600">
+            <mat-icon class="material-icons-outlined">auto_awesome</mat-icon>
+            <p>
+                Based on mitigation measure added, The following controls are added automatically.
+                You can always override this.
+            </p>
+        </div>
+                <mat-form-field appearance="outline" floatLabel="always" class="w-full mat-sm-xl-input retention-field">
+                    <mat-label>Retention Period</mat-label>
+
+                    <div class="retention-wrapper">
+                        <input matInput type="text" formControlName="days" placeholder="days" maxlength="3"
+                            (keypress)="($event.charCode >= 48 && $event.charCode <= 57) ? null : $event.preventDefault()"
+                            class="prefix-input" (click)="$event.stopPropagation()" />
+
+                        <mat-select formControlName="retentionPeriod" placeholder="Retention Period"
+                            (click)="$event.stopPropagation()">
+                            @for (security of retentionPeriod; track security) {
+                            <mat-option [value]="security">
+                                {{ security }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </div>
+                </mat-form-field>
+ Controls Grid -->
+<!-- <div class="grid grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+                <mat-label>Standard</mat-label>
+                <input matInput formControlName="standard">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100 mat-sm-input mat-mdc-mb-0">
+                <mat-label>Control category</mat-label>
+                <input matInput formControlName="controlCategory">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="col-span-1 w-100 mat-sm-input mat-mdc-mb-0">
+                <mat-label>Control description</mat-label>
+                <textarea matInput rows="2"
+                    formControlName="controlDescription">Access control policies and periodic reviews</textarea>
+            </mat-form-field>
+        </div> -->
+
+<!-- Effect & Residual Risk -->
+<!-- <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Effect on risk</p>
+                <p class="font-semibold text-gray-800">Reduced</p>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-600">Residual risk</p>
+                <p class="font-semibold text-gray-800">Low</p>
+            </div>
+        </div> -->

@@ -1,0 +1,436 @@
+<div class="px-8 py-2">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3">
+        <button
+            class="w-8 h-8 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+            <mat-icon class="material-symbols-outlined">arrow_back</mat-icon>
+        </button>
+        <p class="mt-3 headline-medium text-gray-800">Preview</p>
+    </div>
+
+    <form class="bg-white shadow-sm rounded-lg px-4 py-4">
+        <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="remove-border-bottom custom-tab-group h-full mb-4"
+            mat-stretch-tabs="false" mat-align-tabs="start">
+            <mat-tab label="Overview">
+                <div class="my-4 p-4">
+                    <!-- Top Fields Row -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-y-4 gap-x-6 text-sm text-gray-700">
+                        <div>
+                            <p class="font-medium">Name</p>
+                            <p class="text-gray-600">Employee onboarding</p>
+                        </div>
+
+                        <div>
+                            <p class="font-medium">Process owner</p>
+                            <p class="text-gray-600">Kristine Cole</p>
+                        </div>
+
+                        <div>
+                            <p class="font-medium">Associated Department</p>
+                            <p class="text-gray-600">Human resource</p>
+                        </div>
+
+                        <div>
+                            <p class="font-medium">Data Subject Involved</p>
+                            <p class="text-gray-600">1000+</p>
+                        </div>
+
+                        <div>
+                            <p class="font-medium">Role</p>
+                            <p class="text-gray-600">Process controller</p>
+                        </div>
+
+                        <div>
+                            <p class="font-medium">Sub Role</p>
+                            <p class="text-gray-600">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mt-6">
+                        <p class="font-medium text-sm text-gray-700">Description</p>
+                        <p class="text-gray-600 text-sm mt-1">
+                            Manage the hiring and onboarding of new employees including document collection, background
+                            checks,
+                            and
+                            system provisioning.
+                        </p>
+                    </div>
+
+                    <!-- Bottom Fields Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-y-4 gap-x-6 mt-6 text-sm text-gray-700">
+                        <div>
+                            <p class="font-medium">Purpose</p>
+                            <p class="text-gray-600">Hiring process</p>
+                        </div>
+
+                        <div>
+                            <p class="font-medium">Legal Ground</p>
+                            <p class="text-gray-600">Employment</p>
+                        </div>
+
+                        <div>
+                            <p class="font-medium">Frequency</p>
+                            <p class="text-gray-600">6 Months</p>
+                        </div>
+                    </div>
+
+                </div>
+            </mat-tab>
+
+            <mat-tab label="Data Flow">
+                <div class="relative flex-1 overflow-hidden">
+                    <mat-tab-group [(selectedIndex)]="selectedTable"
+                        class="remove-border-bottom custom-tab-group h-full" mat-stretch-tabs="false"
+                        mat-align-tabs="start">
+                        <mat-tab label="source">
+                            <div class="h-full flex flex-col overflow-hidden">
+                                <div class="flex-1 overflow-auto mt-4 rounded-lg no-scrollbar">
+                                    <div class="min-w-[1000px]">
+                                        <table mat-table [dataSource]="dataSource" matSort class="w-full bg-white">
+
+                                            <ng-container matColumnDef="sourceName">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 title-small whitespace-nowrap">
+                                                    Source Name</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 font-medium cursor-pointer label-large whitespace-nowrap text-primary-40">
+                                                    {{ row.sourceName }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="type">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Type</th>
+                                                <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+                                                    <span class="label-large"> {{ row.type }} </span>
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="channel">
+                                                <th mat-header-cell *matHeaderCellDef
+                                                    class="px-4 whitespace-nowrap title-small">Channel</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">{{ row.channel }}</td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="pdElements">
+                                                <th mat-header-cell *matHeaderCellDef
+                                                    class="px-4 whitespace-nowrap title-small">PD elements</th>
+                                                <td mat-cell *matCellDef="let row" class="px-4 whitespace-nowrap">
+                                                    <span class="truncate block body-large w-[140px]">{{ row.pdElements
+                                                        }}</span>
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="actions" stickyEnd>
+                                                <th mat-header-cell *matHeaderCellDef
+                                                    class="z-10 text-right border-l border-gray-300 sticky-actions title-small">
+                                                    Actions</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="z-10 text-right border-l border-gray-300 bg-white sticky-actions body-large">
+                                                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                                                        <mat-icon class="material-symbols-outlined">more_vert</mat-icon>
+                                                    </button>
+                                                    <mat-menu #menu="matMenu">
+                                                        <button mat-menu-item>View</button>
+                                                        <button mat-menu-item>Delete</button>
+                                                    </mat-menu>
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"
+                                                class="bg-gray-100 title-small">
+                                            </tr>
+                                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="sticky bottom-0 bg-white z-10">
+                                    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10,]" class="paginator"
+                                        aria-label="Source pagination">
+                                    </mat-paginator>
+                                </div>
+                            </div>
+                        </mat-tab>
+
+                        <mat-tab label="Assets">
+                            <div class="h-full flex flex-col overflow-hidden">
+                                <div class="flex-1 overflow-auto mt-4 rounded-lg no-scrollbar">
+                                    <div class="min-w-[1000px]">
+                                        <table mat-table [dataSource]="dataSource2" matSort class="w-full bg-white">
+
+                                            <ng-container matColumnDef="name">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 title-small whitespace-nowrap">
+                                                    Name</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 font-medium cursor-pointer label-large whitespace-nowrap text-primary-40">
+                                                    {{ row.name }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="dataSubjects">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Data Subjects</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap label-large">
+                                                    {{ row.dataSubjects }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="dataElements">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Data elements</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">
+                                                    {{ row.dataElements }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="type">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Type</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">
+                                                    {{ row.type }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="vendorName">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Vendor name</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">
+                                                    {{ row.vendorName }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="sources">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Sources</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">
+                                                    {{ row.sources }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="recipient">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Recipient</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">
+                                                    {{ row.recipient }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="actions" stickyEnd>
+                                                <th mat-header-cell *matHeaderCellDef
+                                                    class="z-10 text-right border-l border-gray-300 sticky-actions title-small">
+                                                    Actions</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="z-10 text-right border-l border-gray-300 bg-white sticky-actions body-large">
+                                                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                                                        <mat-icon class="material-symbols-outlined">more_vert</mat-icon>
+                                                    </button>
+                                                    <mat-menu #menu="matMenu">
+                                                        <button mat-menu-item>View</button>
+                                                        <button mat-menu-item>Delete</button>
+                                                    </mat-menu>
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row *matHeaderRowDef="displayedColumns2; sticky: true"
+                                                class="bg-gray-100 title-small">
+                                            </tr>
+                                            <tr mat-row *matRowDef="let row; columns: displayedColumns2;"></tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="sticky bottom-0 bg-white z-10">
+                                    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10,]" class="paginator"
+                                        aria-label="Data inventory pagination">
+                                    </mat-paginator>
+                                </div>
+                            </div>
+                        </mat-tab>
+
+                        <mat-tab label="Recipients">
+                            <div class="h-full flex flex-col overflow-hidden">
+                                <div class="flex-1 overflow-auto mt-4 rounded-lg no-scrollbar">
+                                    <div class="min-w-[1000px]">
+                                        <table mat-table [dataSource]="dataSource3" matSort class="w-full bg-white">
+
+                                            <ng-container matColumnDef="category">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 title-small whitespace-nowrap">
+                                                    Category</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 font-medium cursor-pointer label-large whitespace-nowrap text-primary-40">
+                                                    {{ row.category }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="department">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Department</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap label-large">
+                                                    {{ row.department }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="type">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Type</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">
+                                                    {{ row.type }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="purpose">
+                                                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                                    class="px-4 whitespace-nowrap title-small">
+                                                    Purpose</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="px-4 whitespace-nowrap body-large">
+                                                    {{ row.purpose }}
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="actions" stickyEnd>
+                                                <th mat-header-cell *matHeaderCellDef
+                                                    class="z-10 text-right border-l border-gray-300 sticky-actions title-small">
+                                                    Actions</th>
+                                                <td mat-cell *matCellDef="let row"
+                                                    class="z-10 text-right border-l border-gray-300 bg-white sticky-actions body-large">
+                                                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                                                        <mat-icon class="material-symbols-outlined">more_vert</mat-icon>
+                                                    </button>
+                                                    <mat-menu #menu="matMenu">
+                                                        <button mat-menu-item>View</button>
+                                                        <button mat-menu-item>Delete</button>
+                                                    </mat-menu>
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row *matHeaderRowDef="displayedColumns3; sticky: true"
+                                                class="bg-gray-100 title-small">
+                                            </tr>
+                                            <tr mat-row *matRowDef="let row; columns: displayedColumns3;"></tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="sticky bottom-0 bg-white z-10">
+                                    <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10,]" class="paginator"
+                                        aria-label="Recipients pagination">
+                                    </mat-paginator>
+                                </div>
+                            </div>
+                        </mat-tab>
+                    </mat-tab-group>
+                </div>
+            </mat-tab>
+
+
+            <mat-tab label="Security and retention">
+                <div class="p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        <!-- Retention -->
+                        <div>
+                            <div class="font-medium text-gray-800 mb-1">Retention</div>
+                            <div class="text-gray-600">2 months</div>
+                        </div>
+
+                        <!-- Security Controls -->
+                        <div>
+                            <div class="font-medium text-gray-800 mb-1">Security controls</div>
+                            <div class="text-gray-600">-</div>
+                        </div>
+
+                    </div>
+                </div>
+            </mat-tab>
+
+
+            <mat-tab label="Risk summary">
+                <div class="my-4 mx-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 flex-1">
+
+                        <!-- Processing Risk -->
+                        <div class="border border-gray-400 rounded-lg p-4 bg-white">
+                            <p class="font-medium text-sm text-gray-800 mb-1">Processing Risk</p>
+                            <p class="text-sm text-gray-600 mb-3">Occurs when business logic exposes sensitive data</p>
+                            <p class="text-sm font-medium text-gray-700">Impact <span
+                                    class="text-xl font-bold ml-2">30</span></p>
+                        </div>
+
+                        <!-- Data Elements Risk -->
+                        <div class="border border-gray-400 rounded-lg p-4 bg-white">
+                            <p class="font-medium text-sm text-gray-800 mb-1">Data Elements Risk</p>
+                            <p class="text-sm text-gray-600 mb-3">Risk from sharing data externally without encryption
+                            </p>
+                            <p class="text-sm font-medium text-gray-700">Impact <span
+                                    class="text-xl font-bold ml-2">03</span></p>
+                        </div>
+
+                        <!-- Data Security Risk -->
+                        <div class="border border-gray-400 rounded-lg p-4 bg-white">
+                            <p class="font-medium text-sm text-gray-800 mb-1">Data Security Risk</p>
+                            <p class="text-sm text-gray-600 mb-3">Short description of what this risk means</p>
+                            <p class="text-sm font-medium text-gray-700">Impact <span
+                                    class="text-xl font-bold ml-2">12</span></p>
+                        </div>
+
+                        <!-- AI Risk -->
+                        <div class="border border-gray-400 rounded-lg p-4 bg-white">
+                            <p class="font-medium text-sm text-gray-800 mb-1">AI Risk</p>
+                            <p class="text-sm text-gray-600 mb-3">Short description of what this risk means</p>
+                            <p class="text-sm font-medium text-gray-700">Impact <span
+                                    class="text-xl font-bold ml-2">12</span></p>
+                        </div>
+
+                        <!-- Data Transfer -->
+                        <div class="border border-gray-400 rounded-lg p-4 bg-white">
+                            <p class="font-medium text-sm text-gray-800 mb-1">Data Transfer</p>
+                            <p class="text-sm text-gray-600 mb-3">Short description of what this risk means</p>
+                            <p class="text-sm font-medium text-gray-700">Impact <span
+                                    class="text-xl font-bold ml-2">23</span></p>
+                        </div>
+
+                        <!-- Overall risk score -->
+                        <div class="border border-gray-400 rounded-lg p-4 bg-white">
+                            <p class="font-medium text-sm text-gray-800 mb-1">Overall risk score</p>
+                            <p class="text-sm text-gray-600 mb-3">Short description of what this risk means</p>
+                            <p class="text-sm font-medium text-gray-700">Impact <span
+                                    class="text-lg font-bold ml-2">High</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Start Assessment Button -->
+                    <div class="mt-6 flex justify-end">
+                        <loading-button type="primary">
+                            Start assessment
+                        </loading-button>
+                    </div>
+                </div>
+            </mat-tab>
+
+        </mat-tab-group>
+    </form>
+</div>

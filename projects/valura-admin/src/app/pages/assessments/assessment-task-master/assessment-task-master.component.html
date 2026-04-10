@@ -1,0 +1,10 @@
+<app-assessment-task-list [assessmentTaskMaster]="true" [pendingTaskId]="pendingTaskId" [pendingMessageId]="pendingConversationId"></app-assessment-task-list>
+
+<mat-drawer-container class="right-sidebar fixed-drawer-container" [hasBackdrop]="true" autosize>
+  <mat-drawer #riskViewDrawer mode="over" position="end" class="risk-view-mat-drawer" [disableClose]="true">
+    <app-risk-view-drawer [riskData]="riskViewData" [assessmentId]="riskViewPayload?.assessmentId ?? 0"
+      [sections]="riskViewPayload?.sections || []" [assessmentRiskMaster]="true"
+      (onClose)="closeRiskViewDrawer()">
+    </app-risk-view-drawer>
+  </mat-drawer>
+</mat-drawer-container>

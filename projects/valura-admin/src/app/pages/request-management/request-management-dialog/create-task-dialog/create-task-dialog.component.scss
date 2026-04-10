@@ -1,0 +1,27 @@
+::ng-deep .mat-mdc-dialog-container {
+  // min-width: 450px;
+  // max-width: 600px;
+  min-height: auto;
+  // max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  overflow: hidden;
+}
+
+.custom-blue {
+  color: #1C2B70 !important;
+  fill: #1C2B70 !important;
+}
+
+.notification-step,
+.task-form-step {
+  position: relative;
+  width: 100%;
+}
+
+.dialog-content-wrapper {
+  position: relative;
+  overflow-x: hidden;
+}

@@ -1,0 +1,518 @@
+@use "../../../../../../styles/custom/colors.scss" as us;
+
+.create-task-drawer-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  overflow: hidden;
+
+  >div:first-child {
+    flex-shrink: 0;
+  }
+
+  >.flex-1.overflow-auto {
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 0;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #d9d8d8d3;
+      border-radius: 4px;
+
+      &:hover {
+        background: #555555a9;
+      }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: #c3c1c1 #f1f1f1;
+  }
+
+  >div:last-child {
+    flex-shrink: 0;
+  }
+
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  form {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+.internal-user-selection-container {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+
+  .internal-user-form-field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .create-user-button-wrapper {
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 4px;
+  }
+}
+
+
+::ng-deep {
+  .create-task-drawer-wrapper {
+    .mat-mdc-form-field {
+      &.mat-sm-input {
+        .mat-mdc-text-field-wrapper {
+          .mat-mdc-form-field-flex {
+            .mat-mdc-form-field-infix {
+              padding-top: 8px;
+              padding-bottom: 8px;
+              min-height: 40px;
+            }
+          }
+        }
+      }
+
+      &.mat-sm-auto-input {
+        .mat-mdc-text-field-wrapper {
+          .mat-mdc-form-field-flex {
+            .mat-mdc-form-field-infix {
+              padding-top: 10px;
+              padding-bottom: 10px;
+              min-height: auto;
+
+              mat-chip-grid {
+                margin: 0;
+
+                mat-chip-row {
+                  font-size: 13px;
+                  min-height: 28px;
+                  padding: 4px 8px;
+                  background-color: #ffffff !important;
+                  color: #000000 !important;
+
+                  .mat-mdc-chip-action-label {
+                    font-size: 13px;
+                    color: #000000 !important;
+                  }
+
+                  .delete-icn {
+                    font-size: 16px !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    color: us.$primary !important;
+                  }
+
+                  button[matChipRemove],
+                  .mat-mdc-chip-remove,
+                  .mdc-evolution-chip__action--trailing {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: inline-flex !important;
+                    align-items: center;
+                    justify-content: center;
+                    width: auto !important;
+                    height: auto !important;
+                    padding: 0 !important;
+                    margin-left: 4px !important;
+
+                    &:hover {
+
+                      .delete-icn,
+                      .mat-icon,
+                      mat-icon {
+                        color: #000000 !important;
+                      }
+                    }
+                  }
+
+                  &:hover {
+                    background-color: #f5f5f5 !important;
+                  }
+                }
+
+                input {
+                  margin-top: 4px;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      &.chip-select-field {
+        --mat-form-field-container-height: 90px !important;
+        --mat-form-field-container-vertical-padding: 24px;
+        --mat-form-field-infix-padding-y: 10px;
+
+        .mat-mdc-text-field-wrapper {
+          .mat-mdc-form-field-flex {
+            .mat-mdc-form-field-infix {
+              padding-top: var(--mat-form-field-infix-padding-y);
+              padding-bottom: var(--mat-form-field-infix-padding-y);
+              min-height: auto;
+            }
+          }
+        }
+
+        .mat-mdc-select-trigger {
+          height: 100%;
+          display: flex;
+          align-items: center;
+          padding: 0 12px 0 0;
+        }
+
+        .mat-mdc-form-field-flex {
+          align-items: center;
+        }
+      }
+
+      .mat-mdc-select {
+        max-width: 100%;
+      }
+
+      .calendar-md-icon {
+        font-size: 20px;
+      }
+
+      input,
+      textarea,
+      .mat-mdc-select {
+        max-width: 100%;
+      }
+    }
+
+    mat-chip-row {
+
+      .mat-mdc-chip-trailing-action,
+      .mdc-evolution-chip__action--trailing,
+      button[matChipRemove] {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+        display: inline-flex !important;
+        position: relative !important;
+
+        mat-icon,
+        .mat-icon {
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: inline-flex !important;
+        }
+      }
+    }
+  }
+}
+
+::ng-deep {
+  .create-task-drawer-wrapper {
+    mat-chip-row {
+
+      .mat-mdc-chip-trailing-action,
+      .mdc-evolution-chip__action--trailing,
+      button[matChipRemove],
+      button[type="button"][matChipRemove] {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+        display: inline-flex !important;
+        position: relative !important;
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        min-height: 20px !important;
+        padding: 2px !important;
+        margin: 0 0 0 4px !important;
+        background: transparent !important;
+        border: none !important;
+        cursor: pointer !important;
+        z-index: 10 !important;
+
+        mat-icon,
+        .mat-icon,
+        .delete-icn {
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: inline-flex !important;
+          font-size: 18px !important;
+          width: 18px !important;
+          height: 18px !important;
+        }
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.05) !important;
+          border-radius: 50% !important;
+        }
+      }
+    }
+  }
+}
+
+::ng-deep {
+
+  .display-info-autocomplete-panel,
+  .mat-mdc-autocomplete-panel:has(.group-header-option) {
+    padding: 0 !important;
+    margin-top: 0 !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    .mat-mdc-option:first-child {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+  }
+
+  .cdk-overlay-pane.display-info-autocomplete-panel {
+    .mat-mdc-autocomplete-panel {
+      max-height: 300px !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+  }
+
+  .mat-mdc-autocomplete-panel {
+    .group-header-option {
+      background-color: #f8f9fa !important;
+      border-bottom: 1px solid #e0e0e0 !important;
+      min-height: 36px !important;
+      height: 36px !important;
+      padding: 0 16px !important;
+      margin-bottom: 2px !important;
+
+      &:hover {
+        background-color: #f0f0f0 !important;
+      }
+
+      .mat-mdc-option-pseudo-checkbox {
+        display: none !important;
+      }
+
+      .mdc-list-item__primary-text {
+        width: 100%;
+      }
+    }
+
+    .child-item-option {
+      min-height: 36px !important;
+      height: 36px !important;
+      padding: 0 16px !important;
+      background-color: white !important;
+      margin-bottom: 0px !important;
+
+      &:hover {
+        background-color: rgba(28, 43, 112, 0.08) !important;
+      }
+
+      .mat-mdc-option-pseudo-checkbox {
+        display: none !important;
+      }
+
+      .mdc-list-item__primary-text {
+        width: 100%;
+      }
+    }
+
+    mat-option {
+
+      .mat-pseudo-checkbox,
+      .mat-pseudo-checkbox-minimal {
+        display: none !important;
+      }
+    }
+
+    .mat-mdc-checkbox {
+      --mdc-checkbox-state-layer-size: 36px;
+      display: inline-flex !important;
+      align-items: center !important;
+      vertical-align: middle !important;
+
+      .mdc-checkbox {
+        padding: 4px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mdc-checkbox__background {
+        width: 18px;
+        height: 18px;
+        border-radius: 3px;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+      }
+
+      .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
+      .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
+        background-color: #1C2B70 !important;
+        border-color: #1C2B70 !important;
+      }
+    }
+
+    .flex.items-center {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px;
+      width: 100%;
+      height: 100%;
+
+      .mat-mdc-checkbox {
+        flex-shrink: 0;
+        margin-right: 2px;
+      }
+
+      span {
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+::ng-deep {
+  .mat-mdc-autocomplete-panel {
+    .mat-optgroup-label {
+      display: none !important;
+      height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
+::ng-deep {
+  .internal-user-autocomplete-panel {
+
+    &.mat-mdc-autocomplete-panel,
+    .mat-mdc-autocomplete-panel {
+      min-width: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+}
+
+.priority-chip,
+.effort-chip {
+  transition: all 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+
+  // Checkmark wrapper for smooth space-reserving animation
+  .checkmark-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 0;
+    margin-right: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width 0.18s ease,
+                margin-right 0.18s ease,
+                opacity 0.18s ease;
+
+    .checkmark-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+      color: #1c2b70 !important;
+      transform: scale(1);
+      transition: none;
+    }
+
+    &.visible {
+      max-width: 18px;
+      margin-right: 6px;
+      opacity: 1;
+    }
+  }
+
+  &.selected {
+    background-color: #F8F8F8 !important;
+    color: #1c2b70 !important;
+    border-color: transparent !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    &:hover {
+      background-color: #E8E8E8 !important;
+      border-color: transparent !important;
+      box-shadow: 0 4px 12px rgba(73, 72, 72, 0.15), 0 2px 4px rgba(137, 137, 137, 0.1);
+    }
+
+    &:active {
+      background-color: #DEDEDE !important;
+      border-color: transparent !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  &.unselected {
+    background-color: white !important;
+    color: #374151 !important;
+    border-color: #EEEEEE !important;
+    font-weight: 500 !important;
+    box-shadow: none;
+
+    &:hover {
+      background-color: #EBEBEB !important;
+      border-color: transparent !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      background-color: #E0E0E0 !important;
+      border-color: transparent !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+.create-task-drawer-wrapper {
+  // Reduce spacing for Task Title field error
+  .mb-3.mt-3 {
+    mat-form-field {
+      mat-error {
+        margin-top: -15px;
+      }
+    }
+  }
+
+  // Reduce spacing for External Email field error
+  .flex.gap-3.items-start {
+    mat-form-field.flex-1 {
+      mat-error {
+        margin-top: -15px;
+      }
+    }
+  }
+
+  // Style for Description field error (outside mat-form-field)
+  .mb-4 > mat-error {
+    display: block;
+    font-size: 12px;
+    margin-left: 16px;
+    margin-top: -14px;
+  }
+}

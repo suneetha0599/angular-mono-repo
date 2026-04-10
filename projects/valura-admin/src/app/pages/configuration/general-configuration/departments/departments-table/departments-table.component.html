@@ -1,0 +1,111 @@
+<!-- departments-table.component.html -->
+<div class="h-full flex flex-col overflow-hidden">
+  @if (showTabs) {
+  <div class="mt-2 ms-2">
+    <mat-button-toggle-group class="toggle-btn-grp" [(ngModel)]="selectedTab" (change)="onTabChange($event)">
+      <mat-button-toggle value="DEPARTMENT_SPECIFIC">Department Specific</mat-button-toggle>
+      <!-- Add more toggles if needed -->
+    </mat-button-toggle-group>
+  </div>
+  }
+  <div class="flex-1 overflow-auto rounded-lg no-scrollbar">
+    @if(!requestLoading && hasApiError){
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    }
+    @else if(filteredDepartments().length===0){
+    <item-not-found [imgHeight]="'200px'" [heading]=errorTitle>
+    </item-not-found>
+    }
+    @else{
+    <ng-container *ngTemplateOutlet="departmentTableTemplate"></ng-container>
+    }
+  </div>
+
+  <ng-template #departmentTableTemplate>
+    <table mat-table matSort
+      [dataSource]="isLoading ? shimmerDataSource : (filteredDepartments().length === 0 ? [] : filteredDepartments())"
+      (matSortChange)="onSortChange($event)" class="mat-elevation-z8 w-100 custom-table table  table-layout-fixed">
+
+      <!-- Dynamic Columns -->
+      <ng-container *ngFor="let column of columns" [matColumnDef]="column.key">
+        <!-- Sortable Column Header -->
+        <th mat-header-cell *matHeaderCellDef [mat-sort-header]="column.key" [disabled]="column.sortable === false"
+          [class]="'px-4 title-small whitespace-nowrap ' + column.key + '-col'" [style.width]="column.width">
+          <span class="text-grey title-small">{{ column.label }}</span>
+        </th>
+
+        <td mat-cell *matCellDef="let item" [class]="'px-4 whitespace-nowrap ' + column.key + '-col'"
+          [style.width]="column.width">
+
+          <ng-container *ngIf="!isLoading">
+            <div class="d-flex">
+              @if (column.key === 'name') {
+              <span class="" [appEllipsisTooltip]="getColumnValue(item, column.key)"
+                [colorType]="departmentFullAcess ? 'primary' : 'default'"
+                [matTooltip]="getColumnValue(item, column.key)" matTooltipPosition="below"
+                matTooltipClass="material-tooltip" (click)="departmentFullAcess && onView(item)">
+                {{ getColumnValue(item, column.key) }}
+              </span>
+              } @else {
+              <span class="" [appEllipsisTooltip]="getColumnValue(item, column.key)"
+                [matTooltip]="getColumnValue(item, column.key)" matTooltipPosition="below"
+                matTooltipClass="material-tooltip">
+                {{ getColumnValue(item, column.key) }}
+              </span>
+              }
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="isLoading">
+            <div class="shimmer-line" [class.shimmer-small]="column.key === 'name'"
+              [class.shimmer-large]="column.key === 'description'">
+            </div>
+          </ng-container>
+
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="px-4 title-small whitespace-nowrap actions-col"
+          [style.width]="'10%'">
+          <span class="text-grey title-small">Actions</span>
+        </th>
+        <td mat-cell *matCellDef="let item" class="px-2 whitespace-nowrap actions-col" [style.width]="'10%'">
+          <ng-container *ngIf="!isLoading">
+            <div class="d-flex gap-2">
+              <mat-icon class="material-symbols-outlined mat-md-icon" (click)="departmentFullAcess && onEdit(item)"
+                [class.text-primary]="departmentFullAcess" [class.text-grey]="!departmentFullAcess"
+                [class.cursor-pointer]="departmentFullAcess"
+                [style.opacity]="departmentFullAcess ? '1' : '0.4'">edit</mat-icon>
+              <mat-icon class="material-symbols-outlined mat-md-icon" (click)="departmentFullAcess && onDelete(item)"
+                [class.text-primary]="departmentFullAcess" [class.text-grey]="!departmentFullAcess"
+                [class.cursor-pointer]="departmentFullAcess"
+                [style.opacity]="departmentFullAcess ? '1' : '0.4'">delete</mat-icon>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="isLoading">
+            <div class="shimmer-line shimmer-small"></div>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <!-- Header Row -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-100 title-small"></tr>
+
+      <!-- Rows -->
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.shimmer-row]="isLoading"></tr>
+
+      <!-- Empty State -->
+      <tr *ngIf="!isLoading && filteredDepartments().length === 0" class="no-data-row">
+        <td [attr.colspan]="displayedColumns.length" class="text-center py-16">
+          <div class="flex flex-col items-center">
+            <mat-icon class="text-6xl text-gray-400 mb-4 material-symbols-outlined ">business</mat-icon>
+            <p class="text-gray-600 text-lg mb-2">{{ emptyStateTitle }}</p>
+            <p class="text-gray-500">{{ emptyStateMessage }}</p>
+          </div>
+        </td>
+      </tr>
+
+    </table>
+  </ng-template>

@@ -1,0 +1,27 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+
+.border-bottom {
+    border-bottom: 1px solid colors.$border-color !important;
+}
+
+.trigger-wrapper {
+  height: 560px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.trigger-header {
+  position: sticky;
+  top: 0;
+  background: colors.$body-bg;
+  z-index: 5;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.trigger-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}

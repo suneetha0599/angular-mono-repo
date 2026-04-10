@@ -1,0 +1,112 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+        <button mat-icon-button (click)="goBack()" class="mr-2">
+          <mat-icon class="material-symbols-outlined">arrow_back</mat-icon>
+        </button>
+        <div class="headline-medium my-auto">Assign Role</div>
+      </div>
+    </div>
+  </div>
+  <div class="p-4 flex-1 min-h-0">
+    <div class="flex flex-col rounded-lg h-fit max-h-full bg-white overflow-auto p-6 pl-8">
+      <form [formGroup]="form" class="h-100">
+
+        <div class="mb-4">
+          <p class="label-large ">User Emails</p>
+          <div class="flex flex-wrap gap-3 items-center">
+
+            <div *ngFor="let user of selectedUsers "
+              class="flex items-center bg-blue-100 rounded-full px-4 py-2 gap-2 max-w-xs h-10 relative">
+              <span class="text-md text-blue-700 font-normal truncate pr-4">
+                {{ user.email }}
+              </span>
+              <button mat-icon-button class="chip-remove-btn" (click)="removeUser(user.applicationUserId)">
+                <mat-icon class="text-gray-600 material-symbols-outlined">remove</mat-icon>
+              </button>
+            </div>
+
+            <div class="flex items-center min-w-[322px]">
+              <mat-form-field appearance="outline" class="w-full chip-input-field field-select email-field">
+                <mat-label>Search users by email</mat-label>
+                <input matInput formControlName="userSearch" [matAutocomplete]="auto" placeholder="Type @ to see all">
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayUserFn"
+                  (optionSelected)="onUserSelected($event.option.value)">
+                  <mat-option *ngFor="let user of filteredUsers$ | async" [value]="user">
+                    {{ user.email }} ({{ user.displayName }})
+                  </mat-option>
+                  <mat-option *ngIf="(filteredUsers$ | async)?.length === 0 && form.get('userSearch')?.value">
+                    <span class="text-gray-500">No matching users found</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-icon class="material-symbols-outlined" matSuffix>search</mat-icon>
+
+              </mat-form-field>
+            </div>
+          </div>
+          <mat-error *ngIf="hasFieldError('selectedUsers')" class="text-red-300 text-xs  ml-3">
+            {{ getFieldError('selectedUsers') }}
+          </mat-error>
+        </div>
+
+        <div class="mb-3">
+          <p class="label-large">Department</p>
+          <mat-form-field appearance="outline" class="w-80 chip-input-field field-select">
+            <mat-label>Select Department</mat-label>
+            <mat-select formControlName="department" (selectionChange)="onDepartmentSelected($event)">
+              <mat-option *ngFor="let dept of departments" [value]="dept">
+                {{ dept.name }}
+              </mat-option>
+              <mat-option [value]="null">None</mat-option>
+            </mat-select>
+
+          </mat-form-field>
+        </div>
+
+        <div class="mb-3">
+          <p class="label-large">Roles</p>
+
+          <div class="flex flex-wrap gap-3 items-center">
+            <div *ngFor="let role of selectedRoles"
+              class="flex items-center bg-blue-100 rounded-full px-4 py-2 gap-2 max-w-xs h-10 relative">
+              <span class="text-md text-blue-700 font-normal truncate pr-4">
+                {{ role.name }}
+              </span>
+              <button mat-icon-button class="chip-remove-btn" (click)="removeRole(role.id)">
+                <mat-icon class="text-gray-600 material-symbols-outlined">remove</mat-icon>
+              </button>
+            </div>
+
+            <div class="flex items-center min-w-[322px]">
+              <mat-form-field appearance="outline" class="w-full chip-input-field field-select">
+                <mat-label>Select Role</mat-label>
+                <mat-select formControlName="role" (selectionChange)="onRoleSelected($event)">
+                  <mat-option *ngFor="let role of availableRoles" [value]="role">
+                    {{ role.name }}
+                    <span class="text-xs text-gray-500 ml-2">{{ role.description }}</span>
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="hasFieldError('role')">
+                  {{ getFieldError('role') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end mr-10 pt-5 border-gray-200">
+          <loading-button type="primary" [loading]="submitLoading" [disabled]="!isFormValid"
+            (onButtonClick)="onSubmit()">
+            <span class="label-large">Assign</span>
+          </loading-button>
+
+          <loading-button type="light" [basicButton]="true" class="ml-3" (onButtonClick)="resetForm()">
+            <span class="label-large">Clear</span>
+          </loading-button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

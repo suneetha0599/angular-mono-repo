@@ -1,0 +1,125 @@
+@use "../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../styles/custom/typography.scss" as typography;
+
+.container {
+  width: 100% !important;
+}
+
+.header-card {
+  background-color: colors.$light-primary;
+  box-shadow: none;
+  border-radius: 4px;
+}
+
+.title {
+  font-size: typography.$fs-14;
+}
+
+.days {
+  font-size: typography.$fs-12;
+}
+
+.card {
+
+  background-color: colors.$body-bg;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.tab-group {
+  width: 1208px;
+}
+
+.approved {
+  height: 25px;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 150%;
+  }
+}
+
+@keyframes shimmer-move {
+  100% {
+    left: 150%;
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  height: 100%;
+  width: 150%;
+  background: linear-gradient(90deg,
+      rgba(243, 244, 246, 0) 0%,
+      rgba(255, 255, 255, 0.6) 50%,
+      rgba(243, 244, 246, 0) 100%);
+  animation: shimmer-move 1.3s infinite;
+}
+
+
+::ng-deep .mat-tab-100 {
+  &.custom-tab-group {
+    .mat-mdc-tab-header {
+      border-bottom: 1px solid #e5e7eb;
+      background-color: #ffffff;
+    }
+
+    .mat-mdc-tab-header-pagination {
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .mat-mdc-tab-labels {
+      border-bottom: none;
+    }
+
+
+    .mat-mdc-tab-body-wrapper {
+      padding-top: 0;
+    }
+  }
+}
+
+
+.action-btns {
+  position: absolute;
+  top: 7px;
+  right: 5px;
+  display: flex;
+  gap: 4px;
+  z-index: 0;
+}
+
+.text-muted-gray {
+  color: #767676;
+}
+
+.backgound-gray {
+  background-color: #F8F8F8;
+}
+
+::ng-deep .mat-mdc-tab-header-pagination-controls-enabled .mat-mdc-tab-header-pagination {
+  position: relative;
+  z-index: 1 !important;
+}
+
+::ng-deep .risk-view-mat-drawer,
+::ng-deep .create-risk-mat-drawer,
+::ng-deep .create-task-mat-drawer,
+::ng-deep .section-mat-drawer {
+  transition: transform 480ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+::ng-deep .mat-drawer-backdrop {
+  transition: background-color 480ms ease !important;
+}

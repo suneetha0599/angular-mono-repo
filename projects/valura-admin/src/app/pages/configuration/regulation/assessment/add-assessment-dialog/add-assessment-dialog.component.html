@@ -1,0 +1,28 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">{{data?.mode === "edit" ? "Edit Assessment" : "Add Assessment"}}</h3>
+<button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="confirm dialog close button">
+    <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+    <form [formGroup]="form">
+        <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+            <mat-error>
+                <custom-mat-error class="inline-block" [control]="name" [errors]="name.errors"
+                    controlActualName="Name"></custom-mat-error>
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+    <div class="w-full flex justify-end gap-2 p-0">
+        <loading-button type="secondary" (onButtonClick)="onCancel()">
+            Cancel
+        </loading-button>
+        <loading-button type="primary" [disabled]="form.invalid" [loading]="isSaving" (onButtonClick)="onSave()">
+            {{ data?.mode === 'edit' ? 'Update assessment' : 'Save assessment' }}
+        </loading-button>
+    </div>
+</div>

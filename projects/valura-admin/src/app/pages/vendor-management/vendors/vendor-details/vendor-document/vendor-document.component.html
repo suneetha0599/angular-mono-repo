@@ -1,0 +1,73 @@
+<div class="h-full flex flex-col overflow-hidden">
+    @if(documentDataSource.data.length){
+    <div class="flex-1 overflow-auto rounded-lg no-scrollbar p-3">
+        <table mat-table [dataSource]="documentDataSource"
+            class=" w-full custom-table table  table-md-row table-layout-fixed">
+            @for (header of documentHeaders; track $index) {
+            <ng-container [matColumnDef]="header.columnDef">
+                <th mat-header-cell *matHeaderCellDef [style.width]="header.width"
+                    [ngClass]="{'text-end': header.textEnd}">
+                    {{ header.header }}
+                </th>
+                <td mat-cell *matCellDef="let row">
+                    @switch(header.key){
+                    @case(VendorDocumentKey.DOCUMENT_NAME){
+                    <div class="d-flex">
+                        <span [appEllipsisTooltip]="row.documentName" [colorType]="'primary'" class=""
+                            [matTooltip]="row.documentName" matTooltipPosition="below"
+                            matTooltipClass="material-tooltip" (click)="onViewDocument(row)">
+                            {{ row.documentName || '-' }}
+                        </span>
+                    </div>
+                    <!-- <span class="text-primary pointer" (click)="viewDocument(row.fileKey,row.documentName)"> -->
+                    }
+                    @case(VendorDocumentKey.DOCUMENT_TYPE){
+                    <div class="d-flex text-primary font-medium">
+                        <span [matTooltip]="getAttachmentTooltip(row)" matTooltipPosition="below"
+                            matTooltipClass="material-tooltip"
+                            class="text-primary font-medium overflow-hidden truncate">
+                            {{row?.attachmentUrl?.[0]?.fileName||'-'}} </span>
+                        {{ getAttachmentDisplay(row) }}
+                    </div>
+                    }
+                    @case(VendorDocumentKey.DESCRIPTION){
+                    <div class="d-flex">
+                        <span [appEllipsisTooltip]="row.description" class="" [matTooltip]="row.description"
+                            matTooltipPosition="below" matTooltipClass="material-tooltip">
+                            {{ row.description || '-' }}
+                        </span>
+                    </div>
+                    }
+                    @case(VendorDocumentKey.EFFECTIVE_DATE){
+                    {{row.effectiveDate ? (row.effectiveDate | date:'dd-MM-yyyy') : '-'}}
+                    }
+                    @case(VendorDocumentKey.EXPIRY_DATE){
+                    {{row.expiryDate ? (row.expiryDate | date:'dd-MM-yyyy') : '-'}}
+                    }
+                    @case(VendorDocumentKey.ACTION){
+                    <div class="flex !gap-0 justify-end">
+                        <button mat-icon-button (click)="onEditDocument(row)" class="tiny-icon-btn">
+                            <mat-icon class="edit-icon material-symbols-outlined gray-icon">edit</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="deleteDocument(row)" class="tiny-icon-btn">
+                            <mat-icon class="edit-icon material-symbols-outlined gray-icon">delete</mat-icon>
+                        </button>
+                    </div>
+                    }
+                    @default{
+                    {{row[header.columnDef] || '-'}}
+                    }
+                    }
+                </td>
+            </ng-container>
+            }
+            <tr mat-header-row *matHeaderRowDef="displayedDocumentHeaders"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedDocumentHeaders;"></tr>
+        </table>
+    </div>
+    }
+    @else{
+    <item-not-found [imgHeight]="'200px'" heading="No documents available"></item-not-found>
+    }
+
+</div>

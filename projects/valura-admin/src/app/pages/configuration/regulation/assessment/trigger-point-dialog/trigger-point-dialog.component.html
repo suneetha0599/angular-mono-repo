@@ -1,0 +1,64 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">{{ actionName }} Trigger Point</h3>
+<button mat-icon-button tabindex="-1" class="close" (click)="onCancel()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+@if(actionName === "View") {
+<div mat-dialog-content class="m-0 p-3">
+  <div>
+    <mat-label class="fs-sm-med text-grey">Provision</mat-label>
+    <div>{{ provision.value || "-" }}</div>
+  </div>
+
+  <div class="mt-3">
+    <mat-label class="fs-sm-med text-grey">Trigger Point</mat-label>
+    <div>{{ label.value || "-" }}</div>
+  </div>
+
+  <div class="mt-3">
+    <mat-label class="fs-sm-med text-grey">Simplified Trigger Point</mat-label>
+    <div>{{ description.value || "-" }}</div>
+  </div>
+</div>
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" (onButtonClick)="onEdit()">
+      <mat-icon class="text-light me-2 mat-md-icon material-symbols-outlined">edit</mat-icon>
+      <div>Edit</div>
+    </loading-button>
+  </div>
+</div>
+
+} @else {
+<div mat-dialog-content class="m-0 p-3" [formGroup]="form">
+  <mat-form-field appearance="outline" class="mat-sm-input mat-mdc-mb-0 w-100 mt-2 enabled-mat-input">
+    <mat-label>Provision</mat-label>
+    <input matInput formControlName="provision" />
+    <mat-error>
+      <custom-mat-error class="inline-block" [control]="provision" [errors]="provision.errors"
+        controlActualName="Provision"></custom-mat-error>
+    </mat-error>
+  </mat-form-field>
+  <div class="mt-4">
+    <app-custom-mat-textarea [control]="label" label="Trigger Point" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+  <div class="mt-8">
+    <app-custom-mat-textarea [control]="description" label="Simplified Trigger Point" [minRows]="1" [maxRows]="5">
+    </app-custom-mat-textarea>
+  </div>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="onCancel()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" [disabled]="form.invalid" (onButtonClick)="onSave()">
+      {{ actionName === "Add" ? "Save" : "Update" }}
+    </loading-button>
+  </div>
+</div>
+}

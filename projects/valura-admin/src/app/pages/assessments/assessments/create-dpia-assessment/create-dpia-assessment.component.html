@@ -1,0 +1,167 @@
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+    <div class="mb-2">
+        <div class="flex justify-between">
+            <div class="headline-medium my-auto">{{ isEditMode ? 'Update DPIA Assessment':'Create DPIA Assessment'}}
+            </div>
+        </div>
+    </div>
+    <div class="my-1 toggle">
+        <mat-button-toggle-group [(ngModel)]="selected" class="toggle-btn-grp toggle-group">
+            <mat-button-toggle value="basic">
+                <mat-icon *ngIf="selected === 'basic'"
+                    class="material-symbols-outlined text-primary mat-md-icon me-1">check</mat-icon>
+                Basic Details
+            </mat-button-toggle>
+            <mat-button-toggle value="questions">
+                <mat-icon *ngIf="selected === 'questions'"
+                    class="material-symbols-outlined text-primary mat-md-icon me-1">check</mat-icon>
+                Questions
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+    <!-- <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative p-3 pb-1 bg-white rounded">
+        <div class="d-flex h-100 w-100 flex-column main-canvas bg-white">
+            <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100" #tabGroup>
+                @for(tab of tabHeaderDetails; track tab.id;) {
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <span>{{ tab.name }}</span>
+                    </ng-template>
+                    @if(tab.id === 1) {
+                    <div class="h-full flex flex-col overflow-hidden">
+                        <div class="flex-1 overflow-hidden rounded-lg no-scrollbar">
+                            <app-overview-dpia [overviewForm]="overviewForm" [formUpdated]="formUpdated"
+                                [bpaDetails]="bpaDetails" (templateId)="getTemplateIdFromOverview($event)"
+                                (onCreateBpa)="onCreateBpa($event)" (onChangeBpa)="onChangeBpa($event)" [mode]="mode" [dataUpdated]="dataUpdated">
+                            </app-overview-dpia>
+                        </div>
+                    </div>
+                    }
+                    @else if(tab.id === 2) {
+                    <div class="h-full flex flex-col overflow-hidden">
+                        <div class="flex-1 overflow-hidden rounded-lg no-scrollbar">
+                            <app-triggers-dpia [triggerForm]="triggerForm" [bpaDetails]="bpaDetails"
+                                [dataUpdated]="dataUpdated">
+                            </app-triggers-dpia>
+                        </div>
+                    </div>
+                    }
+                    @else if(tab.id === 3) {
+                    <div class="h-full flex flex-col overflow-hidden">
+                        <div class="flex-1 overflow-hidden rounded-lg no-scrollbar">
+                            <app-questionnaire [assessmentsFormArray]="questionsForm"
+                                [templateId]="templateIdFromOverview" (questionsChanged)="onQuestionsUpdated()">
+                            </app-questionnaire>
+                        </div>
+                    </div>
+                    }
+                </mat-tab>
+                }
+            </mat-tab-group>
+        </div>
+    </div> -->
+    <div class="my-2 pb-2 h-100 w-100 editor-wrapper overflow-hidden position-relative">
+        @if(selected === 'basic') {
+        <div class="h-100 overflow-auto assessment-panel">
+            <div class="grid grid-cols-12 flex-shrink-0">
+                <div class="flex-column col-span-9 custom-panel">
+                    <mat-expansion-panel class=" mx-1 my-2" #panel1="matExpansionPanel" [expanded]="panelState.panel1"
+                        (opened)="panelState.panel1 = true" (closed)="panelState.panel1 = false">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="label-large"> Assessment Overview </mat-panel-title>
+                            <mat-icon class="custom-arrow material-symbols-outlined text-grey"
+                                [class.rotate]="panel1.expanded">
+                                arrow_drop_down
+                            </mat-icon>
+                        </mat-expansion-panel-header>
+                        <app-overview-dpia [overviewForm]="overviewForm" [formUpdated]="formUpdated"
+                            [panelType]="OVERVIEW" [bpaDetails]="bpaDetails" [assessmentSource]="assessmentSource"
+                            (templateId)="getTemplateIdFromOverview($event)" (onCreateBpa)="onCreateBpa($event)" (onCreateVendor)="onCreateVendor($event)"
+                            (onChangeBpa)="onChangeBpa($event)" [mode]="mode" [dataUpdated]="dataUpdated"
+                            (onCreateAsset)="onCreateAsset($event)" (clearDataUpdated)="clearDataUpdated($event)">
+                        </app-overview-dpia>
+                    </mat-expansion-panel>
+
+                    @if(assessmentSource !== AssessemntSource.VENDOR){
+                    <mat-expansion-panel class="mx-1 my-2" #panel2="matExpansionPanel" [expanded]="panelState.panel2"
+                        (opened)="panelState.panel2 = true" (closed)="panelState.panel2 = false">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="label-large"> Regulatory Basis </mat-panel-title>
+                            <mat-icon class="custom-arrow material-symbols-outlined text-grey"
+                                [class.rotate]="panel2.expanded">
+                                arrow_drop_down
+                            </mat-icon>
+                        </mat-expansion-panel-header>
+                        <app-triggers-dpia [triggerForm]="triggerForm" [mode]="mode" [dataUpdated]="dataUpdated"
+                            [bpaDetails]="bpaDetails">
+                        </app-triggers-dpia>
+                    </mat-expansion-panel>
+                    }
+                    <mat-expansion-panel class="mx-1 my-2" #panel3="matExpansionPanel" [expanded]="panelState.panel3"
+                        (opened)="panelState.panel3 = true" (closed)="panelState.panel3 = false">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="label-large"> Risk & Timeline </mat-panel-title>
+                            <mat-icon class="custom-arrow material-symbols-outlined text-grey"
+                                [class.rotate]="panel3.expanded">
+                                arrow_drop_down
+                            </mat-icon>
+                        </mat-expansion-panel-header>
+                        <app-overview-dpia [overviewForm]="overviewForm" [formUpdated]="formUpdated" [panelType]="RISK"
+                            [bpaDetails]="bpaDetails" [assessmentSource]="assessmentSource" (templateId)="getTemplateIdFromOverview($event)"
+                            (onCreateBpa)="onCreateBpa($event)" (onCreateAsset)="onCreateAsset($event)"
+                            (onChangeBpa)="onChangeBpa($event)" [mode]="mode" [dataUpdated]="dataUpdated">
+                        </app-overview-dpia>
+                    </mat-expansion-panel>
+                    <mat-expansion-panel class="mx-1 my-2" #panel4="matExpansionPanel" [expanded]="panelState.panel4"
+                        (opened)="panelState.panel4 = true" (closed)="panelState.panel4 = false">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="label-large"> Roles & Responsibilities </mat-panel-title>
+                            <mat-icon class="custom-arrow material-symbols-outlined text-grey"
+                                [class.rotate]="panel4.expanded">
+                                arrow_drop_down
+                            </mat-icon>
+                        </mat-expansion-panel-header>
+                        <app-overview-dpia [overviewForm]="overviewForm" [formUpdated]="formUpdated" [panelType]="ROLE"
+                            [assessmentSource]="assessmentSource" (templateId)="getTemplateIdFromOverview($event)" [mode]="mode" [dataUpdated]="dataUpdated"
+                            [bpaDetails]="bpaDetails">
+                        </app-overview-dpia>
+                    </mat-expansion-panel>
+                </div>
+            </div>
+        </div>
+        }
+        @else if(selected === 'questions') {
+        <preview-template [_templateFormGroup]="template" [isAssessmentView]="true"
+            [assessmentsFormArray]="questionsForm">
+        </preview-template>
+        <!-- <app-questionnaire [assessmentsFormArray]="questionsForm" [isViewMode]="true"
+                [templateId]="templateIdFromOverview" (questionsChanged)="onQuestionsUpdated()">
+            </app-questionnaire> -->
+        }
+    </div>
+    <div class="bg-white px-3 py-2 rounded">
+        <!-- <hr class="mb-2 mt-0 hr-bold" /> -->
+        <div class="d-flex justify-between">
+            <div>
+                <loading-button type="secondary" class="" (onButtonClick)="onCancel()">
+                    <span>Cancel</span>
+                </loading-button>
+            </div>
+            <div>
+                @if(!isEditMode){
+                <loading-button type="secondary" class="ms-2" (onButtonClick)="onSaveAsDraft()"
+                    [loading]="isDraftLoading" [loadingText]="'Saving...'" [disabled]="isFinalSaved">
+                    <span>Save Draft</span>
+                </loading-button>
+                }
+                <loading-button class="ms-2" (onButtonClick)="onSave()" [loading]="isSubmitLoading"
+                    [loadingText]="'Saving...'">
+                    <span>{{ isEditMode ? 'Update Assessment' : 'Create Assessment' }}</span>
+                </loading-button>
+                <!-- <loading-button type="primary" class="ms-2" (onButtonClick)="onSave()">
+                    <span>Next</span>
+                </loading-button> -->
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,222 @@
+<!-- <div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+  <div class="mb-2">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+        <button (click)="goBack()"
+          class="w-6 h-6 flex !rounded-lg items-center justify-center me-3 text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+          <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+        </button>
+        <div class="headline-medium my-auto">{{pageTitle}}</div>
+        <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToPrevRequest()" [ngClass]="disablePrevBtn ? 'text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_left</mat-icon>
+        </button>
+        <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToNextRequest()" [ngClass]="disableNextBtn ? 'text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if(hasApiError){
+  <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+  }@else{
+  <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative p-3 pb-1 bg-white rounded">
+    <div class="d-flex h-100 w-100 flex-column main-canvas bg-white">
+      @if(!isEditMode){
+      <div class="absolute top-4 right-4 flex gap-2" style="z-index: 1000;">
+        <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="onEdit()"
+          matTooltip="Edit template" matTooltipPosition="below">
+          <mat-icon color="primary" class="material-symbols-outlined">edit</mat-icon>
+        </button>
+      </div>
+      }
+      @if (canDelete) {
+      <div class="absolute top-6 right-15 flex gap-2" style="z-index: 1000;">
+        <button mat-menu-item class="d-flex" (click)="onDelete()">
+          <mat-icon class="mat-md-icon material-symbols-outlined text-primary my-auto">delete</mat-icon>
+        </button>
+      </div>
+      }
+      <mat-tab-group disableRipple animationDuration="300ms" class="custom-tab-group mat-tab-100"
+        [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event.index);">
+        @for (tab of tabHeaderDetails; track tab.id) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span>{{ tab.name }}</span>
+          </ng-template>
+
+          @if (tab.id === 1) {
+          <div class="h-full flex flex-col overflow-hidden">
+            <div class="flex-1 overflow-hidden rounded-lg no-scrollbar">
+              <app-create-template [dataUpdated]="dataUpdated" [templateForm]="templateForm" [isEditMode]="isEditMode">
+              </app-create-template>
+            </div>
+          </div>
+          }
+
+          @else if (tab.id === 2) {
+          <div class="h-full flex flex-col overflow-hidden">
+            <div class="flex-1 overflow-hidden rounded-lg no-scrollbar">
+              <app-questionnaire [assessmentsFormArray]="questionsForm" [isEditMode]="isEditMode"
+                [mode]="templateMode"></app-questionnaire>
+            </div>
+          </div>
+          }
+        </mat-tab>
+        }
+      </mat-tab-group>
+    </div>
+  </div>
+  @if(isEditMode){
+  <div class="bg-white px-4 pt-1 pb-2">
+    <div class="d-flex justify-between">
+      <div>
+        <loading-button type="secondary" class="" (onButtonClick)="onCancel()">
+          <span>Cancel</span>
+        </loading-button>
+      </div>
+      <div>
+        @if(showDraftButton){
+        <loading-button type="secondary" class="ms-2" (onButtonClick)="onSaveAsDraft()" [loading]="isDraftLoading"
+          [loadingText]="'Saving...'">
+          <span>Save Draft</span>
+        </loading-button>
+        }
+        <loading-button class="ms-2" (onButtonClick)="onSave()" [loading]="isSubmitLoading" [loadingText]="'Saving...'"
+          [disabled]="isSaveButtonDisabled">
+          <span>{{ templateId ? 'Save' : 'Create Template' }}</span>
+        </loading-button>
+      </div>
+    </div>
+  </div>
+  }
+</div> -->
+@if(hasApiError){
+<ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+}
+@else{
+<div class="d-flex flex-column p-3 overflow-hidden view-wrapper">
+  <div class="mb-2">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+        <!-- <button (click)="goBack(); $event.stopPropagation();"
+          class="w-6 h-6 flex !rounded-lg items-center justify-center me-3 text-primary-40 border-1 border-gray-300 hover:bg-gray-200">
+          <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+        </button> -->
+        <div class="headline-medium my-auto">{{pageTitle}}</div>
+        <!-- <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToPrevRequest()" [ngClass]="disablePrevBtn ? 'text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_left</mat-icon>
+        </button>
+        <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+          (click)="goToNextRequest()" [ngClass]="disableNextBtn ? 'text-gray-400' : 'text-primary'">
+          <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+        </button> -->
+      </div>
+    </div>
+  </div>
+  <div class="mb-3 toggle d-flex align-items-center justify-between">
+    <div>
+      <mat-button-toggle-group [(ngModel)]="selected" class="toggle-btn-grp toggle-group">
+        <mat-button-toggle value="basic" (click)="onBasicClick($event); $event.stopPropagation();">
+          <mat-icon *ngIf="selected === 'basic'"
+            class="material-symbols-outlined text-primary mat-md-icon me-1">check</mat-icon>
+          Basic Details
+        </mat-button-toggle>
+        <mat-button-toggle value="questions">
+          <mat-icon *ngIf="selected === 'questions'"
+            class="material-symbols-outlined text-primary mat-md-icon me-1">check</mat-icon>
+          Form Questions
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+    <!-- @if(isEditMode && selected === 'questions' && hasSections){
+    <div>
+      <button class="shadow-none bg-transparent mat-button" (click)="onPreviewAndPublish()">
+        <div class="label-large text-primary mx-1">Preview</div>
+      </button>
+    </div>
+    } -->
+  </div>
+  <div class="d-flex h-100 w-100 editor-wrapper overflow-hidden position-relative rounded">
+    <!-- @if(!isEditMode){
+    <div class="absolute top-4 right-4 flex gap-2" style="z-index: 1000;">
+      <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="onEdit()"
+        matTooltip="Edit template" matTooltipPosition="below">
+        <mat-icon color="primary" class="material-symbols-outlined">edit</mat-icon>
+      </button>
+    </div>
+    } -->
+
+    @if (canDelete) {
+    <!-- <div class="absolute top-0 right-15 flex gap-2" style="z-index: 1000;">
+      <button mat-menu-item class="d-flex" (click)="onDelete()">
+        <mat-icon class="mat-md-icon material-symbols-outlined text-primary my-auto">delete</mat-icon>
+      </button>
+    </div> -->
+    }
+
+    @if (selected === 'basic') {
+    <div class="h-full flex flex-col overflow-hidden w-100">
+      <div class="flex-1 overflow-hidden rounded-lg no-scrollbar">
+        <app-create-template [dataUpdated]="dataUpdated" [templateForm]="templateForm" [isEditMode]="isEditMode">
+        </app-create-template>
+      </div>
+    </div>
+    }
+    @else if (selected === 'questions') {
+    <div class="h-full flex flex-col overflow-hidden w-100 pb-3">
+      <div class="flex-1 overflow-hidden rounded-lg no-scrollbar w-100">
+        <app-questionnaire [assessmentsFormArray]="questionsForm" [isEditMode]="isEditMode" [mode]="templateMode"
+          [assessmentSource]="assessmentSource" (questionsChanged)="onQuestionsChange($event)"></app-questionnaire>
+      </div>
+    </div>
+    }
+  </div>
+  @if(isEditMode || isCreateMode){
+  <div class="bg-white p-3 rounded">
+    <div class="d-flex justify-between">
+      <div>
+        <loading-button type="secondary" class="" (onButtonClick)="onCancel()">
+          <span>Cancel</span>
+        </loading-button>
+      </div>
+      <div>
+        @if(showDraftButton){
+        <loading-button type="secondary" class="ms-2" (onButtonClick)="onPreviewAndPublish()"
+          [loading]="isPreviewLoading" [loadingText]="'Loading...'">
+          <span>Preview & publish</span>
+        </loading-button>
+        <loading-button class="ms-2" (onButtonClick)="onSaveAsDraft()" [loading]="isDraftLoading"
+          [loadingText]="'Saving...'" [disabled]="isFinalSaved">
+          <span>Save draft</span>
+        </loading-button>
+
+        } @else {
+
+        <loading-button class="ms-2" (onButtonClick)="onSave()" [loading]="isSubmitLoading" [loadingText]="'Saving...'"
+          [disabled]="isSaveButtonDisabled">
+          <span>Save</span>
+        </loading-button>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</div>
+}
+
+<ng-template #errorLoading>
+  <div class="d-flex flex-column rounded overflow-hidden h-screen bg-white p-2 mt-3 justify-center">
+    <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+  </div>
+  <!-- <div class="d-flex flex-column view-wrapper h-screen overflow-hidden  mt-4">
+    <div class="m-4 flex-1 overflow-hidden">
+      <div class="d-flex flex-column rounded overflow-hidden position-relative  h-full bg-white justify-content-center">
+        <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+      </div>
+    </div>
+  </div> -->
+</ng-template>

@@ -1,0 +1,137 @@
+<div class="flex h-screen overflow-hidden">
+  <!-- Left Panel -->
+  <div class="w-1/2 flex flex-col bg-[#F8FAF9] relative">
+    <app-left-panel-login-page></app-left-panel-login-page>
+  </div>
+  <!-- Right Panel -->
+  <div class="w-1/2 bg-white rounded-tl-[20px] rounded-bl-[20px] flex flex-col h-full relative">
+    <!-- Fixed Icon Section -->
+    <!-- <div class="absolute top-20 left-1/2 transform -translate-x-1/2">
+    </div> -->
+    <div class="overflow-auto h-full flex justify-center items-center">
+      <div class="max-w-md w-[405px] h-full flex flex-col justify-center">
+        <!-- <div class="h-[10%] flex justify-center">
+        </div> -->
+
+        <div class="flex-col justify-center relative">
+          <div class="flex mb-5 justify-center ">
+            <div class="w-[70px] h-[70px] mt-auto rounded-full border border-gray-100 overflow-hidden relative
+            flex items-center justify-center
+            bg-white/60 backdrop-blur-[24px]">
+              <div class="absolute inset-0 bg-[radial-gradient(circle,#D7F049_0%,transparent_70%)] opacity-40"></div>
+              <img
+                [src]="userSessionVerified ? '/assets/images/right_icon.png' : '/assets/images/weui_lock-filled%20(1).png'"
+                alt="Icon" class="w-[44px] h-[44px] z-10" />
+            </div>
+          </div>
+
+          <div class="my-auto w-full">
+            @if (isLoading) {
+            <div class="flex flex-col items-center space-y-6 w-full">
+              <div class="shimmer h-7 w-60 my-2"></div>
+              <div class="shimmer h-4 w-32 my-1"></div>
+              <mat-divider class="my-4 w-full"></mat-divider>
+              <div class="shimmer h-5 w-35 rounded self-start"></div>
+              <div class="flex gap-4 w-[400px] self-start">
+                <div class="shimmer h-[35px] flex-1 rounded"></div>
+                <div class="shimmer h-[35px] w-25 rounded"></div>
+              </div>
+            </div>
+            }
+            @else {
+            <div class="">
+              <div class="display-small mb-2">Guest Login</div>
+              <p class="text-gray-600 title-medium">Privacy, Perfected.</p>
+            </div>
+            <form [formGroup]="step1Form">
+              <div class="flex items-center label-large mb-4">
+                Verify your Identity
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 w-full max-w-sm items-start mb-6">
+
+                <mat-form-field appearance="outline" class="w-full chip-input-field chip-md-input-field">
+                  <mat-label class="label-large">Email</mat-label>
+                  <input matInput formControlName="email" />
+                  <mat-error>
+                    @if (email.hasError('required')) {
+                    Email is required
+                    }
+                    @if (email.hasError('pattern')) {
+                    Please enter a valid email
+                    }
+                  </mat-error>
+                </mat-form-field>
+                @if (!userSessionVerified && !sendOtpRequested) {
+                <loading-button [disabled]="!isVerifyEnabled || verifyUserIsLoading || isOTpTimer"
+                  [loading]="verifyUserIsLoading" (onButtonClick)="verifyUser()">
+                  Send OTP
+                </loading-button>
+                @if(idpConfigs.length > 0) {
+                <div class="flex items-center my-1 md:col-span-2">
+                  <div class="flex-1 border-t border-gray-300"></div>
+                  <span class="px-4 text-sm text-gray-500">or</span>
+                  <div class="flex-1 border-t border-gray-300"></div>
+                </div>
+                }
+                @if(idpConfigs.length > 0) {
+                <div class="md:col-span-2">
+                  @for(idp of idpConfigs; track $index) {
+                  <a class="flex items-center justify-center mb-1 py-2 text-sm text-primary
+               hover:text-primary cursor-pointer transition-colors group" (click)="loginWithIdp(idp)">
+                    <mat-icon class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">
+                      login
+                    </mat-icon>
+                    <span class="group-hover:underline">Sign in through {{ idp.name }}</span>
+                  </a>
+                  }
+                </div>
+                }
+                } @else if (userSessionVerified) {
+                <mat-icon class="!text-green-600 text-2xl self-center material-symbols-outlined">check_circle</mat-icon>
+                }
+              </div>
+              @if (showOtp ) {
+              <mat-divider class="mt-2 mb-4"></mat-divider>
+              <div class="mt-2">
+                <label class="label-large mb-2 block">Enter OTP</label>
+                <div class="flex items-start gap-4 mb-3">
+                  @for (i of [0, 1, 2, 3]; track i) {
+                  <input #otpInput [formControlName]="'otp' + i" maxlength="1" (focus)="focusedOtpIndex = i"
+                    (blur)="focusedOtpIndex = -1" (keyup)="focusNext(i, $event)" (paste)="handlePaste($event)"
+                    type="tel" [ngClass]="{
+                             'border-primary': focusedOtpIndex === i,
+                             'border-gray-300': focusedOtpIndex !== i
+                           }"
+                    class="w-12 h-14 border-1 rounded-lg text-center text-lg label-large-bold outline-none transition-colors duration-200" />
+                  }
+                </div>
+                <div class="grid grid-cols-3 items-center w-full mb-4">
+                  <button type="button"
+                    class="spinner-primary flex label-large items-center border-none text-gray-500 hover:text-primary transition-colors duration-200"
+                    [ngClass]="{'text-gray-500 cursor-not-allowed': isResendDisabled, 'text-primary hover:text-primary': !isResendDisabled}"
+                    (click)="resendOtp()" [disabled]="isResendDisabled">
+                    Resend OTP
+                  </button>
+                  <div class="text-gray-500 label-large ps-8">
+                    {{ otpTimerDisplay }}
+                  </div>
+                </div>
+                <div class="flex gap-4 justify-start">
+                  <loading-button [disabled]="!otpControlsValid || otpVerifiedLoading" [loading]="otpVerifiedLoading"
+                    (onButtonClick)="verifyOtp()">
+                    Verify OTP
+                  </loading-button>
+                </div>
+              </div>
+              }
+            </form>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w-full flex justify-center items-center">
+      <app-footer-component></app-footer-component>
+    </div>
+  </div>
+</div>

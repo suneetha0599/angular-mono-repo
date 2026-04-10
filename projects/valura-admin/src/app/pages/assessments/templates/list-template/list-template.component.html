@@ -1,0 +1,414 @@
+<div class="d-flex flex-column view-wrapper h-screen overflow-hidden">
+  <div class="p-3 pb-0">
+    <div class="d-flex justify-between">
+      <div class="headline-medium my-auto">Templates</div>
+      <div>
+        @if(createAssessmentTemplate){
+        <loading-button type="primary" (onButtonClick)="createTemplate()">
+          Create Template
+        </loading-button>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="p-3 flex-1 overflow-hidden">
+    <div class="d-flex flex-column rounded overflow-hidden position-relative h-full bg-white p-2">
+      <div class="relative flex-1 overflow-hidden">
+        <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)" disableRipple
+          animationDuration="300ms" class="custom-tab-group mat-tab-100">
+          @for(tab of tabHeaderDetails; track tab.key;){
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span>{{ tab.name }}</span>
+              <span class="body-small badge ml-2 fw-600 text-light rounded-pill px-2 py-1"
+                style="font-size: 0.75rem; height: 1.5rem; border-radius: 0.75rem;">{{ tab.count }}</span>
+            </ng-template>
+            <div class="h-full flex flex-col overflow-hidden">
+              <div class="d-flex align-items-center">
+                <!-- Asset Type -->
+                @if (selectedStatus && selectedTabIndex === 0) {
+                <div class="custom-multi-select d-flex align-items-center mr-2 my-2">
+                  <button mat-button class="dropdown-button w-100 px-2"
+                    [matMenuTriggerFor]="showStatusFilter ? statusMenu : null" #statusTrigger="matMenuTrigger">
+                    @if(showStatusFilter) {
+                    <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                    }
+                    <div class="d-flex align-items-center" [ngClass]="{ 'gray-icon': !showStatusFilter }">
+                      <div class="d-flex align-items-center w-full min-w-0">
+                        <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                          Status : {{ filterConfiguration.selectedStatus[0]?.name }}
+                        </span>
+                        @if(filterConfiguration.selectedStatus.length > 1) {
+                        <span class="ml-1 shrink-0 rounded-full filter-badge">
+                          +{{ filterConfiguration.selectedStatus.length - 1 }}
+                        </span>
+                        }
+                      </div>
+                      <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                        (click)="clearSelection('selectedStatus'); statusTrigger.closeMenu(); $event.stopPropagation()">
+                        close
+                      </mat-icon>
+                    </div>
+                  </button>
+
+                  <mat-menu class="status-menu filter-menu" #statusMenu="matMenu" yPosition="below" xPosition="after"
+                    (closed)="onCloseMenu('selectedStatus')" [overlapTrigger]="false">
+                    <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 196px;">
+                      <div class="menu-wrapper">
+                        @for (type of filterConfiguration.statusList; track type;) {
+                        <button mat-menu-item (click)="toggleSelection('STATUS', type)">
+                          <mat-checkbox [checked]="filterConfiguration.tempSelectedStatus.includes(type)">
+                            {{ type.name }}
+                          </mat-checkbox>
+                        </button>
+                        }
+                      </div>
+                      <div class="px-2 py-1 text-end">
+                        <loading-button [smallButton]="true"
+                          (onButtonClick)="onApplyOptionFilter('STATUS', statusTrigger)">
+                          Apply
+                        </loading-button>
+                      </div>
+                    </div>
+                  </mat-menu>
+                </div>
+                }
+
+
+                @if (selectedTemplateType) {
+                <div class="custom-multi-select d-flex align-items-center mr-2 my-2  whitespace-nowrap">
+                  <button mat-button class="dropdown-button w-100 px-2"
+                    [matMenuTriggerFor]="showTemplateTypeFilter ? templateTypeMenu : null"
+                    #templateTypeTrigger="matMenuTrigger">
+                    @if(showTemplateTypeFilter) {
+                    <mat-icon class="material-symbols-outlined">arrow_drop_down</mat-icon>
+                    }
+                    <div class="d-flex align-items-center w-full min-w-0"
+                      [ngClass]="{ 'gray-icon': !showTemplateTypeFilter }">
+                      <div class="d-flex align-items-center">
+                        <span class="overflow-hidden text-ellipsis max-w-[150px]">
+                          Template Type : {{ filterConfiguration.selectedTemplateType[0]?.name }}
+                        </span>
+                        @if(filterConfiguration.selectedTemplateType.length > 1) {
+                        <span class="ml-1 shrink-0 rounded-full filter-badge">
+                          +{{ filterConfiguration.selectedTemplateType.length - 1 }}
+                        </span>
+                        }
+                      </div>
+                      <mat-icon class="clear-icon mt-2 material-symbols-outlined"
+                        (click)="clearSelection('selectedTemplateType'); templateTypeTrigger.closeMenu(); $event.stopPropagation()">
+                        close
+                      </mat-icon>
+                    </div>
+                  </button>
+
+                  <mat-menu class="template-type-menu filter-menu" #templateTypeMenu="matMenu" yPosition="below"
+                    xPosition="after" (closed)="onCloseMenu('selectedTemplateType')" [overlapTrigger]="false">
+                    <div (click)="stopDefaultBehaviour($event)" style="width: 100%; min-width: 225px;">
+                      <div class="menu-wrapper">
+                        @for (cat of filterConfiguration.templateTypeList; track cat;) {
+                        <button mat-menu-item (click)="$event.stopPropagation()">
+                          <mat-checkbox [checked]="isTemplateTypeSelected(cat)"
+                            (change)="toggleSelection('TEMPLATE_TYPE', cat)">
+                            {{ cat.name }}
+                          </mat-checkbox>
+                        </button>
+                        }
+                      </div>
+                      <div class="px-2 py-1 text-end">
+                        <loading-button [smallButton]="true"
+                          (onButtonClick)="onApplyOptionFilter('TEMPLATE_TYPE', templateTypeTrigger)">
+                          Apply
+                        </loading-button>
+                      </div>
+                    </div>
+                  </mat-menu>
+                </div>
+                }
+
+
+                <!-- Clear All -->
+                @if (selectedStatus && selectedTabIndex === 0 ||selectedTemplateType) {
+
+                <div class="d-flex justify-content-center whitespace-nowrap">
+                  <button mat-button class="button" (click)="resetAllFilter()">
+                    <mat-icon class="cursor-pointer material-symbols-outlined">close</mat-icon>
+                    Clear all
+                  </button>
+                </div>
+                }
+
+
+              </div>
+
+              <!-- Table Container -->
+              @if(!requestLoading && hasApiError){
+              <div class="bg-white z-10 h-100">
+                <div class="mt-4 pt-4">
+                  <error-loading-items [imgHeight]="'250px'"></error-loading-items>
+                </div>
+              </div>}
+              @else if(!requestLoading &&isEmptyRequest){
+              <div class="bg-white z-10 h-100">
+                <div class="mt-4 pt-4">
+                  <item-not-found [imgHeight]="'200px'" [heading]=errorTitle></item-not-found>
+                </div>
+              </div>
+              }@else{
+              <div #scrollContainer class="flex-1 overflow-auto rounded-lg no-scrollbar">
+                <ng-container *ngTemplateOutlet="ngTemplateTable"></ng-container>
+              </div>}
+
+              <!-- Pagination -->
+              @if(totalItems > 0 && !requestLoading){
+              <div class="bg-white z-10">
+                <mat-paginator #paginator class="bg-white" [pageSize]="pageSize" [length]="totalItems"
+                  [pageIndex]="pageNo - 1" (page)="onPageChange($event)" [pageSizeOptions]="[10, 50, 100]"
+                  aria-label="Select page">
+                </mat-paginator>
+              </div>
+              }
+            </div>
+          </mat-tab>
+          }
+        </mat-tab-group>
+
+        <!-- Search and Filter Controls -->
+        <div class="absolute top-2 right-2 flex gap-2 z-3">
+          @if(showSearch){
+          <div class="flex items-center">
+            <mat-form-field appearance="outline" class="mat-sm-input mat-round-input enabled-mat-input search-bar">
+              <mat-icon class="mat-md-icon material-symbols-outlined pe-2" matPrefix>search</mat-icon>
+              <input #searchInput matInput [(ngModel)]="filterConfiguration.searchText" placeholder="Search..."
+                (ngModelDebounceChange)="onSearchChange()" />
+              @if(filterConfiguration.searchText){
+              <button matSuffix mat-icon-button class="close-btn" (click)="clearSearch()">
+                <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+              </button>
+              }
+            </mat-form-field>
+            <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn mb-4" (click)="toggleSearch()">
+              <mat-icon class="material-symbols-outlined" color="primary">search</mat-icon>
+            </button>
+          </div>
+          }
+          @else{
+          <button mat-mini-fab class="shadow-none bg-light mat-md-fab-btn" (click)="toggleSearch()">
+            <mat-icon class="material-symbols-outlined" color="primary">search</mat-icon>
+          </button> }
+          <div class="position-relative">
+            @if(filterApplied){
+            <div class="position-absolute  right-[3px] top-[3px]">
+              <div class="custom-badge-count rounded-full"></div>
+            </div>
+            }
+            <button mat-mini-fab class="shadow-none bg-transparent mat-md-fab-btn" (click)="searchFilter()">
+              <mat-icon class="material-symbols-outlined" color="primary">filter_list</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table Template with Enhanced Sorting -->
+<ng-template #ngTemplateTable>
+  <table mat-table [dataSource]="requestLoading ? shimmerDataSource : dataSource" matSort
+    (matSortChange)="onSortChange($event)" [matSortActive]="sortByField" [matSortDirection]="sortDirection"
+    class="mat-elevation-z8 w-100 custom-table table mt-2">
+
+    @for (header of tableHeaders; track header) {
+    <ng-container [matColumnDef]="header.columnDef">
+      <!-- Table Header with Sort -->
+      <th mat-header-cell *matHeaderCellDef [style.width]="header.width" [style.min-width]="header.width"
+        [style.max-width]="header.width"
+        [mat-sort-header]="!requestLoading && header.sortable ? header.columnDef : null"
+        [disabled]="requestLoading || !header.sortable" [arrowPosition]="'after'"
+        class="px-4 title-small whitespace-nowrap header-bg">
+        @if(!requestLoading) {
+        <ng-container>
+          <span class="text-grey title-small">{{ header.headerName }}</span>
+        </ng-container>
+        } @else {
+        <div class="shimmer-line shimmer-small ml-10"></div>
+        }
+      </th>
+
+      <!-- Table Cell -->
+      <td mat-cell [style.width]="header.width" [style.min-width]="header.width" [style.max-width]="header.width"
+        *matCellDef="let row" class="px-4 whitespace-nowrap"
+        [style.max-width]="header.maxWidth  ? header.maxWidth : null">
+        @if(requestLoading){
+        <ng-container>
+          <div class="shimmer-line shimmer-medium"></div>
+        </ng-container>
+        } @else{
+        <ng-container>
+          @switch (header.key) {
+          @case (HEADER_STATUS) {
+          <span class="status p-2 d-flex align-items-center justify-content-center label-large" [style.width]="94"
+            [ngStyle]="{'background-color': getStatusColors(row.status),'color':getStatusTextColors(row.status)}">
+            {{ getStatusText(row.status) }}
+          </span>
+          }
+          @case(HEADER_NAME) {
+          <div class="d-flex">
+            <span [appEllipsisTooltip]="row[header.columnDef]" [colorType]="'primary'"
+              [matTooltip]="row[header.columnDef]" matTooltipPosition="below" matTooltipClass="material-tooltip"
+              (click)="onClickName(row, TEMPLATE_MODE.VIEW)">
+            </span>
+          </div>
+          }
+          @case(HEADER_CREATED_BY) {
+          <div class="d-flex">
+            <span [appEllipsisTooltip]="row[header.columnDef]" [matTooltip]="row[header.columnDef]"
+              matTooltipPosition="below" matTooltipClass="material-tooltip">
+            </span>
+          </div>
+          }
+          @case(HEADER_DESCRIPTION){
+          <span class="truncate max-w-[150px] inline-block" [matTooltip]="row[header.columnDef]"
+            matTooltipPosition="above" matTooltipClass="material-tooltip">
+            {{ row[header.columnDef] }}
+          </span>
+          }
+          @case (HEADER_DATE) {
+          <span class="body-large">
+            {{ row[header.columnDef] | date : "dd.MM.yyyy" }}
+          </span>
+          }
+          @case (HEADER_LINKED_ASSESSMENTS) {
+          <span class="body-large">
+            {{ row[header.columnDef] ?? 0 }}
+          </span>
+          }
+          @case (HEADER_CLONE_STATUS) {
+          <div class="d-flex align-items-center justify-content-start">
+            @if (row.isCloned) {
+            <span class="status-badge-cloned px-0 py-0 d-inline-flex align-items-center"
+              [matTooltip]="'This is a cloned template'" matTooltipPosition="above">
+              <span [appEllipsisTooltip]="'Cloned Template'" [colorType]="'default'" [maxWidth]="100"
+                [matTooltip]="'Cloned Template'" matTooltipPosition="below" matTooltipClass="material-tooltip">
+              </span>
+              <mat-icon class="material-symbols-outlined mat-sm-icon"
+                style="color: #1C2B70; font-size: 18px;">content_copy</mat-icon>
+            </span>
+            } @else {
+            <span [appEllipsisTooltip]="'original Template'" [colorType]="'default'" [maxWidth]="100"
+              [matTooltip]="'original Template'" matTooltipPosition="below" matTooltipClass="material-tooltip">
+            </span>
+            }
+          </div>
+          }
+
+          @case (HEADER_ACTION) {
+          <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn"
+            [disabled]="!editAssessmentTemplate">
+            <mat-icon class="mat-md-icon material-symbols-outlined text-primary">more_vert</mat-icon>
+          </button>
+
+          <mat-menu #actionMenu="matMenu" class="action-panel">
+            @if(isDraftSelected){
+            <button mat-menu-item (click)="openEditTemplate(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined text-primary">edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            }
+            <!-- <button mat-menu-item (click)="onDelete(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined text-primary">delete</mat-icon>
+              <span>Delete</span>
+            </button> -->
+            @if(selectedTabIndex === 0){
+            <button mat-menu-item class="d-flex" (click)="toggleStatus(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined text-primary my-auto"
+                [ngClass]="{'text-grey':row.status!='ACTIVE'}">{{
+                row.status === 'ACTIVE' ? 'toggle_on'
+                : 'toggle_off'
+                }}</mat-icon>
+              <span>{{ row.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}</span>
+            </button>
+            }
+            @if(!isDraftSelected){
+            <button mat-menu-item (click)="duplicateTemplate(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined text-primary">file_copy</mat-icon>
+              <span>Duplicate (Copy)</span>
+            </button>
+            }
+            @if(isDraftSelected){
+            <button mat-menu-item class="d-flex" (click)="onDelete(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined text-primary my-auto">delete</mat-icon>
+              <span>Delete</span>
+            </button>
+            }
+            @if (row.canDelete) {
+            <button mat-menu-item class="d-flex" (click)="onDelete(row)">
+              <mat-icon class="mat-md-icon material-symbols-outlined text-primary my-auto">delete</mat-icon>
+              <span>Delete</span>
+            </button>
+            }
+          </mat-menu>
+          }
+          @default {
+          {{ row[header.columnDef] || "-" }}
+          }
+          }
+        </ng-container>
+        }
+      </td>
+    </ng-container>
+    }
+
+    <!-- Table Rows -->
+    <tr mat-header-row *matHeaderRowDef="displayedHeaders; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedHeaders"></tr>
+
+  </table>
+</ng-template>
+
+<!-- Filter Drawer -->
+<mat-drawer-container class="right-sidebar mat-md-drawer" [hasBackdrop]="true" autosize>
+  <mat-drawer #rightDrawer mode="over" position="end">
+    <app-template-drawer [filterConfiguration]="filterConfiguration" [selectedTabIndex]="selectedTabIndex"
+      (onCloseDrawer)="rightDrawer.toggle()" (onApplyFilter)="onApplyDrawerFilter($event)">
+    </app-template-drawer>
+  </mat-drawer>
+</mat-drawer-container>
+
+<!-- Status Toggle Dialog -->
+<ng-template #toggleDialog>
+  <!-- Title -->
+  <h3 mat-dialog-title class="my-0 p-2 px-3">
+    Status Toggle
+  </h3>
+
+  <!-- Close Button -->
+  <button mat-icon-button tabindex="-1" class="close" aria-label="confirm dialog close button" (click)="onCancel()">
+    <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+  </button>
+
+  <!-- Dialog Content -->
+  <div mat-dialog-content class="m-0 p-3">
+    <div class="flex items-center justify-center space-x-3 border border-gray-300 rounded-md py-2 my-4">
+      <span class="font-medium" [ngClass]="isActive ? 'text-green-600' : 'text-red-500'">
+        {{ isActive ? 'Active' : 'Inactive' }}
+      </span>
+      <mat-slide-toggle [checked]="isActive" (change)="isActive = $event.checked" color="primary">
+      </mat-slide-toggle>
+    </div>
+  </div>
+  <!-- Dialog Actions -->
+  <div mat-dialog-actions class="flex justify-center">
+    <div class="w-full flex justify-end gap-2 p-0">
+
+      <loading-button type="light" [basicButton]="true" (onButtonClick)="onCancel()">
+        <span class="label-large">Cancel</span>
+      </loading-button>
+
+      <loading-button type="primary" (onButtonClick)="onSave()" [loadingText]="'Submit'">
+        <span class="label-large">Submit</span>
+      </loading-button>
+
+    </div>
+  </div>
+</ng-template>

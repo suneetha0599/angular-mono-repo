@@ -1,0 +1,541 @@
+<div class="d-flex flex-column overflow-hidden h-100">
+    <div class="flex justify-between mt-2">
+        <div class="my-auto title-medium p-3 !py-0 d-flex align-items-center gap-1">
+            Task Details
+        </div>
+        <div class="my-auto p-3 !py-0">
+            <button mat-icon-button (click)="closeDrawer()">
+                <mat-icon class="material-symbols-outlined">close</mat-icon>
+            </button>
+        </div>
+    </div>
+    <hr>
+
+    @if (isLoading) {
+    <div class="p-3 animate-pulse overflow-auto h-100">
+        <div class="border rounded-md bg-gray-50 p-3 mb-3">
+            <div class="grid grid-cols-12 gap-y-2">
+                <div class="col-span-2">
+                    <div class="h-3 w-16 shimmer rounded"></div>
+                </div>
+                <div class="col-span-2">
+                    <div class="h-3 w-20 shimmer rounded"></div>
+                </div>
+                <div class="col-span-3">
+                    <div class="h-3 w-20 shimmer rounded"></div>
+                </div>
+                <div class="col-span-2">
+                    <div class="h-3 w-14 shimmer rounded"></div>
+                </div>
+                <div class="col-span-3"></div>
+
+                <div class="col-span-2">
+                    <div class="h-5 w-20 shimmer rounded"></div>
+                </div>
+                <div class="col-span-2">
+                    <div class="h-5 w-24 shimmer rounded"></div>
+                </div>
+                <div class="col-span-3">
+                    <div class="h-5 w-28 shimmer rounded"></div>
+                </div>
+                <div class="col-span-2">
+                    <div class="h-5 w-20 shimmer rounded"></div>
+                </div>
+                <div class="col-span-3 flex justify-end gap-2">
+                    <div class="h-8 w-8 shimmer rounded"></div>
+                    <div class="h-8 w-8 shimmer rounded"></div>
+                    <div class="h-8 w-24 shimmer rounded"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Title shimmer -->
+        <div class="space-y-4">
+            <div>
+                <div class="h-3 w-20 shimmer rounded mb-1"></div>
+                <div class="h-5 w-48 shimmer rounded"></div>
+            </div>
+
+            <!-- Description shimmer -->
+            <div>
+                <div class="h-3 w-24 shimmer rounded mb-1"></div>
+                <div class="h-4 w-full shimmer rounded mb-1"></div>
+                <div class="h-4 w-5/6 shimmer rounded"></div>
+            </div>
+
+            <!-- Assignee / Due Date / Risk ID shimmer -->
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <div class="h-3 w-16 shimmer rounded mb-1"></div>
+                    <div class="h-5 w-28 shimmer rounded"></div>
+                </div>
+                <div>
+                    <div class="h-3 w-16 shimmer rounded mb-1"></div>
+                    <div class="h-5 w-24 shimmer rounded"></div>
+                </div>
+                <div>
+                    <div class="h-3 w-14 shimmer rounded mb-1"></div>
+                    <div class="h-5 w-20 shimmer rounded"></div>
+                </div>
+            </div>
+
+            <!-- Labels shimmer -->
+            <div class="mt-4">
+                <div class="h-3 w-12 shimmer rounded mb-2"></div>
+                <div class="flex gap-2">
+                    <div class="h-7 w-20 shimmer rounded-full"></div>
+                    <div class="h-7 w-24 shimmer rounded-full"></div>
+                    <div class="h-7 w-16 shimmer rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Comment button shimmer -->
+        <div class="mt-3">
+            <div class="h-9 w-32 shimmer rounded"></div>
+        </div>
+    </div>
+    } @else if (taskDetails) {
+    <div class="d-flex flex-column overflow-hidden position-relative pb-0 h-100">
+        <div class="p-3 col w-100 overflow-auto scroll-w-0" style="flex: 1; min-height: 0;">
+
+            <div class="border rounded-md !bg-[#F8F8F8] !border-[#EEEEEE] !p-3 mb-3">
+                <div class="grid grid-cols-12 label-small text-gray">
+                    <div class="col-span-2">Task ID</div>
+                    <div class="col-span-2">Created On</div>
+                    <div class="col-span-3">Created by</div>
+                    <div class="col-span-2">Status</div>
+                    <div class="col-span-3"></div>
+                </div>
+                <div class="grid grid-cols-12 body-large items-start">
+                    <div class="col-span-2">
+                        {{ taskDetails?.taskId }}
+                    </div>
+
+                    <div class="col-span-2">
+                        {{ formatDate(taskDetails?.createdDate) }}
+                    </div>
+
+                    <div class="col-span-3">
+                        <div class="d-flex pe-2">
+                            <p class="body-large !mb-0" [appEllipsisTooltip]="taskDetails?.createdByUserName ?? '' "
+                                [matTooltip]="taskDetails?.createdByUserName || ''" matTooltipPosition="below"
+                                matTooltipClass="material-tooltip">
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-span-2">
+                        {{ taskDetails?.status }}
+                    </div>
+
+                    <div class="col-span-3 !-mt-2">
+                        <div class="d-flex justify-end items-center gap-x-2">
+                            @if (_showActionButton) {
+                            <mat-icon class="material-symbols-outlined mat-md-icon pointer"
+                                (click)="onEditTask()">edit</mat-icon>
+
+                            <mat-icon class="material-symbols-outlined mat-md-icon pointer"
+                                (click)="onDeleteTask()">delete</mat-icon>
+                            }
+
+                            @if (actionOptions.length > 0 && !isAssessmentReadOnly) {
+                            <mat-form-field appearance="outline" class="!w-[100px] mat-sm-input mat-mdc-mb-0">
+                                <mat-select placeholder="Actions" [(value)]="selectedAction"
+                                    [disabled]="disableActionButton" class="text-teal-600 font-small"
+                                    (selectionChange)="onActionChange($event)" [disabled]="submitting">
+
+                                    <mat-option *ngFor="let option of actionOptions" [value]="option.value">
+                                        {{ option.label }}
+                                    </mat-option>
+
+                                </mat-select>
+                            </mat-form-field>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <div class="label-small text-gray">Task Title</div>
+                    <span class="title-large truncate whitespace-nowrap overflow-hidden"
+                        [appEllipsisTooltip]="taskDetails?.title || '-'" [colorType]="'primary'" [maxWidth]="600"
+                        [matTooltip]="taskDetails?.title || '-'" matTooltipPosition="below"
+                        matTooltipClass="material-tooltip">
+                        {{ taskDetails?.title || '-' }}
+                    </span>
+                </div>
+
+
+                <div>
+                    <div class="text-gray-500 label-small">Description</div>
+                    <div class="body-large"
+                        [innerHTML]="(taskDetails?.description || 'No description available.') | safeHtml">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="label-small text-gray">Related Assessment</div>
+                    <span class="body-large truncate whitespace-nowrap overflow-hidden pointer text-primary"
+                        [appEllipsisTooltip]="attachedToDetail?.assessmentDetail?.assessmentTitle || '-'"
+                        [maxWidth]="600" [matTooltip]="attachedToDetail?.assessmentDetail?.assessmentTitle || '-'"
+                        matTooltipPosition="below" matTooltipClass="material-tooltip">
+                        {{ attachedToDetail?.assessmentDetail?.assessmentTitle || '-' }}
+                    </span>
+                </div>
+
+                @if (attachedToDetail?.riskDetail) {
+                <div>
+                    <div class="text-gray-500 label-small mb-1">Related Risk</div>
+                    <div class="title-small me-2">{{ attachedToDetail.riskDetail.riskTitle }}</div>
+                </div>
+                }
+
+                @if (attachedToDetail?.questionDetail) {
+                <div>
+                    <div class="text-gray-500 label-small mb-1">Related Question</div>
+                    <app-question-conversation-panel [assessmentId]="assessmentId"
+                        [questionId]="taskDetails?.attachedToId" [sectionId]="attachedToDetail.questionDetail.sectionId"
+                        [sectionTitle]="attachedToDetail.questionDetail.sectionTitle"
+                        [questionTitle]="attachedToDetail.questionDetail.questionTitle"
+                        [helperText]="attachedToDetail.questionDetail.helperText"
+                        [displayQuestionId]="attachedToDetail.questionDetail.questionId || taskDetails?.attachedToId">
+                    </app-question-conversation-panel>
+                </div>
+                }
+
+
+
+
+
+
+                <div class="d-flex flex-row gap-4">
+
+                    <div class="w-[170px]">
+                        <div class="text-gray-500 label-small w-[170px]">Assignee</div>
+                        <p class="body-large !mb-0 w-[170px]" [appEllipsisTooltip]="taskDetails?.assignToUserName ?? ''"
+                            [matTooltip]="taskDetails?.assignToUserName" matTooltipPosition="below"
+                            matTooltipClass="material-tooltip">
+                            {{ taskDetails?.assignToUserName || '-' }}
+                        </p>
+                    </div>
+
+                    <div class="w-[135px]">
+                        <div class="text-gray-500 label-small w-[135px]">Due Date</div>
+                        <div class="body-large w-[135px]">
+                            {{ taskDetails?.dueDate ? formatDate(taskDetails.dueDate) : '-' }}
+                        </div>
+                    </div>
+
+                    <div class="w-[135px]">
+                        <div class="text-gray-500 label-small w-[135px]">Risk ID</div>
+                        <div class="body-large w-[135px]">
+                            {{ taskDetails?.attachedToId || '-' }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="flex justify-between items-start">
+                    <div>
+                        @if (taskDetails?.taskLabelMappings?.length) {
+                        <p class="label-medium text-gray mb-2">Label</p>
+                        <div class="flex flex-wrap gap-2">
+                            @for (label of taskDetails!.taskLabelMappings!; track label) {
+                            <span
+                                class="inline-flex items-center px-6 py-2 rounded-[23px] bg-[#F2F2F2] text-gray-700 body-small">
+                                {{ label.labelName || label.name || 'Unnamed Label' }}
+                            </span>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div>
+                        @if (!showCommentEditor) {
+                        <div class="mt-3">
+                            <loading-button [basicButton]="true" type="secondary" (click)="openCommentEditor()">
+                                <mat-icon class="material-symbols-outlined label-mediume me-2">add</mat-icon>
+                                <span class="label-medium">Add Comment</span>
+                            </loading-button>
+                        </div>
+                        }
+                    </div>
+                </div>
+                <div class="mt-4">
+                    @if(taskMessages.length){
+                    <div class="chat-toggle-row">
+                        <button class="chat-toggle-btn" (click)="toggleTaskChat()">
+                            <mat-icon class="material-symbols-outlined">
+                                {{ showTaskChat ? 'remove' : 'add' }}
+                            </mat-icon>
+                            {{ showTaskChat ? 'Hide messages' : 'Show messages' }}
+                        </button>
+                    </div>
+                    }
+
+                    @if (showTaskChat && taskMessages.length) {
+                    <div class="mt-2">
+                        @if (isLoadingTaskMessages) {
+                        <div class="text-gray-400 body-small py-2">Loading messages...</div>
+                        } @else if (taskMessages.length === 0) {
+                        <div class="text-gray-400 body-small py-2">No messages yet</div>
+                        } @else {
+                        <div class="messages-area" style="max-height: 300px; overflow-y: auto;"
+                            (scroll)="onTaskMessagesScroll($event)">
+                            @for (message of taskMessages; track message.id) {
+                            <div class="thread-container">
+                                <div class="message-row" [attr.data-message-type]="message.messageType"
+                                    [ngClass]="{'message-row--self': isCurrentUser(message), 'message-row--other': !isCurrentUser(message), 'message-row--highlighted': highlightedMessageId === message.id}"
+                                    [attr.data-message-id]="message.id" (mouseenter)="taskHoveredMessageId = message.id"
+                                    (mouseleave)="taskHoveredMessageId = null">
+
+                                    @if (taskHoveredMessageId === message.id && !message.isDeleted) {
+                                    <div class="message-actions">
+                                        <button mat-icon-button (click)="startTaskReply(message)"
+                                            class="shadow-none bg-transparent mat-md-fab-btn" title="Reply">
+                                            <mat-icon class="material-symbols-outlined">reply</mat-icon>
+                                        </button>
+                                        @if (isMessageOwner(message)) {
+                                        <button mat-icon-button (click)="startTaskEdit(message.id)"
+                                            class="shadow-none bg-transparent mat-md-fab-btn" title="Edit">
+                                            <mat-icon class="material-symbols-outlined">edit</mat-icon>
+                                        </button>
+                                        <button mat-icon-button (click)="deleteTaskMessage(message.id)"
+                                            class="shadow-none bg-transparent mat-md-fab-btn" title="Delete">
+                                            <mat-icon class="material-symbols-outlined">delete</mat-icon>
+                                        </button>
+                                        }
+                                    </div>
+                                    }
+
+                                    <div class="message-card">
+                                        <div class="message-header">
+                                            <span class="message-sender">{{ message.sender }}</span>
+                                            <span class="message-badge"
+                                                [ngClass]="{'message-badge--response': message.messageType === 'Response','message-badge--remark': message.messageType === 'Remark'}">
+                                                {{ message.messageType }}
+                                            </span>
+                                            <span class="message-time">{{ message.timestamp | date: 'dd MMM yyyy,
+                                                hh:mma' }}</span>
+                                        </div>
+                                        @if (message.text) {
+                                        <div class="message-body message-content" [innerHTML]="message.text | safeHtml">
+                                        </div>
+                                        }
+                                        @if (message.attachments?.length) {
+                                        <div class="message-attachments">
+                                            @for (att of message.attachments; track att.id) {
+                                            <div class="message-attachment" (click)="downloadAttachment(att)"
+                                                style="cursor: pointer;">
+                                                <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+                                                <span class="message-attachment-name" [title]="att.name">{{
+                                                    att.name }}</span>
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                </div>
+                                @if (message.replies && message.replies.length > 0) {
+                                <div class="replies-container">
+                                    @if (shouldShowTaskExpandButton(message)) {
+                                    <button class="expand-replies-button"
+                                        (click)="toggleTaskRepliesExpansion(message.id)">
+                                        <span>+ {{ getHiddenTaskRepliesCount(message) }} more replies</span>
+                                    </button>
+                                    }
+
+                                    @for (reply of getVisibleTaskReplies(message); track reply.id) {
+                                    <div class="message-row reply-message" [attr.data-message-type]="reply.messageType"
+                                        [class.message-row--highlighted]="highlightedMessageId === reply.id"
+                                        [attr.data-message-id]="reply.id" (mouseenter)="taskHoveredMessageId = reply.id"
+                                        (mouseleave)="taskHoveredMessageId = null">
+
+                                        @if (taskHoveredMessageId === reply.id && !reply.isDeleted) {
+                                        <div class="message-actions">
+                                            <button mat-icon-button (click)="startTaskReply(reply)"
+                                                class="shadow-none bg-transparent mat-md-fab-btn" title="Reply">
+                                                <mat-icon class="material-symbols-outlined">reply</mat-icon>
+                                            </button>
+                                            @if (isMessageOwner(reply)) {
+                                            <button mat-icon-button (click)="startTaskEdit(reply.id)"
+                                                class="shadow-none bg-transparent mat-md-fab-btn" title="Edit">
+                                                <mat-icon class="material-symbols-outlined">edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="deleteTaskMessage(reply.id)"
+                                                class="shadow-none bg-transparent mat-md-fab-btn" title="Delete">
+                                                <mat-icon class="material-symbols-outlined">delete</mat-icon>
+                                            </button>
+                                            }
+                                        </div>
+                                        }
+
+                                        <div class="message-card">
+                                            <div class="message-header">
+                                                <span class="message-sender">{{ reply.sender }}</span>
+                                                <span class="message-badge"
+                                                    [ngClass]="{'message-badge--response': reply.messageType === 'Response',
+                                                                'message-badge--remark': reply.messageType === 'Remark'}">
+                                                    {{ reply.messageType }}
+                                                </span>
+                                                <span class="message-time">{{ reply.timestamp | date: 'dd MMM yyyy,
+                                                    hh:mm a' }}</span>
+                                            </div>
+                                            @if (reply.text) {
+                                            <div class="message-body message-content"
+                                                [innerHTML]="reply.text | safeHtml">
+                                            </div>
+                                            }
+                                            @if (reply.attachments?.length) {
+                                            <div class="message-attachments">
+                                                @for (att of reply.attachments; track att.id) {
+                                                <div class="message-attachment" (click)="downloadAttachment(att)"
+                                                    style="cursor: pointer;">
+                                                    <mat-icon class="material-symbols-outlined">attach_file</mat-icon>
+                                                    <span class="message-attachment-name" [title]="att.name">{{
+                                                        att.name }}</span>
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+                            }
+                            @if (isLoadingMoreTaskMessages) {
+                            <div class="text-gray-400 body-small py-2 text-center">Loading more messages...</div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+            </div>
+            <!-- <hr> -->
+
+        </div>
+
+        @if (showCommentEditor) {
+        <div class="tiptap-wrapper-with-buttons position-relative pb-0 m-3" [class.toolbar-expanded]="showToolbar"
+            [class.has-reply]="isReplyMode"
+            [class.has-files]="(isEditMode && editingMessageAttachments.length > 0) || selectedFiles.length > 0">
+            @if(isReplyMode && replyingToMessage) {
+            <div class="reply-banner-teams">
+                <div class="reply-banner-content">
+                    <div class="reply-info">
+                        <div class="reply-header">
+                            <span class="reply-sender">{{ replyingToMessage.sender }}</span>
+                            <span class="reply-timestamp">{{ replyingToMessage.timestamp | date: 'dd MMM yyyy, hh:mm a'
+                                }}</span>
+                        </div>
+                        <p class="reply-preview">{{ replyingToMessageText }}</p>
+                    </div>
+                    <button mat-icon-button (click)="cancelReply()" class="reply-close-btn" title="Cancel reply">
+                        <mat-icon class="material-symbols-outlined">close</mat-icon>
+                    </button>
+                </div>
+            </div>
+            }
+
+            <div class="tiptap-toolbar">
+                <div class="toolbar-group">
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('bold')"
+                        (click)="toggleFormat('bold')" title="Bold">
+                        <mat-icon class="toolbar-icon material-symbols-outlined">format_bold</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('italic')"
+                        (click)="toggleFormat('italic')" title="Italic">
+                        <mat-icon class="toolbar-icon material-symbols-outlined">format_italic</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('underline')"
+                        (click)="toggleFormat('underline')" title="Underline">
+                        <mat-icon class="toolbar-icon material-symbols-outlined">format_underlined</mat-icon>
+                    </button>
+                </div>
+
+                <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+                <div class="flex items-center gap-0.5">
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('bulletList')"
+                        (click)="toggleFormat('bulletList')" title="Bullet List">
+                        <mat-icon class="toolbar-icon material-symbols-outlined">format_list_bulleted</mat-icon>
+                    </button>
+
+                    <button type="button" class="toolbar-button" [class.is-active]="isActive('orderedList')"
+                        (click)="toggleFormat('orderedList')" title="Numbered List">
+                        <mat-icon class="toolbar-icon material-symbols-outlined">format_list_numbered</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div #editorContainer class="tiptap-editor-container"></div>
+
+            <div class="selected-files-preview-internal">
+                @if(isEditMode) {
+                @for(attachment of editingMessageAttachments; track attachment.id; let idx = $index) {
+                <div class="file-preview-card">
+                    <mat-icon class="material-symbols-outlined text-gray-600">attach_file</mat-icon>
+                    <span class="file-name" [title]="attachment.name">{{attachment.name}}</span>
+                    <button mat-icon-button (click)="removeEditingAttachment(idx)" class="remove-file-button"
+                        title="Remove file">
+                        <mat-icon class="material-symbols-outlined">close</mat-icon>
+                    </button>
+                </div>
+                }
+                }
+
+                @for(file of selectedFiles; track file.name; let idx = $index) {
+                <div class="file-preview-card">
+                    <mat-icon class="material-symbols-outlined text-gray-600">attach_file</mat-icon>
+                    <span class="file-name" [title]="file.name">{{file.name}}</span>
+                    <button mat-icon-button (click)="removeSelectedFile(idx)" class="remove-file-button"
+                        title="Remove file">
+                        <mat-icon class="material-symbols-outlined">close</mat-icon>
+                    </button>
+                </div>
+                }
+            </div>
+
+            <div class="input-actions">
+                <button mat-icon-button class="action-button format-button" [class.active]="showToolbar"
+                    (click)="toggleToolbar()" title="Toggle formatting" disableRipple>
+                    <mat-icon class="mat-md-icon material-symbols-outlined">
+                        drive_file_rename_outline
+                    </mat-icon>
+                </button>
+                <button mat-icon-button class="action-button" (click)="attachFiles()" title="Attach files"
+                    disableRipple>
+                    <mat-icon class="mat-md-icon material-symbols-outlined">attach_file</mat-icon>
+                </button>
+                @if (isEditMode) {
+                <div class="flex gap-2">
+                    <button mat-icon-button (click)="cancelEdit()" class="action-button" title="Cancel">
+                        <mat-icon class="mat-md-icon material-symbols-outlined">close</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="sendMessage()" [disabled]="isSendingMessage"
+                        class="action-button send-button" title="Update" disableRipple>
+                        <mat-icon class="mat-md-icon material-symbols-outlined">
+                            {{ isSendingMessage ? 'schedule' : 'send' }}
+                        </mat-icon>
+                    </button>
+                </div>
+                } @else {
+                <button class="done-btn" (click)="sendMessage()">Done</button>
+                }
+            </div>
+        </div>
+        }
+
+    </div>
+    }
+
+</div>

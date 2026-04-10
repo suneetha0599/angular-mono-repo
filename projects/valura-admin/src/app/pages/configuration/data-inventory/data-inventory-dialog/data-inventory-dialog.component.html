@@ -1,0 +1,59 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  {{dialogTitle}}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="close dialog">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3" [formGroup]="form">
+
+  @if(form){
+  <form class="w-full">
+
+    <div class="mb-4">
+      <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+    </div>
+
+    @if (isDataSubject) {
+    <div>
+      <mat-form-field appearance="outline" class="mat-sm-text-area w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Description</mat-label>
+        <app-custom-mat-textarea [control]="description" label="Description" [minRows]="1" [maxRows]="5">
+        </app-custom-mat-textarea>
+      </mat-form-field>
+    </div>
+    }
+
+    @if (isCategory) {
+    <div>
+      <mat-form-field appearance="outline" class="w-full mat-mdc-mb-0 mat-sm-input">
+        <mat-label>Sensitivity</mat-label>
+        <mat-select formControlName="sensitivity">
+          @for (option of classificationMasterList; track option.id) {
+          <mat-option [value]="option.id">{{option.name}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    }
+
+  </form>
+  }
+
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <loading-button type="secondary" (onButtonClick)="closeDialog()">
+      Cancel
+    </loading-button>
+    <loading-button type="primary" [loading]="submitLoading" [disabled]="isUpdateButtonDisabled"
+      (onButtonClick)="onSave()" [loadingText]="buttonText">
+      <span class="px-2">{{buttonText}}</span>
+    </loading-button>
+  </div>
+</div>

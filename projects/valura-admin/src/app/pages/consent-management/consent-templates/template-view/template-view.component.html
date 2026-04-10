@@ -1,0 +1,62 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3">
+  Template preview
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="close()" aria-label="confirm dialog close button">
+  <mat-icon class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+
+  <p class="body-medium text-gray-700 bg-gray-100 p-3 rounded mb-4">
+    Please review and manage your consent for how we use your data.
+    This helps us provide and improve our services while respecting your privacy preferences
+  </p>
+
+  <!-- Inputs -->
+  <div class="space-y-3">
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput placeholder="Name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput placeholder="Email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <input matInput placeholder="Phone number" />
+    </mat-form-field>
+  </div>
+
+  <!-- Checkboxes -->
+  <div class="space-y-4 mt-4">
+    <mat-checkbox class="block body-medium fontColor" checked>
+      I agree to receive promotional emails, product updates,
+      and marketing communication tailored to my preferences.
+    </mat-checkbox>
+
+    <mat-checkbox class="block body-medium fontColor" checked required>
+      I agree to the use of my personal data for creating and managing my account,
+      including verifying my identity and securing access.
+    </mat-checkbox>
+  </div>
+
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+
+    <button mat-stroked-button class="!rounded-xl p-2">
+      <mat-icon class="material-symbols-outlined">qr_code_scanner</mat-icon>
+    </button>
+
+    <loading-button type="primary" class="mx-2">
+      Get API key
+    </loading-button>
+
+    <loading-button type="primary" class="mx-2">
+      Embedded code
+    </loading-button>
+
+  </div>
+</div>

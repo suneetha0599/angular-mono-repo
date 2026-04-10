@@ -1,0 +1,201 @@
+@use "../../../../../../styles/custom/colors.scss" as colors;
+@use "../../../../../../styles/custom/typography.scss" as typography;
+
+.close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: colors.$body-color;
+}
+
+mat-dialog-title {
+  font-size: typography.$fs-16;
+  font-weight: 600;
+  color: colors.$dark;
+}
+
+// Custom radio button styling
+.custom-radio {
+  margin-bottom: 0.5rem;
+}
+
+// Search option styling
+.search-option {
+  height: auto !important;
+  padding: 8px 16px !important;
+  border-bottom: 1px solid #e0e0e0;
+
+  &:hover {
+    background-color: transparent !important;
+  }
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.search-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  color: #666;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  padding: 4px;
+
+  &::placeholder {
+    color: #999;
+  }
+}
+
+.no-results {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 16px;
+}
+
+// Custom styling for disabled Entity Type field to look enabled
+::ng-deep {
+  // Target the disabled Entity Type field
+  .mat-mdc-form-field:has(.mat-mdc-select[formcontrolname="entityType"]) {
+    // Keep label color normal (not grayed out)
+    .mat-mdc-form-field-label {
+      color: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    // Keep text color normal (not grayed out)
+    .mat-mdc-select-disabled {
+      color: rgba(0, 0, 0, 0.87) !important;
+      cursor: default !important;
+    }
+
+    // Keep outline color normal (not grayed out)
+    .mat-mdc-notched-outline .mdc-notched-outline__leading,
+    .mat-mdc-notched-outline .mdc-notched-outline__notch,
+    .mat-mdc-notched-outline .mdc-notched-outline__trailing {
+      border-color: rgba(0, 0, 0, 0.38) !important;
+    }
+
+    // Remove the disabled arrow icon dimming
+    .mat-mdc-select-arrow {
+      color: rgba(0, 0, 0, 0.54) !important;
+    }
+  }
+}
+
+.readonly-declaration-box {
+  background-color: #f9fafb !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: inherit;
+  line-height: 1.6;
+
+  // Custom scrollbar (optional - looks modern)
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.3);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0,0,0,0.5);
+  }
+}
+
+
+
+.readonly-scroll-box {
+  // Make it look exactly like a disabled Material textarea
+  background-color: #f9fafb !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: inherit;
+  line-height: 1.6;
+
+  // Nice custom scrollbar (modern look)
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  // Firefox scrollbar
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.readonly-textarea-wrapper {
+  width: 100%;
+}
+
+.readonly-textarea {
+  width: 100%;
+  min-height: 192px; /* matches rows="8" */
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.87);
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  // Scrollbar styling
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}
+
+// Ensure outline matches Material Design
+.mat-mdc-form-field.readonly-textarea-wrapper {
+  .mat-mdc-text-field-wrapper {
+    background-color: #f9f9f9;
+  }
+}

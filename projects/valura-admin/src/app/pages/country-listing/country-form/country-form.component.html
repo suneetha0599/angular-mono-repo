@@ -1,0 +1,152 @@
+<div class="flex flex-col h-screen overflow-hidden view-wrapper pb-2">
+  <div class="p-4 pb-0">
+    <div class="flex justify-between">
+      <div class="flex items-center">
+
+        <button (click)="goBack() "
+          class="w-6 h-6 flex !rounded-lg items-center justify-center text-primary-40 border-1 border-gray-300 hover:bg-gray-200 ">
+          <mat-icon class="back-icon material-symbols-outlined">arrow_back</mat-icon>
+        </button>
+        <div class="text-2xl font-medium -mt-1 ml-1.5 pt-1">{{ pageTitle }}</div>
+          <button [disabled]="disablePrevBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+            (click)="goToPrevRequest()">
+            <mat-icon class="material-symbols-outlined"
+              [ngClass]="disablePrevBtn ? '!text-gray-400' : 'text-primary'">chevron_left</mat-icon>
+          </button>
+          <button [disabled]="disableNextBtn" mat-icon-button color="primary" class="medium-icon d-flex my-auto"
+            (click)="goToNextRequest()" [ngClass]="disableNextBtn ? '!text-gray-400' : 'text-primary'">
+            <mat-icon class=" material-symbols-outlined">chevron_right</mat-icon>
+          </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State with Shimmer Effects -->
+  <div *ngIf="isDataLoading" class="p-4 flex-1 min-h-0">
+    <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden shadow-sm">
+      <div class="p-6">
+        <!-- Country Name Shimmer -->
+        <div class="mb-3">
+          <div
+            class="h-5 w-24 mb-2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer rounded">
+          </div>
+          <div class="w-[30%]">
+            <div
+              class="h-14 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer rounded">
+            </div>
+          </div>
+        </div>
+
+        <!-- Country Code Shimmer -->
+        <div class="mb-3">
+          <div
+            class="h-5 w-24 mb-2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer rounded">
+          </div>
+          <div class="w-[30%]">
+            <div
+              class="h-14 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer rounded">
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Code Shimmer -->
+        <div class="mb-3">
+          <div
+            class="h-5 w-24 mb-2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer rounded">
+          </div>
+          <div class="w-[30%]">
+            <div
+              class="h-14 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer rounded">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Form Content -->
+  @if(!isDataLoading && hasApiError){
+  <ng-container *ngTemplateOutlet="errorLoading"></ng-container>
+  }@else{
+  <div *ngIf="!isDataLoading" class="p-4 flex-1 min-h-0">
+    <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden shadow-sm">
+      <form [formGroup]="form" class="flex flex-col h-full">
+        <div class="p-6 flex-1 overflow-auto">
+          <!-- Country Name Field -->
+          <div class="mb-3">
+            <p class="text-sm font-medium mb-2 text-gray-700">Country Name</p>
+            <div class="w-[30%]">
+              <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                <input matInput formControlName="name" class="text-base">
+                <mat-error>
+                  <custom-mat-error class="inline-block" [errors]="nameControl.errors" [control]="nameControl"
+                    controlActualName="Country Name"></custom-mat-error>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Country Code Field -->
+          <div class="mb-3">
+            <p class="text-sm font-medium mb-2 text-gray-700">Country Code</p>
+            <div class="w-[30%]">
+              <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                <input matInput formControlName="countryCode" class="text-base uppercase">
+               <mat-error>
+                  <custom-mat-error class="inline-block" [errors]="countryCodeControl.errors" [control]="countryCodeControl"
+                    controlActualName="Country Code"></custom-mat-error>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Phone Code Field -->
+          <div class="mb-3">
+            <p class="text-sm font-medium mb-2 text-gray-700">Phone Code</p>
+            <div class="w-[30%]">
+              <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                <input matInput formControlName="countryPhoneCode" class="text-base">
+                <mat-error>
+                  <custom-mat-error class="inline-block" [errors]="countryPhoneCodeControl.errors" [control]="countryPhoneCodeControl"
+                    controlActualName="Phone Code"></custom-mat-error>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Phone Number Length Field -->
+          <div class="mb-3">
+            <p class="text-sm font-medium mb-2 text-gray-700">Phone Number Length</p>
+            <div class="w-[30%]">
+              <mat-form-field appearance="outline" class="w-full mat-sm-xl-input">
+                <input matInput type="number" formControlName="phoneNumberLength" class="text-base">
+                <mat-error *ngIf="hasFieldError('phoneNumberLength')">
+                  {{ getFieldError('phoneNumberLength') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions - Sticky Footer -->
+        <div class="flex justify-start gap-3 p-3 bg-white border-t border-gray-200 mt-auto mb-15">
+          <loading-button type="primary" [loading]="submitLoading" [disabled]="!canSave" (onButtonClick)="onSubmit()">
+            <span class="text-sm font-medium">{{ submitButtonText }}</span>
+          </loading-button>
+
+          <loading-button type="light" [basicButton]="true" (onButtonClick)="goBack()">
+            <span class="text-sm font-medium">Cancel</span>
+          </loading-button>
+        </div>
+      </form>
+    </div>
+  </div>}
+</div>
+
+
+<ng-template #errorLoading>
+  <div class="p-4 flex-1 min-h-0">
+    <div class="flex flex-col rounded-lg h-full bg-white overflow-hidden justify-center">
+      <error-loading-items [imgHeight]="'200px'"></error-loading-items>
+    </div>
+  </div>
+</ng-template>

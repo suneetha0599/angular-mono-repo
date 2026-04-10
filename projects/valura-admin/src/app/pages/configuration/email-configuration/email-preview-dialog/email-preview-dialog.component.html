@@ -1,0 +1,18 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3"></h3>
+<button mat-icon-button tabindex="-1" class="close" (click)="onClose()" aria-label="confirm dialog close button">
+  <mat-icon  class="fs-5 material-symbols-outlined">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+  <div class="email-header">
+    <div class="company-name">Valura</div>
+  </div>
+
+  <div class="email-body" [innerHTML]="sanitizedHtml"></div>
+</div>
+
+<div mat-dialog-actions class="flex justify-center">
+  <div class="w-full flex justify-end gap-2 p-0">
+    <button mat-button class="cancel-btn" (click)="onClose()">Cancel</button>
+  </div>
+</div>

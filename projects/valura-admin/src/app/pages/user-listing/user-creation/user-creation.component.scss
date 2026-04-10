@@ -1,0 +1,73 @@
+@use "../../../../styles/custom/colors.scss" as colors;
+
+.chip-input-field {
+  min-width: 200px;
+
+  ::ng-deep .mat-mdc-form-field-wrapper {
+    height: 40px;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 40px !important;
+    border-radius: 8px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: 8px 12px !important;
+    min-height: auto !important;
+  }
+
+  ::ng-deep .mat-mdc-floating-label {
+    color: #666 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+
+    &.mdc-floating-label--float-above {
+      top: 0 !important;
+      transform: translateY(-50%) scale(0.75) !important;
+    }
+  }
+
+
+  &.user-search-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+  }
+
+  @media (max-width: 600px) {
+    min-width: 160px;
+  }
+}
+
+.back-icon {
+  font-size: 17px !important;
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.bg-white {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.grid {
+  gap: 1.5rem;
+}
+
+::ng-deep .custom-checkbox.mat-checkbox .mat-checkbox-frame {
+  border-radius: 6px;
+  border: 2px solid #4f46e5;
+}
+
+::ng-deep .custom-checkbox.mat-checkbox-checked .mat-checkbox-background {
+  background-color: #4f46e5 !important;
+}
+
+::ng-deep .chip-input-field input::placeholder {
+  font-size: 13px !important;
+}
+
+::ng-deep .chip-input-field .mat-mdc-input-element::placeholder {
+  font-size: 13px !important;
+}
+
+
+

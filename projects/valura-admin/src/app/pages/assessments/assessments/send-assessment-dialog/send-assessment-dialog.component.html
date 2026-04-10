@@ -1,0 +1,30 @@
+<div class="m-4">
+    <div class="fw-semibold header d-flex justify-between">
+        <div>Asessment Created</div>
+        <div><mat-icon class="material-symbols-outlined text-primary cursor-pointer fs-lg-med" (click)="dialog.close(0)">close</mat-icon></div>
+    </div>
+    <div class="description">What do you want to do next?</div>
+    <div class="mt-3 d-flex">
+        <div class="my-2">
+            <mat-card class="p-2">
+                <div><mat-radio-button></mat-radio-button></div>
+                <div class="mx-2">
+                    <div class="mt-2 title">Continue myself</div>
+                    <div class="content">Fill remaining sections with AI assistance.</div>
+                </div>
+            </mat-card>
+        </div>
+        <div class="my-2 ms-3">
+            <mat-card class="p-2">
+                <div><mat-radio-button></mat-radio-button></div>
+                <div class="mx-2">
+                    <div class="mt-2 title">Assign task to process owner</div>
+                    <div class="content">A task will be created for [process owner].</div>
+                </div>
+            </mat-card>
+        </div>
+    </div>
+    <div class="mt-3 d-flex justify-end">
+        <loading-button type="primary" (onButtonClick)="onContinue()">Continue</loading-button>
+    </div>
+</div>

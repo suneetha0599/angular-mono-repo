@@ -1,0 +1,99 @@
+<h3 mat-dialog-title class="my-0 p-2 px-3 fs-5 font-medium">
+  {{
+  mode === 'edit'
+  ? 'Edit Declaration'
+  : mode === 'view'
+  ? 'View Declaration'
+  : 'Add Declaration'
+  }}
+</h3>
+
+<button mat-icon-button tabindex="-1" class="close" (click)="closeDialog()" aria-label="confirm dialog close button">
+  <mat-icon class="material-symbols-outlined fs-5">close</mat-icon>
+</button>
+
+<div mat-dialog-content class="m-0 p-3">
+
+  @if (!isEdit) {
+  <div class="space-y-6">
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-1">Type</mat-label>
+      <div>{{ typeLabel() }}</div>
+    </div>
+
+    @if (isRightSpecificView()) {
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-1">Right</mat-label>
+      <div>{{ rightDisplayName() }}</div>
+    </div>
+    }
+
+    <div>
+      <mat-label class="fs-sm-med text-grey block mb-2">Declaration Statement</mat-label>
+      <div>{{ declaration() || '-' }}</div>
+    </div>
+  </div>
+  }
+
+  @if (isEdit) {
+  <form [formGroup]="form" class="space-y-4">
+
+    <div>
+      <mat-label class="block mb-2 font-medium">Type</mat-label>
+      <mat-radio-group formControlName="type" class="flex gap-6">
+        <mat-radio-button value="REGULATION_SPECIFIC">General</mat-radio-button>
+        <mat-radio-button value="RIGHT_SPECIFIC">Right Specific</mat-radio-button>
+      </mat-radio-group>
+      @if (form.get('type')?.invalid && (form.get('type')?.touched || form.get('type')?.dirty)) {
+      <mat-error class="mt-1">Type is required</mat-error>
+      }
+    </div>
+
+    @if (isRightSpecific) {
+    <mat-form-field appearance="outline" class="w-full mat-sm-input"
+      [class.mb-4]="entityIdControl.invalid && (entityIdControl.touched || entityIdControl.dirty)">
+      <mat-label>Select Right</mat-label>
+      <mat-select formControlName="entityId">
+        @for (right of rights; track right.id) {
+        <mat-option [value]="right.id">{{ right.rightTitleSimplified }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>
+        <custom-mat-error class="inline-block" [control]="entityIdControl" [errors]="entityIdControl.errors"
+          controlActualName="Select Right">
+        </custom-mat-error>
+      </mat-error>
+    </mat-form-field>
+    }
+
+    <div>
+      <div>
+        <app-custom-mat-textarea [control]="declarationControl" label="Declaration Statement" [minRows]="1"
+          [maxRows]="5">
+        </app-custom-mat-textarea>
+      </div>
+    </div>
+
+  </form>
+  }
+
+</div>
+
+<div mat-dialog-actions class="flex justify-center gap-3 px-4 pb-4 pt-2">
+  <loading-button type="secondary" (onButtonClick)="closeDialog()">
+    Cancel
+  </loading-button>
+
+  @if (!isEdit && declarationId) {
+  <loading-button type="primary" (onButtonClick)="startEditing()">
+    <mat-icon class="me-2 material-symbols-outlined">edit</mat-icon>
+    Edit
+  </loading-button>
+  }
+
+  @if (isEdit) {
+  <loading-button type="primary" [disabled]="form.invalid" [loading]="isSaving" (onButtonClick)="onSave()">
+    {{ declarationId ? 'Update' : 'Save' }}
+  </loading-button>
+  }
+</div>

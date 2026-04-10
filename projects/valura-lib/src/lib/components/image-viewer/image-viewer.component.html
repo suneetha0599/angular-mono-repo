@@ -1,0 +1,42 @@
+<div class="img-container" (wheel)="scrollZoom($event)">
+
+    <div cdkDrag class="drag-element">
+        <ng-container>
+            <img [src]="src" [ngStyle]="style" (load)="onLoad()" (cdkDragStarted)="onDragStart($event)"
+                (loadstart)="onLoadStart()" (error)="onError()" />
+        </ng-container>
+    </div>
+
+    @if(loading){
+    <div class="spinner-container">
+        <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    </div>
+    }
+
+    @if(showError){
+    <div class="error-container">
+        <p>Couldn't load the image</p>
+    </div>
+    }
+</div>
+
+<div class="flex justify-center">
+    <div class="absolute top-2 justify-center flex gap-2 p-1">
+        <button class="mat-md-fab-btn bg-transparent shadow-none" mat-mini-fab
+            *ngIf="config.btnShow?.rotateCounterClockwise" (click)="rotateCounterClockwise()">
+            <mat-icon class="material-symbols-outlined">rotate_left</mat-icon>
+        </button>
+        <button class="mat-md-fab-btn bg-transparent shadow-none" mat-mini-fab *ngIf="config.btnShow?.rotateClockwise"
+            (click)="rotateClockwise()">
+            <mat-icon class="material-symbols-outlined">rotate_right</mat-icon>
+        </button>
+        <button class="mat-md-fab-btn bg-transparent shadow-none" mat-mini-fab *ngIf="config.btnShow?.zoomIn"
+            (click)="zoomIn()">
+            <mat-icon class="material-symbols-outlined">zoom_in</mat-icon>
+        </button>
+        <button class="mat-md-fab-btn bg-transparent shadow-none" mat-mini-fab *ngIf="config.btnShow?.zoomOut"
+            (click)="zoomOut()">
+            <mat-icon class="material-symbols-outlined">zoom_out</mat-icon>
+        </button>
+    </div>
+</div>
